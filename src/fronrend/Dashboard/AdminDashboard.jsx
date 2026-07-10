@@ -9,8 +9,12 @@ import {
   updateTourOnServer,
   deleteTourOnServer
 } from '../Tours/ToursData';
+import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
+
+const API_BASE_URL = getApiUrl();
+const apiPath = (path) => `${API_BASE_URL}${path}`;
 
 const initialRoomForm = {
   title: '',
@@ -199,8 +203,7 @@ const DragAndDropUploader = ({ value, onChange, multiple = false }) => {
 
       try {
         const token = localStorage.getItem('token');
-        const API_URL = import.meta.env.VITE_API_URL || '';
-        const response = await fetch(`${API_URL}/api/upload`, {
+        const response = await fetch(apiPath('/api/upload'), {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
@@ -497,13 +500,13 @@ const AdminDashboard = () => {
 
       try {
         const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes] = await Promise.all([
-          fetch('/api/bookings'),
-          fetch('/api/admin/users', { headers: authHeaders }),
-          fetch('/api/rooms'),
-          fetch('/api/gallery'),
-          fetch('/api/attractions'),
-          fetch('/api/events'),
-          fetch('/api/events/admin/bookings', { headers: authHeaders })
+          fetch(apiPath('/api/bookings')),
+          fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
+          fetch(apiPath('/api/rooms')),
+          fetch(apiPath('/api/gallery')),
+          fetch(apiPath('/api/attractions')),
+          fetch(apiPath('/api/events')),
+          fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders })
         ]);
 
         const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
@@ -562,7 +565,7 @@ const AdminDashboard = () => {
         totalMembers: Number(roomForm.totalMembers || 1)
       };
 
-      const response = await fetch(editingRoomId ? `/api/admin/rooms/${editingRoomId}` : '/api/admin/rooms', {
+      const response = await fetch(apiPath(editingRoomId ? `/api/admin/rooms/${editingRoomId}` : '/api/admin/rooms'), {
         method: editingRoomId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -594,7 +597,7 @@ const AdminDashboard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`/api/admin/rooms/${roomId}`, {
+      const response = await fetch(apiPath(`/api/admin/rooms/${roomId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -621,7 +624,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const response = await fetch('/api/admin/gallery', {
+      const response = await fetch(apiPath('/api/admin/gallery'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -645,7 +648,7 @@ const AdminDashboard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`/api/admin/gallery/${imageId}`, {
+      const response = await fetch(apiPath(`/api/admin/gallery/${imageId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -672,7 +675,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const response = await fetch(editingAttractionId ? `/api/admin/attractions/${editingAttractionId}` : '/api/admin/attractions', {
+      const response = await fetch(apiPath(editingAttractionId ? `/api/admin/attractions/${editingAttractionId}` : '/api/admin/attractions'), {
         method: editingAttractionId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -703,7 +706,7 @@ const AdminDashboard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`/api/admin/attractions/${attractionId}`, {
+      const response = await fetch(apiPath(`/api/admin/attractions/${attractionId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -732,7 +735,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const response = await fetch(editingEventId ? `/api/events/${editingEventId}` : '/api/events', {
+      const response = await fetch(apiPath(editingEventId ? `/api/events/${editingEventId}` : '/api/events'), {
         method: editingEventId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -768,7 +771,7 @@ const AdminDashboard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`/api/events/${eventId}`, {
+      const response = await fetch(apiPath(`/api/events/${eventId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -925,7 +928,7 @@ const AdminDashboard = () => {
 
     setUpdatingRoleUserId(targetUser._id);
     try {
-      const response = await fetch(`/api/admin/users/${targetUser._id}/role`, {
+      const response = await fetch(apiPath(`/api/admin/users/${targetUser._id}/role`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

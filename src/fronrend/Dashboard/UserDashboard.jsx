@@ -9,7 +9,8 @@ import { getApiUrl } from '../../config/api'
 
 const API_URL = `${getApiUrl()}/api/reviews`
 const ROOMS_API_URL = `${getApiUrl()}/api/rooms`
-const BOOKINGS_API_URL = '/api/bookings'
+const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
+const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
 const getBookingsCacheKey = (identifier) => `hotel_user_dashboard_bookings_${identifier || 'guest'}`
 const parseBookingDate = (value) => {
   const date = new Date(value)
@@ -154,7 +155,7 @@ const UserDashboard = () => {
       const storedToken = token || localStorage.getItem('token');
       if (!storedToken) return;
       try {
-        const response = await fetch('/api/events/my-bookings', {
+        const response = await fetch(EVENT_BOOKINGS_API_URL, {
           headers: {
             'Authorization': `Bearer ${storedToken}`
           }

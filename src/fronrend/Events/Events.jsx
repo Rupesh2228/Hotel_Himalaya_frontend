@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import Components from '../componets/componets';
 import LastComponents from '../componets/LastComponents';
 import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 import './Events.css';
 
-const API_URL = '';
+const API_URL = getApiUrl();
 
 const Events = () => {
   const { user } = useAuth();
