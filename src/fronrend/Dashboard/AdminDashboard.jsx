@@ -89,7 +89,12 @@ const initialTourForm = {
   seoMetaDescription: '',
   urlSlug: '',
   availableDates: '',
-  advancedJson: ''
+  highlights: '',
+  itinerary: '',
+  included: '',
+  excluded: '',
+  travelAdvice: '',
+  faqs: ''
 };
 
 const splitList = (value) =>
@@ -98,14 +103,11 @@ const splitList = (value) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-const safeParseJson = (value, fallback) => {
-  if (!value || !String(value).trim()) return fallback;
-  try {
-    return JSON.parse(value);
-  } catch {
-    throw new Error('Advanced JSON is invalid. Please fix the JSON syntax and try again.');
-  }
-};
+const splitListNewline = (value) =>
+  String(value || '')
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean);
 
 const sectionTitleMap = {
   dashboard: 'Room Bookings',
@@ -169,17 +171,12 @@ const buildTourFormFromTour = (tour) => ({
   seoMetaDescription: tour.seoMetaDescription || '',
   urlSlug: tour.urlSlug || tour.slug || '',
   availableDates: (tour.availableDates || []).join(', '),
-  advancedJson: JSON.stringify({
-    highlights: tour.highlights || [],
-    itinerary: tour.itinerary || [],
-    included: tour.included || [],
-    excluded: tour.excluded || [],
-    travelAdvice: tour.travelAdvice || [],
-    faqs: tour.faqs || [],
-    reviews: tour.reviews || { averageRating: 0, totalReviews: 0, ratingBreakdown: {}, customerPhotos: [], list: [] },
-    infoCards: tour.infoCards || {},
-    mapRouteDetails: tour.mapRouteDetails || {},
-  }, null, 2)
+  highlights: (tour.highlights || []).join('\n'),
+  itinerary: (tour.itinerary || []).map((item) => typeof item === 'object' ? `${item.title || ''}: ${item.description || ''}` : String(item)).join('\n'),
+  included: (tour.included || []).join('\n'),
+  excluded: (tour.excluded || []).join('\n'),
+  travelAdvice: (tour.travelAdvice || []).join('\n'),
+  faqs: (tour.faqs || []).map((item) => typeof item === 'object' ? `${item.question || ''} | ${item.answer || ''}` : String(item)).join('\n')
 });
 
 const DragAndDropUploader = ({ value, onChange, multiple = false }) => {
@@ -798,7 +795,6 @@ const AdminDashboard = () => {
     }
 
     try {
-      const advanced = safeParseJson(tourForm.advancedJson, {});
       const titleSlug = slugify(tourForm.slug || tourForm.urlSlug || tourForm.title);
       const durationDays = Number(tourForm.durationDays || 0);
       const durationNights = Number(tourForm.durationNights || 0);
@@ -826,7 +822,7 @@ const AdminDashboard = () => {
         languages: splitList(tourForm.languages),
         pickupLocation: tourForm.pickupLocation.trim(),
         googleMapsEmbedUrl: tourForm.googleMapsEmbedUrl.trim(),
-        mapRouteDetails: advanced.mapRouteDetails || {
+        mapRouteDetails: {
           route: tourForm.route.trim(),
           startingPoint: tourForm.startingPoint.trim(),
           hotelMarker: tourForm.hotelMarker.trim(),
@@ -848,20 +844,32 @@ const AdminDashboard = () => {
         seoMetaDescription: tourForm.seoMetaDescription.trim(),
         urlSlug: tourForm.urlSlug.trim() || titleSlug,
         availableDates: splitList(tourForm.availableDates),
-        highlights: advanced.highlights || [],
-        itinerary: advanced.itinerary || [],
-        included: advanced.included || [],
-        excluded: advanced.excluded || [],
-        travelAdvice: advanced.travelAdvice || [],
-        faqs: advanced.faqs || [],
-        reviews: advanced.reviews || {
+        highlights: splitListNewline(tourForm.highlights),
+        itinerary: splitListNewline(tourForm.itinerary).map((line) => {
+          const parts = line.split(':');
+          if (parts.length >= 2) {
+            return { title: parts[0].trim(), description: parts.slice(1).join(':').trim() };
+          }
+          return { title: line, description: '' };
+        }),
+        included: splitListNewline(tourForm.included),
+        excluded: splitListNewline(tourForm.excluded),
+        travelAdvice: splitListNewline(tourForm.travelAdvice),
+        faqs: splitListNewline(tourForm.faqs).map((line) => {
+          const parts = line.split('|');
+          if (parts.length >= 2) {
+            return { question: parts[0].trim(), answer: parts.slice(1).join('|').trim() };
+          }
+          return { question: line, answer: '' };
+        }),
+        reviews: {
           averageRating: 0,
           totalReviews: 0,
           ratingBreakdown: {},
           customerPhotos: [],
           list: []
         },
-        infoCards: advanced.infoCards || {
+        infoCards: {
           duration: `${durationDays} Days / ${durationNights} Nights`,
           groupSize: `Max ${maxTravelers || 0} People`,
           difficulty: tourForm.difficulty.trim(),
@@ -1474,12 +1482,57 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Advanced JSON</label>
+                  <label>Highlights</label>
                   <textarea
-                    value={tourForm.advancedJson}
-                    onChange={(e) => setTourForm({ ...tourForm, advancedJson: e.target.value })}
-                    rows="10"
-                    placeholder='Optional nested data: { "highlights": [], "itinerary": [], "included": [], "excluded": [], "travelAdvice": [], "faqs": [], "reviews": {}, "infoCards": {}, "mapRouteDetails": {} }'
+                    value={tourForm.highlights}
+                    onChange={(e) => setTourForm({ ...tourForm, highlights: e.target.value })}
+                    rows="4"
+                    placeholder={'Enter one highlight per line, e.g.:\nBreathtaking mountain views\nAuthentic local cuisine\nExpert local guides'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Itinerary</label>
+                  <textarea
+                    value={tourForm.itinerary}
+                    onChange={(e) => setTourForm({ ...tourForm, itinerary: e.target.value })}
+                    rows="6"
+                    placeholder={'Enter one item per line as Title: Description, e.g.:\nDay 1: Arrival and hotel check-in\nDay 2: City tour and sightseeing\nDay 3: Mountain trek to base camp'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>What's Included</label>
+                  <textarea
+                    value={tourForm.included}
+                    onChange={(e) => setTourForm({ ...tourForm, included: e.target.value })}
+                    rows="4"
+                    placeholder={'Enter one item per line, e.g.:\nHotel accommodation\nBreakfast and dinner\nTransportation'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>What's Excluded</label>
+                  <textarea
+                    value={tourForm.excluded}
+                    onChange={(e) => setTourForm({ ...tourForm, excluded: e.target.value })}
+                    rows="4"
+                    placeholder={'Enter one item per line, e.g.:\nPersonal expenses\nTravel insurance\nLunch'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Travel Advice</label>
+                  <textarea
+                    value={tourForm.travelAdvice}
+                    onChange={(e) => setTourForm({ ...tourForm, travelAdvice: e.target.value })}
+                    rows="4"
+                    placeholder={'Enter one tip per line, e.g.:\nBring warm clothing\nCarry sunscreen and sunglasses\nStay hydrated at high altitudes'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>FAQs</label>
+                  <textarea
+                    value={tourForm.faqs}
+                    onChange={(e) => setTourForm({ ...tourForm, faqs: e.target.value })}
+                    rows="4"
+                    placeholder={'Enter one FAQ per line as Question | Answer, e.g.:\nWhat is the best season? | October to December\nIs travel insurance required? | Yes, it is mandatory'}
                   />
                 </div>
 
