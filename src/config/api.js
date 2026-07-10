@@ -1,5 +1,5 @@
 export const DEFAULT_BACKEND_PORT = 3000;
-export const DEFAULT_LIVE_BACKEND_URL = 'https://hotel-himalaya-backend-1.onrender.com';
+export const DEFAULT_LIVE_BACKEND_URL = 'https://hotel-himalaya.onrender.com';
 
 export const getApiBaseUrl = () => {
   const configuredUrl = import.meta.env.VITE_API_URL?.trim();
