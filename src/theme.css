@@ -1,0 +1,545 @@
+/* Clean blue and white design system */
+:root {
+  --color-background: #FFFFFF;
+  --color-heading: #111827;
+  --color-paragraph: #4B5563;
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-active: #2563EB;
+  --color-link: #2563EB;
+  --color-success: #22C55E;
+  --color-error: #EF4444;
+  --color-warning: #F59E0B;
+  --color-border: #E5E7EB;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F9FAFB;
+  --color-surface-tint: #EFF6FF;
+  --color-heading-rgb: 17, 24, 39;
+  --color-primary-rgb: 37, 99, 235;
+
+  --background: var(--color-background);
+  --surface: var(--color-surface);
+  --surface-soft: var(--color-surface-soft);
+  --surface-muted: var(--color-surface-tint);
+  --border: var(--color-border);
+  --text-primary: var(--color-heading);
+  --text-secondary: var(--color-paragraph);
+  --text-muted: var(--color-paragraph);
+  --text-muted-soft: #6B7280;
+  --text-accent: var(--color-primary);
+  --accent-strong: var(--color-primary);
+  --accent-soft: var(--color-surface-tint);
+  --card-border: var(--color-border);
+  --gold-100: #EFF6FF;
+  --gold-200: #DBEAFE;
+  --gold-300: var(--color-primary);
+  --gold-400: var(--color-primary);
+  --gold-500: var(--color-primary-hover);
+  --gold-600: #1E40AF;
+  --shadow-sm: 0 10px 28px rgba(17, 24, 39, 0.06);
+  --shadow-md: 0 18px 44px rgba(17, 24, 39, 0.09);
+  --shadow-lg: 0 28px 70px rgba(17, 24, 39, 0.12);
+  --shadow-gold-sm: 0 12px 24px rgba(37, 99, 235, 0.18);
+}
+
+html {
+  background: var(--color-background);
+}
+
+body,
+#root,
+.home_page,
+.about_page,
+.service_page,
+.events-page,
+.gallery-section,
+.contact-page,
+.tours_list_page,
+.tour_details_page,
+.login_booking_page,
+.dashboard-page,
+.user-dashboard,
+.admin-dashboard,
+.attraction-detail-page,
+.not-found-page,
+.server-error-page {
+  background: var(--color-background) !important;
+  color: var(--color-heading) !important;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.welcome,
+.attractions_title,
+.section-title,
+.page-title,
+.hero-title,
+.event-title,
+.card_title,
+.tour-title,
+.dashboard-title,
+.contact-title,
+.service-title {
+  color: var(--color-heading) !important;
+  letter-spacing: 0 !important;
+}
+
+p,
+li,
+small,
+label,
+.intro_text,
+.card_short_desc,
+.event-desc,
+.meta-item,
+.review_count,
+.section-subtitle,
+.page-subtitle,
+.hero-content p,
+.contact-subtitle,
+.service-description,
+.dashboard-subtitle {
+  color: var(--color-paragraph) !important;
+}
+
+a,
+.section-tag,
+.card_location,
+.spec_icon,
+.final_price strong,
+.meta-item .icon,
+.tour-highlight svg,
+.contact-icon,
+.service-icon,
+.nav-icon {
+  color: var(--color-link) !important;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  box-shadow: 0 8px 30px rgba(17, 24, 39, 0.06) !important;
+}
+
+header::after {
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent) !important;
+}
+
+nav,
+nav.open {
+  background: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: 0 20px 44px rgba(17, 24, 39, 0.10) !important;
+}
+
+.menu__link,
+.menu-toggle,
+button.menu__link {
+  color: var(--color-heading) !important;
+  border-radius: 8px !important;
+}
+
+.menu__link::before {
+  background: var(--color-active) !important;
+}
+
+.menu__link:hover,
+.menu__link.active {
+  color: var(--color-active) !important;
+  background: var(--color-surface-tint) !important;
+}
+
+nav ul li:last-child .menu__link,
+.logout-button {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.22) !important;
+}
+
+nav ul li:last-child .menu__link:hover,
+nav ul li:last-child .menu__link.active,
+.logout-button:hover {
+  background: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #FFFFFF !important;
+}
+
+.home_hero,
+.events-hero,
+.tours_hero,
+.tour_details_hero,
+.about-hero,
+.service-hero,
+.contact-hero,
+.gallery-hero {
+  background:
+    linear-gradient(120deg, rgba(239, 246, 255, 0.94), rgba(255, 255, 255, 0.86)),
+    var(--hero-image, none) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.tours_hero,
+.tour_details_hero {
+  background-image:
+    linear-gradient(120deg, rgba(17, 24, 39, 0.70), rgba(37, 99, 235, 0.38)),
+    url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1600&auto=format&fit=crop') !important;
+}
+
+.tours_hero h1,
+.tours_hero p,
+.tour_details_hero h1,
+.tour_details_hero p {
+  color: #FFFFFF !important;
+}
+
+.attractions_section,
+.stats_section,
+.cta_section,
+.catalog_section,
+.events-section,
+.gallery-content,
+.service_section,
+.contact-section,
+.dashboard-section {
+  background: var(--color-background) !important;
+}
+
+.tour_package_card,
+.event-card,
+.attraction_card,
+.gallery-card,
+.service-card,
+.contact-card,
+.login-card,
+.booking-modal-content,
+.room-card,
+.card,
+.panel,
+.table-wrapper,
+.dashboard-card,
+.form-card,
+.stat_box,
+.cta_box,
+.spec_item,
+.no-events,
+.review-form-card,
+.service-review-card,
+.admin-panel,
+.user-panel {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-sm) !important;
+  color: var(--color-heading) !important;
+}
+
+.tour_package_card:hover,
+.event-card:hover,
+.attraction_card:hover,
+.gallery-card:hover,
+.service-card:hover,
+.dashboard-card:hover,
+.stat_box:hover {
+  border-color: rgba(37, 99, 235, 0.32) !important;
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-4px);
+}
+
+.spec_item,
+.discount_badge,
+.event-placeholder-image,
+.gallery-filter,
+.badge,
+.pill,
+.tab,
+.status-badge {
+  background: var(--color-surface-tint) !important;
+  border-color: #BFDBFE !important;
+  color: var(--color-primary) !important;
+}
+
+.badge_featured,
+.badge_bestseller,
+.event-price-badge,
+.admin_badge.status,
+.admin_badge.recommendation,
+.tab.active,
+.status-badge.active,
+.status-approved,
+.success,
+.success-message {
+  background: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: #FFFFFF !important;
+}
+
+.rating_stars,
+.service-review-stars .star-filled,
+.warning,
+.pending,
+.status-pending {
+  color: var(--color-warning) !important;
+}
+
+.error,
+.error-message,
+.events-error,
+.status-rejected,
+.status-cancelled,
+.wishlist_btn:hover,
+.wishlist_btn.active,
+.love-react-btn:hover,
+.love-react-btn.loved {
+  color: var(--color-error) !important;
+}
+
+.events-error,
+.error-message {
+  background: #FEF2F2 !important;
+  border-color: #FECACA !important;
+}
+
+button,
+.btn,
+.btn-cta,
+.btn_primary,
+.btn-primary,
+.btn_book_now,
+.book-button,
+.cta_btn,
+.attraction_card_btn,
+.prompt-login-btn,
+.submit-btn,
+.login-submit,
+.booking-submit,
+.save-btn,
+.add-btn,
+.edit-btn,
+.view-btn,
+.pagination_btn.active,
+button[class*="btn"] {
+  background: var(--color-primary) !important;
+  border: 1px solid var(--color-primary) !important;
+  border-radius: 12px !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18) !important;
+  font-weight: 700;
+}
+
+button:hover,
+.btn:hover,
+.btn-cta:hover,
+.btn_primary:hover,
+.btn-primary:hover,
+.btn_book_now:hover,
+.book-button:hover,
+.cta_btn:hover,
+.attraction_card_btn:hover,
+.prompt-login-btn:hover,
+.submit-btn:hover,
+.login-submit:hover,
+.booking-submit:hover,
+button[class*="btn"]:hover {
+  background: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.24) !important;
+}
+
+.btn_view_details,
+.btn-secondary,
+.secondary-btn,
+.cancel-btn,
+.outline-btn,
+.pagination_btn {
+  background: #FFFFFF !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-primary) !important;
+  box-shadow: none !important;
+}
+
+.btn_view_details:hover,
+.btn-secondary:hover,
+.secondary-btn:hover,
+.cancel-btn:hover,
+.outline-btn:hover,
+.pagination_btn:hover {
+  background: var(--color-surface-tint) !important;
+  border-color: #BFDBFE !important;
+  color: var(--color-primary-hover) !important;
+}
+
+input,
+textarea,
+select,
+.form-input,
+.form-control,
+.search-input {
+  background: #FFFFFF !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  color: var(--color-heading) !important;
+  box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.form-input:focus,
+.form-control:focus,
+.search-input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14) !important;
+  outline: none !important;
+}
+
+::placeholder {
+  color: #9CA3AF !important;
+}
+
+table,
+th,
+td {
+  border-color: var(--color-border) !important;
+}
+
+th {
+  background: var(--color-surface-soft) !important;
+  color: var(--color-heading) !important;
+}
+
+td {
+  color: var(--color-paragraph) !important;
+}
+
+.gold-divider,
+.welcome::after,
+.section-divider {
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent) !important;
+}
+
+.spinner,
+.loading-spinner {
+  border-color: #DBEAFE !important;
+  border-left-color: var(--color-primary) !important;
+  border-top-color: var(--color-primary) !important;
+}
+
+footer,
+.footer,
+.last-components,
+.footer-container {
+  background: #f3f3f3 !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-paragraph) !important;
+}
+
+footer h1,
+footer h2,
+footer h3,
+footer h4,
+footer strong,
+.footer-title {
+  color: var(--color-heading) !important;
+}
+
+footer a,
+.footer a {
+  color: var(--color-link) !important;
+}
+
+footer p,
+footer li,
+footer span,
+.footer p,
+.footer li,
+.footer span {
+  color: var(--color-paragraph) !important;
+}
+
+@media (max-width: 680px) {
+  header {
+    padding: 12px 16px !important;
+  }
+
+  nav ul li {
+    border-bottom: 1px solid var(--color-border) !important;
+  }
+
+  .menu__link {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* Final polish: remove black and pink background treatments */
+.nav-backdrop,
+.modal-backdrop,
+.dialog-backdrop,
+.overlay,
+.lightbox,
+.gallery-lightbox,
+.booking-modal-overlay {
+  background: rgba(37, 99, 235, 0.12) !important;
+  backdrop-filter: blur(6px);
+}
+
+.events-error,
+.error-message,
+.alert-error,
+.status-rejected,
+.status-cancelled,
+.love-react-btn:hover,
+.love-react-btn.loved,
+.wishlist_btn:hover,
+.wishlist_btn.active,
+[class*="error"],
+[class*="danger"] {
+  background: #FFFFFF !important;
+  border-color: #FCA5A5 !important;
+}
+
+.social-icon.tiktok,
+.server-btn,
+.not-found-btn,
+.dark-card,
+.dark-panel,
+[class*="dark"] {
+  background: #FFFFFF !important;
+  color: var(--color-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.tour_details_page section,
+.tour_details_page aside,
+.tour_details_page .booking-sidebar,
+.tour_details_page .booking-widget,
+.admin-dashboard,
+.user-dashboard,
+.login_booking_page,
+.gallery-section,
+.contact-page,
+.service_page,
+.events-page {
+  background-color: #FFFFFF !important;
+}
+
+.home_page section:nth-of-type(even),
+.about_page section:nth-of-type(even),
+.service_page section:nth-of-type(even),
+.events-page section:nth-of-type(even),
+.gallery-section section:nth-of-type(even),
+.contact-page section:nth-of-type(even),
+.tours_list_page section:nth-of-type(even),
+.tour_details_page section:nth-of-type(even) {
+  background: #f3f3f3 !important;
+}

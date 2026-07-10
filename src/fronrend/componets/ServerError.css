@@ -1,0 +1,137 @@
+.error-500-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f3f3f3 0%, #ffffff 100%);
+}
+
+.error-500-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.error-500-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.gold-gear-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gold-gear-container.secondary {
+  width: 60px;
+  height: 60px;
+  margin-left: -20px;
+  margin-top: 35px;
+}
+
+.gear-outer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 8px dashed #d4af37;
+  border-radius: 50%;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
+  animation: spin-clockwise 8s linear infinite;
+}
+
+.gold-gear-container.secondary .gear-outer {
+  border-color: #aa8612;
+  border-style: dotted;
+  animation: spin-counter-clockwise 6s linear infinite;
+}
+
+.gear-inner {
+  width: 30%;
+  height: 30%;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.error-500-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #111111;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.error-500-message {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #555555;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-bottom: 32px;
+}
+
+.error-500-btn {
+  font-family: 'Inter', sans-serif;
+  background-color: #FFFFFF;
+  color: #ffffff;
+  border: 1px solid #111111;
+  padding: 14px 36px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.error-500-btn:hover {
+  background-color: #ffffff;
+  color: #d4af37;
+  border-color: #d4af37;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(212, 175, 55, 0.2);
+}
+
+@keyframes spin-clockwise {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-counter-clockwise {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@media (max-width: 600px) {
+  .gold-gear-container {
+    width: 70px;
+    height: 70px;
+    border-width: 6px;
+  }
+  .gold-gear-container.secondary {
+    width: 45px;
+    height: 45px;
+    margin-left: -15px;
+    margin-top: 25px;
+  }
+  .error-500-title {
+    font-size: 1.8rem;
+  }
+}
+
