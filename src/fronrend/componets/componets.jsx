@@ -1,5 +1,18 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import {
+  CalendarDays,
+  GalleryHorizontalEnd,
+  Home,
+  Hotel,
+  LockKeyhole,
+  Map,
+  Menu,
+  Phone,
+  Sparkles,
+  UserRound,
+  X,
+} from 'lucide-react'
 import logo from '../../img/logo.png'
 import './componets.css'
 import { useAuth } from '../../context/AuthContext'
@@ -13,33 +26,32 @@ const Components = () => {
   const closeMenu = () => setIsMenuOpen(false)
 
   const navLinks = [
-    { to: '/', label: 'Home', emoji: '🏠' },
-    { to: '/about', label: 'About Us', emoji: '🏨' },
-    { to: '/services', label: 'Services', emoji: '🛎️' },
-    { to: '/tours', label: 'Tours', emoji: '🗺️' },
-    { to: '/gallery', label: 'Gallery', emoji: '📸' },
-    { to: '/events', label: 'Events', emoji: '🎉' },
-    { to: '/contact', label: 'Contact', emoji: '📞' },
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/about', label: 'About Us', icon: Hotel },
+    { to: '/services', label: 'Services', icon: Sparkles },
+    { to: '/tours', label: 'Tours', icon: Map },
+    { to: '/gallery', label: 'Gallery', icon: GalleryHorizontalEnd },
+    { to: '/events', label: 'Events', icon: CalendarDays },
+    { to: '/contact', label: 'Contact', icon: Phone },
   ]
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className={isMenuOpen ? 'nav-backdrop open' : 'nav-backdrop'}
         onClick={closeMenu}
         aria-hidden="true"
       />
 
-      <header>
+      <header className="site-header">
         <div className="nav-header">
           <h1 className="logo">
-            <NavLink to="/" onClick={closeMenu}>
+            <NavLink to="/" onClick={closeMenu} aria-label="Hotel Himalayan home">
               <img src={logo} alt="Hotel Himalayan" />
+              <span className="logo-wordmark">Hotel Himalayan</span>
             </NavLink>
           </h1>
 
-          {/* Animated hamburger toggle */}
           <button
             type="button"
             className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
@@ -47,16 +59,14 @@ const Components = () => {
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             onClick={toggleMenu}
           >
+            <Menu className="menu-toggle-icon" aria-hidden="true" />
             <span className="bar bar-1" />
             <span className="bar bar-2" />
             <span className="bar bar-3" />
           </button>
         </div>
 
-        {/* Slide-out mobile drawer */}
         <nav className={isMenuOpen ? 'nav open' : 'nav'} aria-label="Main navigation">
-
-          {/* Drawer header */}
           <div className="nav-drawer-header">
             <img src={logo} alt="Hotel Himalayan" className="drawer-logo" />
             <div className="drawer-hotel-name">
@@ -64,12 +74,12 @@ const Components = () => {
               <span className="drawer-subtitle">Luxury & Comfort</span>
             </div>
             <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
-              ✕
+              <X size={18} aria-hidden="true" />
             </button>
           </div>
 
           <ul>
-            {navLinks.map(({ to, label, emoji }) => (
+            {navLinks.map(({ to, label, icon: Icon }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -77,8 +87,8 @@ const Components = () => {
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                   end={to === '/'}
                 >
-                  <span className="nav-link-emoji">{emoji}</span>
-                  {label}
+                  <Icon className="nav-link-icon" aria-hidden="true" />
+                  <span>{label}</span>
                 </NavLink>
               </li>
             ))}
@@ -94,7 +104,7 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link profile-link active' : 'menu__link profile-link'}
                 >
-                  <span className="nav-link-emoji">👤</span>
+                  <UserRound className="nav-link-icon" aria-hidden="true" />
                   <span>{user.name || 'Profile'}</span>
                 </NavLink>
                 {isProfileOpen && (
@@ -113,8 +123,8 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link login-link active' : 'menu__link login-link'}
                 >
-                  <span className="nav-link-emoji">🔐</span>
-                  Login / Book Now
+                  <LockKeyhole className="nav-link-icon" aria-hidden="true" />
+                  <span>Login / Book Now</span>
                 </NavLink>
               </li>
             )}
