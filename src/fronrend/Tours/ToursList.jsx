@@ -171,13 +171,13 @@ const ToursList = () => {
                       <div className="card_pricing">
                         {tour.discount > 0 && (
                           <div className="discount_row">
-                            <span className="original_price">${tour.price}</span>
+                            <span className="original_price">Rs.{tour.price}</span>
                             <span className="discount_badge">-{tour.discount}% Off</span>
                           </div>
                         )}
                         <p className="final_price">
                           <span className="starting_label">From </span>
-                          <strong>${discountedPrice}</strong>
+                          <strong>Rs.{discountedPrice}</strong>
                           <span className="pax_label">/ person</span>
                         </p>
                       </div>

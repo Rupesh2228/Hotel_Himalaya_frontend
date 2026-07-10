@@ -1320,17 +1320,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Gallery Images</label>
-                    <textarea value={tourForm.galleryImages} onChange={(e) => setTourForm({ ...tourForm, galleryImages: e.target.value })} placeholder="comma separated image URLs" rows="3" />
-                  </div>
-                  <div className="form-group">
-                    <label>Videos</label>
-                    <textarea value={tourForm.videos} onChange={(e) => setTourForm({ ...tourForm, videos: e.target.value })} placeholder="comma separated video URLs" rows="3" />
-                  </div>
-                </div>
-
                 <div className="form-group">
                   <label>Short Description</label>
                   <textarea value={tourForm.shortDescription} onChange={(e) => setTourForm({ ...tourForm, shortDescription: e.target.value })} rows="3" />
@@ -1376,26 +1365,21 @@ const AdminDashboard = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Google Maps Embed URL</label>
-                    <input type="text" value={tourForm.googleMapsEmbedUrl} onChange={(e) => setTourForm({ ...tourForm, googleMapsEmbedUrl: e.target.value })} />
-                  </div>
-                  <div className="form-group">
                     <label>Available Dates</label>
                     <input type="text" value={tourForm.availableDates} onChange={(e) => setTourForm({ ...tourForm, availableDates: e.target.value })} placeholder="2026-09-12, 2026-10-05" />
+                  </div>
+                  <div className="form-group">
+                    <label>Route</label>
+                    <input type="text" value={tourForm.route} onChange={(e) => setTourForm({ ...tourForm, route: e.target.value })} />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Route</label>
-                    <input type="text" value={tourForm.route} onChange={(e) => setTourForm({ ...tourForm, route: e.target.value })} />
-                  </div>
-                  <div className="form-group">
                     <label>Starting Point</label>
                     <input type="text" value={tourForm.startingPoint} onChange={(e) => setTourForm({ ...tourForm, startingPoint: e.target.value })} />
                   </div>
                 </div>
-
                 <div className="form-row">
                   <div className="form-group">
                     <label>Hotel Marker</label>

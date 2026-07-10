@@ -1,21 +1,21 @@
 /* Tour Details Luxury Styling Sheet */
 
 :root {
-  --tour-bg: #f3f3f3;
-  --tour-surface: #f3f3f3;
-  --tour-surface-soft: #f3f3f3;
-  --tour-text: #2f241d;
-  --tour-muted: #6d5a4a;
-  --tour-accent: #b56b2f;
-  --tour-accent-dark: #8c4b1f;
-  --tour-accent-soft: #f4dfc8;
-  --tour-border: rgba(99, 71, 49, 0.14);
-  --tour-shadow: 0 16px 40px -18px rgba(47, 36, 29, 0.32);
+  --tour-bg: #eff6ff;
+  --tour-surface: #ffffff;
+  --tour-surface-soft: #f0fdf4;
+  --tour-text: #1e293b;
+  --tour-muted: #64748b;
+  --tour-accent: #2563eb;
+  --tour-accent-dark: #1d4ed8;
+  --tour-accent-soft: #dbeafe;
+  --tour-border: #e2e8f0;
+  --tour-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
 .tour_details_page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--tour-bg) 0%, #fdf8f1 100%);
+  background: linear-gradient(135deg, var(--tour-bg) 0%, #eff6ff 100%);
   font-family: 'Inter', sans-serif;
   color: var(--tour-text);
   position: relative;
@@ -25,7 +25,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top left, rgba(181, 107, 47, 0.12), transparent 30%);
+  background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%);
   pointer-events: none;
 }
 

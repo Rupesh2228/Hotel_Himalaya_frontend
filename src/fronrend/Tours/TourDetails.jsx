@@ -477,7 +477,7 @@ const handleBookNowSubmit = (e) => {
               <div className="mobile_action_panel">
                 <div className="mobile_price_box">
                   <span className="price_label">From</span>
-                  <span className="price_val">${Math.round(tour.price * (1 - tour.discount / 100))}</span>
+                  <span className="price_val">Rs.{Math.round(tour.price * (1 - tour.discount / 100))}</span>
                 </div>
                 <button 
                   className="btn_book_now_mob" 
@@ -574,17 +574,23 @@ const handleBookNowSubmit = (e) => {
             <section id="section_highlights" className="detail_section_box">
               <h2 className="section_title">Tour Highlights</h2>
               <div className="highlights_icon_grid">
-                {tour.highlights.map((item) => (
-                  <div className="highlight_icon_card" key={item.id}>
-                    <div className="highlight_icon_wrapper">
-                      {iconMap[item.icon] || <FaCheckCircle />}
+                {(Array.isArray(tour.highlights) ? tour.highlights : []).map((item, idx) => {
+                  const hasIconAndTitle = typeof item === 'object' && item !== null;
+                  const itemTitle = hasIconAndTitle ? item.title : String(item);
+                  const itemDesc = hasIconAndTitle ? item.desc : '';
+                  const itemIcon = hasIconAndTitle ? item.icon : '';
+                  return (
+                    <div className="highlight_icon_card" key={idx}>
+                      <div className="highlight_icon_wrapper">
+                        {iconMap[itemIcon] || <FaCheckCircle />}
+                      </div>
+                      <div className="highlight_text_content">
+                        <h4>{itemTitle}</h4>
+                        {itemDesc && <p>{itemDesc}</p>}
+                      </div>
                     </div>
-                    <div className="highlight_text_content">
-                      <h4>{item.title}</h4>
-                      <p>{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
@@ -592,17 +598,21 @@ const handleBookNowSubmit = (e) => {
             <section id="section_itinerary" className="detail_section_box">
               <h2 className="section_title">Day-by-Day Itinerary</h2>
               <div className="itinerary_timeline_accordion">
-                {tour.itinerary.map((dayItem, idx) => {
-                  const isOpen = !!openItineraryDays[dayItem.day]
+                {(Array.isArray(tour.itinerary) ? tour.itinerary : []).map((dayItem, idx) => {
+                  const isObj = typeof dayItem === 'object' && dayItem !== null;
+                  const dayNum = isObj ? (dayItem.day || idx + 1) : idx + 1;
+                  const dayTitle = isObj ? (dayItem.title || '') : String(dayItem);
+                  const dayDesc = isObj ? (dayItem.description || '') : '';
+                  const isOpen = !!openItineraryDays[dayNum];
                   return (
                     <div key={idx} className={`timeline_day_card ${isOpen ? 'expanded' : ''}`}>
                       {/* Day Accordion Header */}
                       <div 
                         className="day_header_toggle"
-                        onClick={() => toggleItineraryDay(dayItem.day)}
+                        onClick={() => toggleItineraryDay(dayNum)}
                       >
-                        <div className="day_badge_number">Day {dayItem.day}</div>
-                        <h4 className="day_title_text">{dayItem.title}</h4>
+                        <div className="day_badge_number">Day {dayNum}</div>
+                        <h4 className="day_title_text">{dayTitle}</h4>
                         <div className="accordion_arrow_icon">
                           {isOpen ? <FaChevronUp /> : <FaChevronDown />}
                         </div>
@@ -611,38 +621,48 @@ const handleBookNowSubmit = (e) => {
                       {/* Day Accordion Body */}
                       {isOpen && (
                         <div className="day_body_content">
-                          <p className="day_full_description">{dayItem.description}</p>
+                          {dayDesc && <p className="day_full_description">{dayDesc}</p>}
                           
                           {/* Mini Details Grid */}
-                          <div className="day_meta_specs_table">
-                            <div className="table_row">
-                              <span className="row_label">☕ Meals Included:</span>
-                              <span className="row_val">{dayItem.meals}</span>
+                          {isObj && (dayItem.meals || dayItem.accommodation || dayItem.walkingHours || dayItem.elevation) && (
+                            <div className="day_meta_specs_table">
+                              {dayItem.meals && (
+                                <div className="table_row">
+                                  <span className="row_label">☕ Meals Included:</span>
+                                  <span className="row_val">{dayItem.meals}</span>
+                                </div>
+                              )}
+                              {dayItem.accommodation && (
+                                <div className="table_row">
+                                  <span className="row_label">🛏️ Accommodation:</span>
+                                  <span className="row_val">{dayItem.accommodation}</span>
+                                </div>
+                              )}
+                              {dayItem.walkingHours && (
+                                <div className="table_row">
+                                  <span className="row_label">🥾 Walking Hours:</span>
+                                  <span className="row_val">{dayItem.walkingHours}</span>
+                                </div>
+                              )}
+                              {dayItem.elevation && (
+                                <div className="table_row">
+                                  <span className="row_label">📈 Target Elevation:</span>
+                                  <span className="row_val">{dayItem.elevation}</span>
+                                </div>
+                              )}
                             </div>
-                            <div className="table_row">
-                              <span className="row_label">🛏️ Accommodation:</span>
-                              <span className="row_val">{dayItem.accommodation}</span>
-                            </div>
-                            <div className="table_row">
-                              <span className="row_label">🥾 Walking Hours:</span>
-                              <span className="row_val">{dayItem.walkingHours}</span>
-                            </div>
-                            <div className="table_row">
-                              <span className="row_label">📈 Target Elevation:</span>
-                              <span className="row_val">{dayItem.elevation}</span>
-                            </div>
-                          </div>
+                          )}
 
                           {/* Day Image */}
-                          {dayItem.image && (
+                          {isObj && dayItem.image && (
                             <div className="day_img_box">
-                              <img src={dayItem.image} alt={`Day ${dayItem.day} - ${dayItem.title}`} />
+                              <img src={dayItem.image} alt={`Day ${dayNum} - ${dayTitle}`} />
                             </div>
                           )}
                         </div>
                       )}
                     </div>
-                  )
+                  );
                 })}
               </div>
             </section>
@@ -654,12 +674,15 @@ const handleBookNowSubmit = (e) => {
                 <div className="included_column_box">
                   <h3 className="column_header_title inc"><FaCheckCircle /> What's Included</h3>
                   <ul className="inc_exc_checklist">
-                    {tour.included.map((inc, i) => (
-                      <li key={i}>
-                        <FaCheckCircle className="check_icon_color" />
-                        <span>{inc.item}</span>
-                      </li>
-                    ))}
+                    {(Array.isArray(tour.included) ? tour.included : []).map((inc, i) => {
+                      const itemText = typeof inc === 'object' && inc !== null ? inc.item : String(inc);
+                      return (
+                        <li key={i}>
+                          <FaCheckCircle className="check_icon_color" />
+                          <span>{itemText}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 
@@ -667,12 +690,15 @@ const handleBookNowSubmit = (e) => {
                 <div className="excluded_column_box">
                   <h3 className="column_header_title exc"><FaTimesCircle /> What's Excluded</h3>
                   <ul className="inc_exc_crosslist">
-                    {tour.excluded.map((exc, i) => (
-                      <li key={i}>
-                        <FaTimesCircle className="cross_icon_color" />
-                        <span>{exc.item}</span>
-                      </li>
-                    ))}
+                    {(Array.isArray(tour.excluded) ? tour.excluded : []).map((exc, i) => {
+                      const itemText = typeof exc === 'object' && exc !== null ? exc.item : String(exc);
+                      return (
+                        <li key={i}>
+                          <FaTimesCircle className="cross_icon_color" />
+                          <span>{itemText}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>
@@ -682,67 +708,27 @@ const handleBookNowSubmit = (e) => {
             <section className="detail_section_box travel_advice_section">
               <h2 className="section_title">Essential Travel Advice</h2>
               <div className="travel_advice_cards_grid">
-                {tour.travelAdvice.map((advice, i) => (
-                  <div className="advice_card_item" key={i}>
-                    <div className="advice_card_header">
-                      <div className="advice_icon_box">
-                        {iconMap[advice.icon] || <FaCompass />}
+                {(Array.isArray(tour.travelAdvice) ? tour.travelAdvice : []).map((advice, i) => {
+                  const isObj = typeof advice === 'object' && advice !== null;
+                  const itemTitle = isObj ? advice.title : String(advice);
+                  const itemDesc = isObj ? advice.desc : '';
+                  const itemIcon = isObj ? advice.icon : '';
+                  return (
+                    <div className="advice_card_item" key={i}>
+                      <div className="advice_card_header">
+                        <div className="advice_icon_box">
+                          {iconMap[itemIcon] || <FaCompass />}
+                        </div>
+                        <h4>{itemTitle}</h4>
                       </div>
-                      <h4>{advice.title}</h4>
+                      {itemDesc && <p>{itemDesc}</p>}
                     </div>
-                    <p>{advice.desc}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
-            {/* Google Map section */}
-            <section id="section_map" className="detail_section_box map_section_card">
-              <h2 className="section_title">Route Interactive Map</h2>
-              
-              <div className="map_frame_wrapper">
-                <iframe 
-                  title="Google Map himalaya Tour"
-                  src={tour.googleMapsEmbedUrl}
-                  width="100%" 
-                  height="360" 
-                  style={{ border: 0, borderRadius: '16px' }} 
-                  allowFullScreen="" 
-                  loading="lazy" 
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
 
-                {/* Route detail Overlay Cards */}
-                <div className="map_route_overlay_card">
-                  <h4>Route & Landmarks</h4>
-                  <ul>
-                    <li>⛳ <strong>Starting Point:</strong> {tour.mapRouteDetails?.startingPoint}</li>
-                    <li>⛰️ <strong>Milestone:</strong> {tour.mapRouteDetails?.route.split(' - ').slice(1, -1).join(' → ')}</li>
-                    <li>🏁 <strong>Destination:</strong> {tour.mapRouteDetails?.destinationMarker}</li>
-                    <li>🏨 <strong>Hotel Lodging:</strong> {tour.mapRouteDetails?.hotelMarker}</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            {/* Gallery Masonry Grid */}
-            <section id="section_gallery" className="detail_section_box">
-              <h2 className="section_title">Expedition Photo Gallery</h2>
-              <div className="gallery_masonry_grid">
-                {tour.galleryImages.map((img, i) => (
-                  <div 
-                    key={i} 
-                    className="masonry_img_item"
-                    onClick={() => setLightboxImg(img)}
-                  >
-                    <img src={img} alt={`himalaya scenery ${i+1}`} />
-                    <div className="masonry_item_overlay">
-                      <span>Click to view</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
 
             {/* Reviews Section */}
             <section id="section_reviews" className="detail_section_box reviews_card_section">
@@ -898,7 +884,7 @@ const handleBookNowSubmit = (e) => {
                         <p className="sim_loc"><FaMapMarkerAlt /> {simTour.destination}</p>
                         <div className="sim_footer">
                           <span>{simTour.durationDays} Days</span>
-                          <span className="sim_price">${discPrice}</span>
+                          <span className="sim_price">Rs.{discPrice}</span>
                         </div>
                       </div>
                     </div>
