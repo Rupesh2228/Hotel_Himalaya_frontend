@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { FaBars, FaTimes } from 'react-icons/fa'
 import logo from '../../img/logo.png'
 import './componets.css'
 import { useAuth } from '../../context/AuthContext'
@@ -13,56 +12,90 @@ const Components = () => {
   const toggleMenu = () => setIsMenuOpen((open) => !open)
   const closeMenu = () => setIsMenuOpen(false)
 
+  const navLinks = [
+    { to: '/', label: 'Home', emoji: '🏠' },
+    { to: '/about', label: 'About Us', emoji: '🏨' },
+    { to: '/services', label: 'Services', emoji: '🛎️' },
+    { to: '/tours', label: 'Tours', emoji: '🗺️' },
+    { to: '/gallery', label: 'Gallery', emoji: '📸' },
+    { to: '/events', label: 'Events', emoji: '🎉' },
+    { to: '/contact', label: 'Contact', emoji: '📞' },
+  ]
+
   return (
     <>
-      <div className={isMenuOpen ? 'nav-backdrop open' : 'nav-backdrop'} onClick={closeMenu} />
+      {/* Backdrop */}
+      <div
+        className={isMenuOpen ? 'nav-backdrop open' : 'nav-backdrop'}
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
+
       <header>
         <div className="nav-header">
           <h1 className="logo">
             <NavLink to="/" onClick={closeMenu}>
-              <img src={logo} alt="Hotel himalaya" />
+              <img src={logo} alt="Hotel Himalayan" />
             </NavLink>
           </h1>
 
+          {/* Animated hamburger toggle */}
           <button
             type="button"
-            className="menu-toggle"
+            className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
             aria-expanded={isMenuOpen}
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             onClick={toggleMenu}
           >
-            {isMenuOpen ? <FaTimes /> : <FaBars />}
-            Menu
+            <span className="bar bar-1" />
+            <span className="bar bar-2" />
+            <span className="bar bar-3" />
           </button>
         </div>
 
-        <nav className={isMenuOpen ? 'nav open' : 'nav'}>
+        {/* Slide-out mobile drawer */}
+        <nav className={isMenuOpen ? 'nav open' : 'nav'} aria-label="Main navigation">
+
+          {/* Drawer header */}
+          <div className="nav-drawer-header">
+            <img src={logo} alt="Hotel Himalayan" className="drawer-logo" />
+            <div className="drawer-hotel-name">
+              <span className="drawer-title">Hotel Himalayan</span>
+              <span className="drawer-subtitle">Luxury & Comfort</span>
+            </div>
+            <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
+              ✕
+            </button>
+          </div>
+
           <ul>
-            <li><NavLink to="/" className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Home</NavLink></li>
-            <li><NavLink to="/about" className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>About Us</NavLink></li>
-            <li><NavLink to="/services" className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Services</NavLink></li>
-            <li><NavLink to="/tours" className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Tours</NavLink></li>
-            <li><NavLink to="/gallery" className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Gallery</NavLink></li>
-            <li><NavLink to="/events" className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Events</NavLink></li>
-            <li><NavLink to="/contact" onClick={closeMenu} className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Contact</NavLink></li>
+            {navLinks.map(({ to, label, emoji }) => (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  onClick={closeMenu}
+                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
+                  end={to === '/'}
+                >
+                  <span className="nav-link-emoji">{emoji}</span>
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+
             {user ? (
               <li
                 className="profile-nav-item"
-                style={{ position: 'relative' }}
                 onMouseEnter={() => setIsProfileOpen(true)}
                 onMouseLeave={() => setIsProfileOpen(false)}
               >
                 <NavLink
                   to={user.role === 'admin' ? '/admin' : '/dashboard'}
                   onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
+                  className={({ isActive }) => isActive ? 'menu__link profile-link active' : 'menu__link profile-link'}
                 >
-                  Profile
+                  <span className="nav-link-emoji">👤</span>
+                  <span>{user.name || 'Profile'}</span>
                 </NavLink>
                 {isProfileOpen && (
                   <div className="profile-dropdown-menu">
@@ -74,7 +107,16 @@ const Components = () => {
                 )}
               </li>
             ) : (
-              <li><NavLink to="/login" onClick={closeMenu} className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}>Login/Booking</NavLink></li>
+              <li>
+                <NavLink
+                  to="/login"
+                  onClick={closeMenu}
+                  className={({ isActive }) => isActive ? 'menu__link login-link active' : 'menu__link login-link'}
+                >
+                  <span className="nav-link-emoji">🔐</span>
+                  Login / Book Now
+                </NavLink>
+              </li>
             )}
           </ul>
         </nav>
