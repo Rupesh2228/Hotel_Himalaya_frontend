@@ -86,7 +86,7 @@ const Login_Booking = () => {
   // Handle Google OAuth initialization
   useEffect(() => {
     if (!user && googleReady && !globalGoogleInitialized) {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "your_google_client_id_here.apps.googleusercontent.com";
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1043554381692-qdp5juu0prcha8n1ajc7bgtk2peu2uud.apps.googleusercontent.com";
       if (!clientId || clientId.includes('your_google_client_id_here')) {
         setLocalError('Google sign-in is not configured yet.');
         return;
