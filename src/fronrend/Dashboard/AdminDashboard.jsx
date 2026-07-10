@@ -198,13 +198,17 @@ const DragAndDropUploader = ({ value, onChange, multiple = false }) => {
       formData.append('image', file);
 
       try {
-        const response = await fetch('/api/upload', {
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${API_URL}/api/upload`, {
           method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
         });
 
         if (!response.ok) {
-          throw new Error('Upload failed');
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || 'Upload failed');
         }
 
         const data = await response.json();
