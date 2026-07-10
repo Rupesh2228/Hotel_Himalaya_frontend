@@ -1,4 +1,4 @@
-import './lastcomponents.css'
+import './LastComponents.css'
 const LastComponents = () => {
   return (
     <div>
