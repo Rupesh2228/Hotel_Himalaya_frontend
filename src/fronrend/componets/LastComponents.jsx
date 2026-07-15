@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './LastComponents.css'
 const LastComponents = () => {
   return (
@@ -98,12 +99,12 @@ const LastComponents = () => {
       <h2>NAVIGATION</h2>
 
       <ul>
-        <li><a href="../Home/Home.jsx">Home</a></li>
-        <li><a href="../About_us/Aboutus.jsx">About Us</a></li>
-        <li><a href="../Services/Services.jsx">Service</a></li>
-        <li><a href="../Gallery/Gallery.jsx">Gallery</a></li>
-        <li><a href="../Contact/Contact.jsx">Contact</a></li>
-        <li><a href="../Login/Login.jsx">Login/Booking</a></li>
+        <li><Link to="/home">Home</Link></li>
+        <li><Link to="/about">About Us</Link></li>
+        <li><Link to="/services">Service</Link></li>
+        <li><Link to="/gallery">Gallery</Link></li>
+        <li><Link to="/contact">Contact</Link></li>
+        <li><Link to="/login">Login/Booking</Link></li>
       </ul>
     </div>
 
