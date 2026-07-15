@@ -226,7 +226,7 @@ const UserDashboard = () => {
     )
 
     if (conflictingBooking) {
-      alert(`This room is already booked for the selected time.\nRoom: ${conflictingBooking.title}\nCode: ${conflictingBooking.verificationCode || '-'}\nStatus: ${getBookingStatus(conflictingBooking)}`)
+      alert(`This room is already booked for the selected time.\nRoom:`)
       return
     }
 
@@ -265,7 +265,7 @@ const UserDashboard = () => {
 
       if (!response.ok) {
         if (response.status === 409) {
-          alert(`This room is already booked for the selected time.\nRoom: ${data?.booking?.roomTitle || data?.booking?.title || selectedRoom.title}\nCode: ${data?.booking?.verificationCode || '-'}\nStatus: ${data?.booking?.status || 'Booked'}`)
+          alert(`This room is already booked for the selected time.\nRoom`)
           return
         }
         throw new Error(data?.error || 'Failed to book room')
@@ -273,7 +273,7 @@ const UserDashboard = () => {
 
       setBookings((currentBookings) => [data, ...currentBookings])
       localStorage.setItem(bookingsCacheKey, JSON.stringify([data, ...bookings]))
-      alert(`Room booked successfully!\nRoom: ${selectedRoom.title}\nPrice: ${formatRoomPrice(selectedRoom)}\nVerification Code: ${data.verificationCode}\nMembers: ${memberCount}\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}`)
+      alert(`Room booked successfully!\nRoom: ${selectedRoom.title}\nPrice: ${formatRoomPrice(selectedRoom)}\nMembers: ${memberCount}\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}`)
 
       setCheckIn('')
       setCheckOut('')
