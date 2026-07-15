@@ -1769,7 +1769,7 @@ const AdminDashboard = () => {
                 <div className="table-wrapper">
                   <table>
                     <thead>
-                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Price</th><th>Status</th><th>Code</th><th>Actions</th></tr>
+                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Price</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Code</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {roomBookings.map((b) => (
@@ -1778,6 +1778,8 @@ const AdminDashboard = () => {
                           <td>{b.bookedByName}</td>
                           <td>{b.bookedByEmail || '—'}</td>
                           <td>Rs. {b.roomPrice}</td>
+                          <td>{b.checkIn || '—'}</td>
+                          <td>{b.checkOut || '—'}</td>
                           <td>
                             <span className={`badge ${b.verified ? 'badge-active' : 'badge-pending'}`}>
                               {b.verified ? 'Verified' : b.status || 'Booked'}
