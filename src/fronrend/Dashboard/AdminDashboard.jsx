@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt } from 'react-icons/fa';
+import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -337,7 +337,9 @@ const AdminDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [messagesError, setMessagesError] = useState('');
-  const [reviews] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [reviewsError, setReviewsError] = useState('');
   const [galleryImages, setGalleryImages] = useState([]);
   const [roomList, setRoomList] = useState([]);
   const [attractions, setAttractions] = useState([]);
@@ -498,7 +500,7 @@ const AdminDashboard = () => {
       const authHeaders = { Authorization: `Bearer ${token}` };
 
       try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes] = await Promise.all([
+        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes] = await Promise.all([
           fetch(apiPath('/api/bookings')),
           fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
           fetch(apiPath('/api/rooms')),
@@ -506,7 +508,8 @@ const AdminDashboard = () => {
           fetch(apiPath('/api/attractions')),
           fetch(apiPath('/api/events')),
           fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
-          fetch(apiPath('/api/messages'), { headers: authHeaders })
+          fetch(apiPath('/api/messages'), { headers: authHeaders }),
+          fetch(apiPath('/api/reviews'))
         ]);
 
         const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
@@ -517,6 +520,7 @@ const AdminDashboard = () => {
         const eventsData = eventsRes.ok ? await eventsRes.json() : [];
         const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
         const messagesData = messagesRes.ok ? await messagesRes.json() : [];
+        const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
 
         setRoomBookings(bookingsData || []);
         setUsers(usersData || []);
@@ -526,14 +530,17 @@ const AdminDashboard = () => {
         setEvents(eventsData || []);
         setEventBookings(eventBookingsData || []);
         setMessages(messagesData || []);
+        setReviews(reviewsData || []);
       } catch (error) {
         console.error(error);
         setEventBookingsError('Could not load admin dashboard data right now.');
         setMessagesError('Could not load messages right now.');
+        setReviewsError('Could not load reviews right now.');
       } finally {
         setLoadingAdminData(false);
         setLoadingEventBookings(false);
         setLoadingMessages(false);
+        setLoadingReviews(false);
       }
     };
 
@@ -706,6 +713,28 @@ const AdminDashboard = () => {
       setAdminMessage('Message deleted.');
     } catch (error) {
       setAdminError(error.message || 'Unable to delete message.');
+    }
+  };
+
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm('Delete this review?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/reviews/${reviewId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to delete review.');
+      }
+      setReviews((current) => current.filter((review) => review._id !== reviewId));
+      setAdminMessage('Review deleted.');
+    } catch (error) {
+      setAdminError(error.message || 'Unable to delete review.');
     }
   };
 
@@ -1117,7 +1146,7 @@ const AdminDashboard = () => {
               <div className="table-wrapper">
                 <table>
                   <thead>
-                    <tr><th>From</th><th>Email</th><th>Phone</th><th>Message</th><th>Actions</th></tr>
+                    <tr><th>From</th><th>Email</th><th>Phone</th><th>Message</th><th>Date</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
                     {messages.map((m) => (
@@ -1126,11 +1155,50 @@ const AdminDashboard = () => {
                         <td>{m.email}</td>
                         <td>{m.phone || '—'}</td>
                         <td>{m.message}</td>
+                        <td>{new Date(m.createdAt || Date.now()).toLocaleString()}</td>
                         <td>
                           <button
                             type="button"
                             className="btn-danger btn-sm"
                             onClick={() => handleDeleteMessage(m._id || m.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+            )}
+          </div>
+        );
+      case 'reviews':
+        return (
+          <div className="admin-panel-slot">
+            {reviewsError ? <div className="message error">{reviewsError}</div> : null}
+            {loadingReviews ? (
+              <div className="empty-state">Loading reviews…</div>
+            ) : reviews.length === 0 ? (
+              <div className="empty-state">No reviews yet.</div>
+            ) : (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr><th>Author</th><th>Rating</th><th>Review</th><th>Date</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody>
+                    {reviews.map((review) => (
+                      <tr key={review._id || review.id}>
+                        <td>{review.author || review.name || 'Guest'}</td>
+                        <td>{review.rating || 0}/5</td>
+                        <td>{review.text}</td>
+                        <td>{new Date(review.createdAt || review.updatedAt || Date.now()).toLocaleDateString()}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn-danger btn-sm"
+                            onClick={() => handleDeleteReview(review._id || review.id)}
                           >
                             Delete
                           </button>
@@ -1143,8 +1211,6 @@ const AdminDashboard = () => {
             )}
           </div>
         );
-      case 'reviews':
-        return <div className="empty-state">No reviews yet.</div>;
       case 'gallery':
         return (
           <div className="admin-panel-slot">
@@ -1840,6 +1906,8 @@ const AdminDashboard = () => {
             { id: 'events', label: 'Manage Events', icon: <FaCalendarAlt /> },
             { id: 'attractions', label: 'Attractions', icon: <FaPlus /> },
             { id: 'gallery', label: 'Gallery Images', icon: <FaPlus /> },
+            { id: 'messages', label: 'Messages', icon: <FaEnvelope /> },
+            { id: 'reviews', label: 'Reviews', icon: <FaTrash /> },
             { id: 'users', label: 'Registered Users', icon: <FaUsers /> },
           ].map((item) => (
             <button
@@ -1934,3 +2002,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

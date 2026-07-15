@@ -210,6 +210,48 @@
   color: #fff;
 }
 
+.admin-panel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.panel-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--admin-text-secondary);
+}
+
+.panel-summary .badge {
+  margin-left: 8px;
+}
+
+.badge-unread,
+.badge-read {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-unread {
+  background-color: #dc2626;
+  color: #fff;
+}
+
+.badge-read {
+  background-color: #10b981;
+  color: #fff;
+}
+
 /* ===== MAIN AREA ===== */
 .admin-main {
   flex: 1;
