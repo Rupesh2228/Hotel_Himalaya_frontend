@@ -98,12 +98,12 @@ const LastComponents = () => {
       <h2>NAVIGATION</h2>
 
       <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About Us</a></li>
-        <li><a href="/services">Service</a></li>
-        <li><a href="/gallery">Gallery</a></li>
-        <li><a href="/contact">Contact</a></li>
-        <li><a href="/login">Login/Booking</a></li>
+        <li><a href="../Home/Home.jsx">Home</a></li>
+        <li><a href="../About_us/Aboutus.jsx">About Us</a></li>
+        <li><a href="../Services/Services.jsx">Service</a></li>
+        <li><a href="../Gallery/Gallery.jsx">Gallery</a></li>
+        <li><a href="../Contact/Contact.jsx">Contact</a></li>
+        <li><a href="../Login/Login.jsx">Login/Booking</a></li>
       </ul>
     </div>
 
