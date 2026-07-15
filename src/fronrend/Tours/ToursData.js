@@ -394,6 +394,15 @@ const slugify = (value) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+const toAbsoluteImage = (img) => {
+  if (!img) return img;
+  const trimmed = String(img).trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
+  // treat as relative path on backend
+  return `${API_URL}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
+};
+
 const normalizeTour = (tour) => {
   if (!tour) return tour;
 
@@ -405,6 +414,18 @@ const normalizeTour = (tour) => {
   normalizedTour.urlSlug = normalizedTour.urlSlug || normalizedTour.slug || slugify(normalizedTour.title || '');
   normalizedTour.slug = normalizedTour.slug || normalizedTour.urlSlug || slugify(normalizedTour.title || '');
   normalizedTour.homepageVisibility = homepageVisibility;
+
+  // Ensure cover and gallery images are absolute URLs
+  try {
+    normalizedTour.coverImage = normalizedTour.coverImage ? toAbsoluteImage(normalizedTour.coverImage) : normalizedTour.coverImage;
+    if (Array.isArray(normalizedTour.galleryImages)) {
+      normalizedTour.galleryImages = normalizedTour.galleryImages.map((img) => toAbsoluteImage(img));
+    } else {
+      normalizedTour.galleryImages = normalizedTour.galleryImages ? [toAbsoluteImage(normalizedTour.galleryImages)] : [];
+    }
+  } catch (e) {
+    // ignore image normalization failures
+  }
 
   return normalizedTour;
 };

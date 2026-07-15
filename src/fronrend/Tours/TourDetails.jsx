@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { 
-  FaHeart, FaShareAlt, FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, 
+  FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, 
   FaCheckCircle, FaTimesCircle, FaPlus, FaMinus, FaChevronDown, FaChevronUp, 
   FaMountain, FaUserCheck, FaCar, FaGlobe, FaSun, FaBed, FaHiking, FaCompass, 
   FaCalendarWeek, FaArrowUp, FaCalendarDay, FaUserPlus, FaTicketAlt, FaShieldAlt, 
@@ -48,8 +48,6 @@ const TourDetails = () => {
   const [tour, setTour] = useState(null)
   
   // UI States
-  const [wishlisted, setWishlisted] = useState(false)
-  const [shareMessage, setShareMessage] = useState('')
   const [activeCoverIdx, setActiveCoverIdx] = useState(0)
   const [lightboxImg, setLightboxImg] = useState(null)
   const [openItineraryDays, setOpenItineraryDays] = useState({ 1: true }) // Day 1 open by default
@@ -177,8 +175,7 @@ const handleBookNowSubmit = (e) => {
         const nextDate = (found.availableDates || []).find((date) => date >= minTravelDate) || minTravelDate
         setSelectedDate(nextDate)
 
-        const savedWishlist = JSON.parse(localStorage.getItem('himalaya_wishlist') || '[]')
-        setWishlisted(savedWishlist.includes(found._id))
+          // wishlist removed
       } else {
         setTour(null)
         setAdminTourData(null)
@@ -242,25 +239,7 @@ const handleBookNowSubmit = (e) => {
   const finalTotal = afterBaseDiscount - promoDiscountAmt
 
   // Handlers
-  const handleToggleWishlist = () => {
-    const savedWishlist = JSON.parse(localStorage.getItem('himalaya_wishlist') || '[]')
-    let updated = []
-    if (wishlisted) {
-      updated = savedWishlist.filter(id => id !== tour._id)
-      setWishlisted(false)
-    } else {
-      updated = [...savedWishlist, tour._id]
-      setWishlisted(true)
-    }
-    localStorage.setItem('himalaya_wishlist', JSON.stringify(updated))
-  }
-
-  const handleShare = () => {
-    const pageUrl = window.location.href
-    navigator.clipboard.writeText(pageUrl)
-    setShareMessage('Copied link to clipboard!')
-    setTimeout(() => setShareMessage(''), 3000)
-  }
+  // wishlist and share handlers removed
 
   const applyPromo = () => {
     const cleanCode = promoCode.trim().toUpperCase()
@@ -401,7 +380,7 @@ const handleBookNowSubmit = (e) => {
             <section className="tour_hero_gallery_section">
               <div className="main_hero_image_wrapper">
                 <img 
-                  src={tour.galleryImages[activeCoverIdx] || tour.coverImage} 
+                  src={tour.galleryImages[activeCoverIdx] || tour.coverImage || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=1200&auto=format&fit=crop'} 
                   alt={tour.title} 
                   className="main_hero_image"
                 />
@@ -412,25 +391,7 @@ const handleBookNowSubmit = (e) => {
                   {tour.bestSellerBadge && <span className="hero_badge bestseller">🔥 Best Seller</span>}
                 </div>
 
-                {/* Floating utility buttons */}
-                <div className="hero_floating_actions">
-                  <button 
-                    className={`hero_action_btn wishlist_btn ${wishlisted ? 'active' : ''}`}
-                    onClick={handleToggleWishlist}
-                    title="Save to Wishlist"
-                  >
-                    <FaHeart />
-                  </button>
-                  <button 
-                    className="hero_action_btn share_btn"
-                    onClick={handleShare}
-                    title="Share Tour"
-                  >
-                    <FaShareAlt />
-                  </button>
-                </div>
-
-                {shareMessage && <div className="share_toast_alert">{shareMessage}</div>}
+                {/* Floating utility buttons removed (wishlist/share) */}
               </div>
 
               {/* Gallery Thumbnails (Image Slider) */}
@@ -441,7 +402,7 @@ const handleBookNowSubmit = (e) => {
                     className={`thumbnail_card_item ${idx === activeCoverIdx ? 'active' : ''}`}
                     onClick={() => setActiveCoverIdx(idx)}
                   >
-                    <img src={img} alt={`Gallery slide ${idx + 1}`} />
+                    <img src={img || tour.coverImage || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=400&auto=format&fit=crop'} alt={`Gallery slide ${idx + 1}`} />
                   </div>
                 ))}
               </div>

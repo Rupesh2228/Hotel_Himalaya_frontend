@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaHeart, FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCompass, FaChevronRight } from 'react-icons/fa'
+import { FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCompass, FaChevronRight } from 'react-icons/fa'
 import { getStoredTours, getVisibleTours, subscribeToTourChanges } from './ToursData'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
@@ -9,7 +9,6 @@ import './ToursList.css'
 const ToursList = () => {
   const navigate = useNavigate()
   const [tours, setTours] = useState([])
-  const [wishlist, setWishlist] = useState([])
   const visibleTours = getVisibleTours(tours)
 
   useEffect(() => {
@@ -20,9 +19,6 @@ const ToursList = () => {
 
     loadTours()
 
-    const savedWishlist = JSON.parse(localStorage.getItem('himalaya_wishlist') || '[]')
-    setWishlist(savedWishlist)
-
     const unsubscribe = subscribeToTourChanges((updatedTours) => {
       setTours(Array.isArray(updatedTours) ? updatedTours : [])
     })
@@ -30,17 +26,7 @@ const ToursList = () => {
     return () => unsubscribe()
   }, [])
 
-  const toggleWishlist = (id, e) => {
-    e.stopPropagation()
-    let updated = []
-    if (wishlist.includes(id)) {
-      updated = wishlist.filter(item => item !== id)
-    } else {
-      updated = [...wishlist, id]
-    }
-    setWishlist(updated)
-    localStorage.setItem('himalaya_wishlist', JSON.stringify(updated))
-  }
+  // wishlist removed per design: no client-side wishlist UI
 
   const handleBookNow = (slug, e) => {
     e.stopPropagation()
@@ -83,7 +69,6 @@ const ToursList = () => {
           {visibleTours
             .map((tour) => {
               const discountedPrice = calculateDiscountedPrice(tour.price, tour.discount)
-              const isWishlisted = wishlist.includes(tour._id)
 
               return (
                 <div 
@@ -92,8 +77,8 @@ const ToursList = () => {
                   onClick={() => navigate(`/tours/${tour.urlSlug}`)}
                 >
                   {/* Large Cover Image */}
-                  <div className="card_image_wrapper">
-                    <img src={tour.coverImage} alt={tour.title} className="card_cover_img" />
+                    <div className="card_image_wrapper">
+                    <img src={tour.coverImage || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=1200&auto=format&fit=crop'} alt={tour.title} className="card_cover_img" />
                     
                     {/* Top Badges */}
                     <div className="card_badges_container">
@@ -102,19 +87,22 @@ const ToursList = () => {
                     </div>
 
                     {/* Wishlist Icon Button */}
-                    <button 
-                      className={`wishlist_btn ${isWishlisted ? 'active' : ''}`}
-                      onClick={(e) => toggleWishlist(tour._id, e)}
-                      aria-label="Add to wishlist"
-                    >
-                      <FaHeart />
-                    </button>
+                    {/* wishlist button removed */}
 
                     {/* Admin Highlight Badges */}
                     <div className="card_admin_badges">
                       {tour.recommendedBadge && <span className="admin_badge recommendation">Admin Choice</span>}
                       <span className="admin_badge status">{tour.bookingStatus}</span>
                     </div>
+
+                    {/* Small gallery thumbnails (show up to 3) */}
+                    {Array.isArray(tour.galleryImages) && tour.galleryImages.length > 0 && (
+                      <div className="card_thumbs_container">
+                        {tour.galleryImages.slice(0, 3).map((img, i) => (
+                          <img key={i} src={img} alt={`thumb-${i}`} className="card_thumb_img" />
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Card Content Body */}

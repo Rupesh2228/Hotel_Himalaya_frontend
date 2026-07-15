@@ -1524,6 +1524,14 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Gallery Images (upload 3+)</label>
+                    <DragAndDropUploader value={tourForm.galleryImages} onChange={(galleryImages) => setTourForm({ ...tourForm, galleryImages })} multiple={true} />
+                    <small style={{ color: '#6b7280' }}>Upload multiple images; they will be saved as the tour gallery.</small>
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label>Short Description</label>
                   <textarea value={tourForm.shortDescription} onChange={(e) => setTourForm({ ...tourForm, shortDescription: e.target.value })} rows="3" />

@@ -183,6 +183,8 @@
 .admin_badge.status { background: rgba(79, 109, 29, 0.82); color: #fff; }
 
 .card_body { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
+.card_thumbs_container { position: absolute; bottom: 12px; right: 16px; display: flex; gap: 6px; z-index: 6; }
+.card_thumb_img { width: 54px; height: 34px; object-fit: cover; border-radius: 8px; box-shadow: 0 6px 14px rgba(0,0,0,0.12); border: 2px solid rgba(255,255,255,0.9); }
 .card_location { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #8c4b1f; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
 .location_icon { font-size: 0.85rem; }
 .card_title { font-family: 'Playfair Display', serif; font-size: 1.28rem; margin: 0 0 8px; color: #2f241d; }
