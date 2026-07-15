@@ -1,6 +1,29 @@
 import { Link } from 'react-router-dom'
 import './LastComponents.css'
+import {
+  CalendarDays,
+  GalleryHorizontalEnd,
+  Home,
+  Hotel,
+  LockKeyhole,
+  Map,
+  Menu,
+  Phone,
+  Sparkles,
+  UserRound,
+  X,
+} from 'lucide-react'
 const LastComponents = () => {
+  const navLinks = [
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/about', label: 'About Us', icon: Hotel },
+    { to: '/services', label: 'Services', icon: Sparkles },
+    { to: '/tours', label: 'Tours', icon: Map },
+    { to: '/gallery', label: 'Gallery', icon: GalleryHorizontalEnd },
+    { to: '/events', label: 'Events', icon: CalendarDays },
+    { to: '/contact', label: 'Contact', icon: Phone },
+  ]
+
   return (
     <div>
       
@@ -97,14 +120,15 @@ const LastComponents = () => {
 
     <div className="footer-box nav-box">
       <h2>NAVIGATION</h2>
-
       <ul>
-        <li><Link to="/home">Home</Link></li>
-        <li><Link to="/about">About Us</Link></li>
-        <li><Link to="/services">Service</Link></li>
-        <li><Link to="/gallery">Gallery</Link></li>
-        <li><Link to="/contact">Contact</Link></li>
-        <li><Link to="/login">Login/Booking</Link></li>
+        {navLinks.map(({ to, label, icon: Icon }) => (
+          <li key={to}>
+            <Link to={to} className="footer-nav-link">
+              <Icon size={14} />
+              {label}
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
 
