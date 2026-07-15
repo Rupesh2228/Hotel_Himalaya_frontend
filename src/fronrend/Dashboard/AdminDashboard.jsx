@@ -334,7 +334,9 @@ const AdminDashboard = () => {
 
   const [roomBookings, setRoomBookings] = useState([]);
   const [users, setUsers] = useState([]);
-  const [messages] = useState([{ id: 1, name: 'Guest', email: 'g@example.com', message: 'Hello' }]);
+  const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [messagesError, setMessagesError] = useState('');
   const [reviews] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const [roomList, setRoomList] = useState([]);
@@ -496,14 +498,15 @@ const AdminDashboard = () => {
       const authHeaders = { Authorization: `Bearer ${token}` };
 
       try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes] = await Promise.all([
+        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes] = await Promise.all([
           fetch(apiPath('/api/bookings')),
           fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
           fetch(apiPath('/api/rooms')),
           fetch(apiPath('/api/gallery')),
           fetch(apiPath('/api/attractions')),
           fetch(apiPath('/api/events')),
-          fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders })
+          fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
+          fetch(apiPath('/api/messages'), { headers: authHeaders })
         ]);
 
         const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
@@ -513,6 +516,7 @@ const AdminDashboard = () => {
         const attractionsData = attractionsRes.ok ? await attractionsRes.json() : [];
         const eventsData = eventsRes.ok ? await eventsRes.json() : [];
         const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
+        const messagesData = messagesRes.ok ? await messagesRes.json() : [];
 
         setRoomBookings(bookingsData || []);
         setUsers(usersData || []);
@@ -521,12 +525,15 @@ const AdminDashboard = () => {
         setAttractions(attractionsData || []);
         setEvents(eventsData || []);
         setEventBookings(eventBookingsData || []);
+        setMessages(messagesData || []);
       } catch (error) {
         console.error(error);
         setEventBookingsError('Could not load admin dashboard data right now.');
+        setMessagesError('Could not load messages right now.');
       } finally {
         setLoadingAdminData(false);
         setLoadingEventBookings(false);
+        setLoadingMessages(false);
       }
     };
 
@@ -606,6 +613,99 @@ const AdminDashboard = () => {
       setAdminMessage('Room deleted.');
     } catch (error) {
       setAdminError(error.message || 'Unable to delete room.');
+    }
+  };
+
+  const handleDeleteRoomBooking = async (bookingId) => {
+    if (!window.confirm('Delete this room booking?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/admin/bookings/${bookingId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to delete room booking.');
+      }
+      setRoomBookings((current) => current.filter((booking) => booking._id !== bookingId));
+      setAdminMessage('Room booking deleted.');
+    } catch (error) {
+      setAdminError(error.message || 'Unable to delete room booking.');
+    }
+  };
+
+  const handleVerifyRoomBooking = async (booking) => {
+    if (!booking || booking.verified) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/admin/bookings/${booking._id}/verify`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ verificationCode: booking.verificationCode, verifiedBy: user?.name || 'admin' })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Unable to verify booking.');
+      setRoomBookings((current) => current.map((item) => (item._id === booking._id ? data : item)));
+      setAdminMessage('Room booking verified.');
+    } catch (error) {
+      setAdminError(error.message || 'Unable to verify booking.');
+    }
+  };
+
+  const handleDeleteEventBooking = async (bookingId) => {
+    if (!window.confirm('Delete this event booking?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/events/admin/bookings/${bookingId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to delete event booking.');
+      }
+      setEventBookings((current) => current.filter((booking) => booking._id !== bookingId));
+      setAdminMessage('Event booking deleted.');
+    } catch (error) {
+      setAdminError(error.message || 'Unable to delete event booking.');
+    }
+  };
+
+  const handleDeleteTourBooking = (bookingId) => {
+    if (!window.confirm('Delete this tour booking?')) return;
+    const updated = tourBookings.filter((booking) => booking._id !== bookingId);
+    persistTourBookings(updated);
+    setAdminMessage('Tour booking deleted.');
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('Delete this message?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/messages/${messageId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to delete message.');
+      }
+      setMessages((current) => current.filter((message) => message._id !== messageId));
+      setAdminMessage('Message deleted.');
+    } catch (error) {
+      setAdminError(error.message || 'Unable to delete message.');
     }
   };
 
@@ -1007,11 +1107,40 @@ const AdminDashboard = () => {
         );
       case 'messages':
         return (
-          <div className="table-wrapper">
-            <table>
-              <thead><tr><th>From</th><th>Email</th><th>Message</th></tr></thead>
-              <tbody>{messages.map((m) => (<tr key={m.id}><td>{m.name}</td><td>{m.email}</td><td>{m.message}</td></tr>))}</tbody>
-            </table>
+          <div className="admin-panel-slot">
+            {messagesError ? <div className="message error">{messagesError}</div> : null}
+            {loadingMessages ? (
+              <div className="empty-state">Loading messages…</div>
+            ) : messages.length === 0 ? (
+              <div className="empty-state">No messages yet.</div>
+            ) : (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr><th>From</th><th>Email</th><th>Phone</th><th>Message</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody>
+                    {messages.map((m) => (
+                      <tr key={m._id || m.id}>
+                        <td>{m.name}</td>
+                        <td>{m.email}</td>
+                        <td>{m.phone || '—'}</td>
+                        <td>{m.message}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn-danger btn-sm"
+                            onClick={() => handleDeleteMessage(m._id || m.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         );
       case 'reviews':
@@ -1261,6 +1390,15 @@ const AdminDashboard = () => {
                         <div className="eb-detail"><span className="eb-detail-label">Total</span><span className="eb-detail-value eb-highlight">Rs. {Number(booking.eventPrice || 0) * Number(booking.ticketsCount || 0)}</span></div>
                         <div className="eb-detail"><span className="eb-detail-label">Booked</span><span className="eb-detail-value">{new Date(booking.createdAt).toLocaleDateString()}</span></div>
                       </div>
+                    </div>
+                    <div className="eb-card-actions">
+                      <button
+                        type="button"
+                        className="btn-sm btn-danger"
+                        onClick={() => handleDeleteEventBooking(booking._id)}
+                      >
+                        Delete Booking
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1603,6 +1741,12 @@ const AdminDashboard = () => {
                               ❌ Reject
                             </button>
                           )}
+                          <button
+                            className="btn-sm btn-danger"
+                            onClick={() => handleDeleteTourBooking(b._id)}
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1625,11 +1769,40 @@ const AdminDashboard = () => {
                 <div className="table-wrapper">
                   <table>
                     <thead>
-                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Price</th><th>Status</th></tr>
+                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Price</th><th>Status</th><th>Code</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {roomBookings.map((b) => (
-                        <tr key={b._id}><td>{b.roomTitle}</td><td>{b.bookedByName}</td><td>{b.bookedByEmail}</td><td>Rs. {b.roomPrice}</td><td><span className="badge badge-active">{b.status}</span></td></tr>
+                        <tr key={b._id}>
+                          <td>{b.roomTitle}</td>
+                          <td>{b.bookedByName}</td>
+                          <td>{b.bookedByEmail || '—'}</td>
+                          <td>Rs. {b.roomPrice}</td>
+                          <td>
+                            <span className={`badge ${b.verified ? 'badge-active' : 'badge-pending'}`}>
+                              {b.verified ? 'Verified' : b.status || 'Booked'}
+                            </span>
+                          </td>
+                          <td>{b.verificationCode || '—'}</td>
+                          <td style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            {!b.verified && b.verificationCode ? (
+                              <button
+                                type="button"
+                                className="btn-sm btn-approve"
+                                onClick={() => handleVerifyRoomBooking(b)}
+                              >
+                                Verify
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="btn-sm btn-danger"
+                              onClick={() => handleDeleteRoomBooking(b._id)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                   </table>

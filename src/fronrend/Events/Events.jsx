@@ -23,7 +23,6 @@ const Events = () => {
   const [bookingMessage, setBookingMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ticketBooking, setTicketBooking] = useState(null);
-  const [ticketQrDataUrl, setTicketQrDataUrl] = useState('');
   const [showTicketModal, setShowTicketModal] = useState(false);
 
   useEffect(() => {
@@ -104,20 +103,7 @@ const Events = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Booking failed');
 
-      const qrPayload = {
-        bookingId: data._id,
-        eventTitle: data.eventTitle,
-        guestName: data.bookedByName || bookingForm.name,
-        guestEmail: data.bookedByEmail || bookingForm.email,
-        guestPhone: data.bookedByPhone || bookingForm.phone || '',
-        ticketsCount: data.ticketsCount,
-        totalAmount: data.eventPrice * data.ticketsCount,
-        bookedAt: data.createdAt
-      };
-      const qrUrl = await QRCode.toDataURL(JSON.stringify(qrPayload), { width: 240, margin: 1 });
-
       setTicketBooking(data);
-      setTicketQrDataUrl(qrUrl);
       setShowTicketModal(true);
       setBookingMessage('Successfully Booked! Enjoy your event.');
       setTimeout(() => {
@@ -310,27 +296,21 @@ const Events = () => {
             <button type="button" className="close-modal" onClick={() => setShowTicketModal(false)}>&times;</button>
             <div className="qr-modal-header">
               <h3>{ticketBooking.eventTitle}</h3>
-              <p>Your event ticket is ready</p>
+              <p>Your booking is confirmed</p>
             </div>
-            <div className="qr-ticket-box">
-              {ticketQrDataUrl ? <img src={ticketQrDataUrl} alt="Event QR code" className="qr-ticket-image" /> : <div className="qr-loading">Generating QR…</div>}
+            <div className="qr-ticket-box booking-confirmation-box">
+              <p>Thank you for booking. We look forward to seeing you at the event.</p>
             </div>
-            <p className="qr-ticket-help">Please scan this QR during the event for fast entry.</p>
-            <div className="qr-ticket-meta">
+            <div className="qr-ticket-meta booking-confirmation-meta">
               <span>Guest: {ticketBooking.bookedByName || bookingForm.name}</span>
               <span>Tickets: {ticketBooking.ticketsCount}</span>
             </div>
             <button
               type="button"
               className="modal-submit-button"
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = ticketQrDataUrl;
-                link.download = `${(ticketBooking.eventTitle || 'event').toLowerCase().replace(/\s+/g, '-')}-ticket.png`;
-                link.click();
-              }}
+              onClick={() => setShowTicketModal(false)}
             >
-              Download QR
+              Close
             </button>
           </div>
         </div>

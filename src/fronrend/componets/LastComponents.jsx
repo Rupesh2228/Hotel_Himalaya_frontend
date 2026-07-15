@@ -5,13 +5,9 @@ import {
   GalleryHorizontalEnd,
   Home,
   Hotel,
-  LockKeyhole,
   Map,
-  Menu,
   Phone,
   Sparkles,
-  UserRound,
-  X,
 } from 'lucide-react'
 const LastComponents = () => {
   const navLinks = [
