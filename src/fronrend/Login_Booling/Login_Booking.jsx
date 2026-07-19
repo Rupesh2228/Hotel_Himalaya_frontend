@@ -34,7 +34,7 @@ const Login_Booking = () => {
   const [forgotStep, setForgotStep] = useState(0);
   const [forgotOTP, setForgotOTP] = useState("");
   const [forgotNewPassword, setForgotNewPassword] = useState("");
-  const googleInitialized = useRef(false);
+  const handleGoogleResponseRef = useRef(null);
 
   // Booking states
   const [rooms, setRooms] = useState([]);
@@ -83,6 +83,21 @@ const Login_Booking = () => {
     };
   }, []);
 
+  // Update the ref to the latest callback function every render
+  useEffect(() => {
+    handleGoogleResponseRef.current = async (response) => {
+      try {
+        setLocalError("");
+        const loggedInUser = await googleLogin(response.credential);
+        setLocalSuccess("Logged in successfully with Google!");
+        const dest = loggedInUser?.role === 'admin' ? '/admin' : (location.state?.from || '/dashboard');
+        navigate(dest);
+      } catch (err) {
+        setLocalError(err.message || "Google Login failed");
+      }
+    };
+  });
+
   // Handle Google OAuth initialization
   useEffect(() => {
     if (!user && googleReady) {
@@ -93,22 +108,16 @@ const Login_Booking = () => {
       }
 
       try {
-        if (!googleInitialized.current) {
+        if (!window.isGoogleInitialized) {
           window.google.accounts.id.initialize({
             client_id: clientId,
-            callback: async (response) => {
-              try {
-                setLocalError("");
-                const loggedInUser = await googleLogin(response.credential);
-                setLocalSuccess("Logged in successfully with Google!");
-                const dest = loggedInUser?.role === 'admin' ? '/admin' : (location.state?.from || '/dashboard');
-                navigate(dest);
-              } catch (err) {
-                setLocalError(err.message || "Google Login failed");
+            callback: (response) => {
+              if (handleGoogleResponseRef.current) {
+                handleGoogleResponseRef.current(response);
               }
             },
           });
-          googleInitialized.current = true;
+          window.isGoogleInitialized = true;
         }
 
         const btnContainer = document.getElementById("google-btn-container");
