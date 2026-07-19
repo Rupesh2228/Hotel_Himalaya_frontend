@@ -34,6 +34,7 @@ const Login_Booking = () => {
   const [forgotStep, setForgotStep] = useState(0);
   const [forgotOTP, setForgotOTP] = useState("");
   const [forgotNewPassword, setForgotNewPassword] = useState("");
+  const googleInitialized = useRef(false);
 
   // Booking states
   const [rooms, setRooms] = useState([]);
@@ -92,20 +93,23 @@ const Login_Booking = () => {
       }
 
       try {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: async (response) => {
-            try {
-              setLocalError("");
-              const loggedInUser = await googleLogin(response.credential);
-              setLocalSuccess("Logged in successfully with Google!");
-              const dest = loggedInUser?.role === 'admin' ? '/admin' : (location.state?.from || '/dashboard');
-              navigate(dest);
-            } catch (err) {
-              setLocalError(err.message || "Google Login failed");
-            }
-          },
-        });
+        if (!googleInitialized.current) {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: async (response) => {
+              try {
+                setLocalError("");
+                const loggedInUser = await googleLogin(response.credential);
+                setLocalSuccess("Logged in successfully with Google!");
+                const dest = loggedInUser?.role === 'admin' ? '/admin' : (location.state?.from || '/dashboard');
+                navigate(dest);
+              } catch (err) {
+                setLocalError(err.message || "Google Login failed");
+              }
+            },
+          });
+          googleInitialized.current = true;
+        }
 
         const btnContainer = document.getElementById("google-btn-container");
         if (btnContainer) {
