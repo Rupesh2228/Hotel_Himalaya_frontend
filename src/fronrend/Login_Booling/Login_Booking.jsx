@@ -7,7 +7,6 @@ import background from '../../img/background.jpg';
 import { getApiUrl } from '../../config/api';
 
 const API_URL = getApiUrl();
-let globalGoogleInitialized = false;
 
 const Login_Booking = () => {
   const navigate = useNavigate();
@@ -85,7 +84,7 @@ const Login_Booking = () => {
 
   // Handle Google OAuth initialization
   useEffect(() => {
-    if (!user && googleReady && !globalGoogleInitialized) {
+    if (!user && googleReady) {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "39198121017-ksa12cpsjaqv5mbsub25b6nonfnisp6u.apps.googleusercontent.com";
       if (!clientId || clientId.includes('your_google_client_id_here')) {
         setLocalError('Google sign-in is not configured yet.');
@@ -107,7 +106,6 @@ const Login_Booking = () => {
             }
           },
         });
-        globalGoogleInitialized = true;
 
         const btnContainer = document.getElementById("google-btn-container");
         if (btnContainer) {
@@ -124,7 +122,7 @@ const Login_Booking = () => {
         setLocalError('Google sign-in is currently unavailable.');
       }
     }
-  }, [user, googleReady, googleLogin, navigate, location]);
+  }, [user, googleReady, googleLogin, navigate, location, isLogin, forgotMode, signupStep]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
