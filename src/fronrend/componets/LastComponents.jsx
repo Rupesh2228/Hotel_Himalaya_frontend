@@ -37,6 +37,8 @@ const LastComponents = () => {
       <div className="footer-item">
         <span>☎</span>
         <p><a href="tel:015591884">015591884</a></p>
+         <p><a href="tel:9841558313">9841558313</a></p>
+
       </div>
 
       <div className="footer-item">
@@ -140,7 +142,7 @@ const LastComponents = () => {
     style={{border:0, borderRadius: "20px", display: 'block'}}
     allowFullScreen
     loading="lazy"
-    title="himalaya Inn Location"
+    title="Hotel Himalaya INN Khona"
   ></iframe>
 </div>
       </div>

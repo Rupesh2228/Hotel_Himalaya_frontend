@@ -262,10 +262,10 @@ const Login_Booking = () => {
       <div className="container">
         <div className="card">
           <div className="left">
-            <img src={background} alt="Hotel himalaya landscape" className="auth-panel-image" />
+            <img src={background} alt="Hotel Himalaya INN Khona landscape" className="auth-panel-image" />
             <div className="auth-panel-overlay" />
             <div className="auth-panel-content">
-              <span className="left-badge">Hotel himalaya Inn</span>
+              <span className="left-badge">Hotel Himalaya INN Khona</span>
               <h1>Luxury stay starts here.</h1>
               <p>Sign in to manage bookings, reserve rooms, and enjoy a smoother guest experience.</p>
             </div>

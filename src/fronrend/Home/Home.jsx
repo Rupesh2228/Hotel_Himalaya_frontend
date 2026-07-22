@@ -52,11 +52,11 @@ const Home = () => {
 
       <main className="home_hero">
         <div className="hero_container">
-          <h1 className="welcome">Welcome to Hotel himalaya</h1>
+          <h1 className="welcome">Welcome to Hotel Himalaya INN Khona </h1>
 
           <div className="intro_row">
             <div className="intro_img">
-              <img src={home} alt="Hotel himalaya" />
+              <img src={home} alt="Hotel Himalaya INN Khona Khona INN Khona" />
             </div>
 
             <p className="intro_text">

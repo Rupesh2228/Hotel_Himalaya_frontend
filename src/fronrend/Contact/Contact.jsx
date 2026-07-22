@@ -27,8 +27,8 @@ const Contact = () => {
               <a href="mailto:info@hotelkhokana.com" className="contact-secondary-action">Email Us</a>
             </div>
           </div>
-          <div className="hero-visual" aria-label="Hotel himalaya Inn">
-            <img src={background} alt="Hotel himalaya Inn" />
+          <div className="hero-visual" aria-label="Hotel Himalaya INN Khona Khona INN Khona">
+            <img src={background} alt="Hotel Himalaya INN Khona Khona INN Khona" />
             <div className="hero-visual-card">
               <span>Open all day</span>
               <strong>24/7 Guest Support</strong>
@@ -39,7 +39,7 @@ const Contact = () => {
         <section className="contact-grid">
           <div className="contact-info-panel">
             <div className="contact-card">
-              <span className="section-kicker">Hotel himalaya Inn</span>
+              <span className="section-kicker">Hotel Himalaya INN Khona Khona INN Khona</span>
               <h2>Contact Details</h2>
               <p>Reach our front desk or reservation team anytime. We are happy to answer your questions and assist with bookings.</p>
             </div>
@@ -49,23 +49,21 @@ const Contact = () => {
                 <div className="icon-box"><FaPhoneAlt /></div>
                 <div>
                   <h3>Call Us</h3>
-                  <p>+977 1 559 1234</p>
-                  <p>+977 987 654 3210</p>
+                  <p><a href="9841558313">9841558313</a></p>
                 </div>
               </div>
               <div className="info-group">
                 <div className="icon-box"><FaEnvelope /></div>
                 <div>
                   <h3>Email Us</h3>
-                  <p>info@hotelkhokana.com</p>
-                  <p>reservation@hotelkhokana.com</p>
+                  <p><a href="hotelhikhona@gmail.com">hotelhikhona@gmail.com</a></p>
                 </div>
               </div>
               <div className="info-group">
                 <div className="icon-box"><FaMapMarkerAlt /></div>
                 <div>
                   <h3>Location</h3>
-                  <p>Khokana, Lalitpur - 44700</p>
+                  <p>Khokana, Lalitpur</p>
                   <p>Bagmati Province, Nepal</p>
                 </div>
               </div>
@@ -89,7 +87,7 @@ const Contact = () => {
             <span className="section-kicker">Ready to arrive?</span>
             <h2>Visit us for warm Nepali hospitality</h2>
             <p>
-              Plan your stay at Hotel Khokana and enjoy comfort, culture, and caring service in the heart of Nepal.
+              Plan your stay at Hotel Himalaya INN Khona and enjoy comfort, culture, and caring service in the heart of Nepal.
             </p>
           </div>
           <button className="btn-cta">Learn More</button>

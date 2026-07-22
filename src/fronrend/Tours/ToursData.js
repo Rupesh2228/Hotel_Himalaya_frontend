@@ -1,4 +1,4 @@
-// Local data store for himalaya Travel & Tours
+// Local data store for Hotel Himalaya INN Khona Khona INN Khona Travel & Tours
 // Includes default high-quality data and methods to persist edits to localStorage
 
 import { getApiUrl } from '../../config/api';
@@ -56,10 +56,10 @@ Trek through lush pine forests, cross suspension bridges adorned with prayer fla
     bookingStatus: "Available",
     tourGuideAssignment: "Ang Tshering Sherpa (IFMGA Certified Guide)",
     vehicleAssignment: "Private Yeti Heli & Airport Premium Shuttles",
-    hotelAssignment: "Hotel himalaya Inn Kathmandu (3 Nights) & Yeti Mountain Homes (8 Nights)",
+    hotelAssignment: "Hotel Himalaya INN Khona Khona INN Khona Kathmandu (3 Nights) & Yeti Mountain Homes (8 Nights)",
     homepageVisibility: true,
     publishStatus: "Published",
-    seoTitle: "Everest Base Camp Luxury Trek 12 Days | himalaya Travel & Tours",
+    seoTitle: "Everest Base Camp Luxury Trek 12 Days | Hotel Himalaya INN Khona Khona INN Khona Travel & Tours",
     seoMetaDescription: "Book our premium 12-day Everest Base Camp Trek. Enjoy luxury sherpa lodges, gourmet local dinners, expert guides, and majestic mountain vistas. Book now!",
     urlSlug: "everest-base-camp-luxury-trek",
     availableDates: ["2026-09-12", "2026-10-05", "2026-11-02"],
@@ -91,9 +91,9 @@ Trek through lush pine forests, cross suspension bridges adorned with prayer fla
       {
         day: 1,
         title: "Arrival in Kathmandu & Welcome Dinner",
-        description: "Welcome to Nepal! Upon arrival at Tribhuvan International Airport (KTM), our premium representative will pick you up in a private VIP SUV and transfer you to the luxurious himalaya Inn. In the evening, enjoy an authentic Nepalese welcome dinner with cultural performances.",
+        description: "Welcome to Nepal! Upon arrival at Tribhuvan International Airport (KTM), our premium representative will pick you up in a private VIP SUV and transfer you to the luxurious Hotel Himalaya INN Khona Khona INN Khona. In the evening, enjoy an authentic Nepalese welcome dinner with cultural performances.",
         meals: "Dinner",
-        accommodation: "Hotel himalaya Inn (5-Star)",
+        accommodation: "Hotel Himalaya INN Khona Khona INN Khona (5-Star)",
         walkingHours: "0 hrs",
         elevation: "1,400m",
         image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400&auto=format&fit=crop"
@@ -183,7 +183,7 @@ Trek through lush pine forests, cross suspension bridges adorned with prayer fla
         title: "Summit Kala Patthar & Heli Flyback to Kathmandu",
         description: "Pre-dawn climb to the summit of Kala Patthar (5,545m) for the most magnificent sunrise over Mount Everest. Return to Gorakshep for breakfast, then board a private VIP Helicopter for a scenic flight back to Kathmandu. Transfer to hotel.",
         meals: "Breakfast, Dinner",
-        accommodation: "Hotel himalaya Inn (5-Star)",
+        accommodation: "Hotel Himalaya INN Khona Khona INN Khona (5-Star)",
         walkingHours: "3-4 hrs",
         elevation: "5,545m",
         image: "https://images.unsplash.com/photo-1522083165195-342750297f05?q=80&w=400&auto=format&fit=crop"
@@ -293,7 +293,7 @@ Trek through lush pine forests, cross suspension bridges adorned with prayer fla
           rating: 5,
           date: "May 2026",
           title: "Incredible Altitude Luxury",
-          comment: "I was hesitant about trekking EBC at age 58, but himalaya Travel & Tours made it exceptionally comfortable. Hot showers every evening and warm electric blankets in the Namche lodge were lifesavers. Highly recommended!",
+          comment: "I was hesitant about trekking EBC at age 58, but Hotel Himalaya INN Khona Khona INN Khona Travel & Tours made it exceptionally comfortable. Hot showers every evening and warm electric blankets in the Namche lodge were lifesavers. Highly recommended!",
           verified: true
         },
         {
@@ -347,10 +347,10 @@ Trek through lush pine forests, cross suspension bridges adorned with prayer fla
     bookingStatus: "Available",
     tourGuideAssignment: "Dawa Pemba Sherpa",
     vehicleAssignment: "Private 4WD Jeeps & Pokhara flights",
-    hotelAssignment: "Hotel himalaya Inn & Luxury Tea Houses",
+    hotelAssignment: "Hotel Himalaya INN Khona Khona INN Khona & Luxury Tea Houses",
     homepageVisibility: true,
     publishStatus: "Published",
-    seoTitle: "Annapurna Circuit Trek | himalaya Travel & Tours",
+    seoTitle: "Annapurna Circuit Trek | Hotel Himalaya INN Khona Khona INN Khona Travel & Tours",
     seoMetaDescription: "Trek the classic Annapurna Circuit with high-end support, premium lodges, and professional guides. View prices and departures.",
     urlSlug: "annapurna-circuit-luxury-expedition",
     availableDates: ["2026-09-20", "2026-10-10"],
@@ -371,7 +371,7 @@ Trek through lush pine forests, cross suspension bridges adorned with prayer fla
       tourType: "Alpine Trekking"
     },
     itinerary: [
-      { day: 1, title: "Kathmandu Arrival", description: "Arrive in Kathmandu and check in to your hotel.", meals: "Dinner", accommodation: "Hotel himalaya Inn", walkingHours: "0", elevation: "1400m", image: "" }
+      { day: 1, title: "Kathmandu Arrival", description: "Arrive in Kathmandu and check in to your hotel.", meals: "Dinner", accommodation: "Hotel Himalaya INN Khona Khona INN Khona", walkingHours: "0", elevation: "1400m", image: "" }
     ],
     included: [{ item: "Airport transfers", active: true }],
     excluded: [{ item: "Tips", active: true }],

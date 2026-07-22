@@ -637,7 +637,7 @@ const UserDashboard = () => {
                   </div>
                   <div className="form-group">
                     <label>Your Review</label>
-                    <textarea placeholder="Tell us about your experience at Hotel himalaya Inn..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} rows={4} />
+                    <textarea placeholder="Tell us about your experience at Hotel Himalaya INN Khona Khona INN Khona..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} rows={4} />
                   </div>
                   <button className="btn gold" type="submit" disabled={submitting}>
                     {submitting ? '⏳ Submitting...' : '✓ Submit Review'}

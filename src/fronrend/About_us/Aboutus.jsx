@@ -24,7 +24,7 @@ const AboutUs = () => {
           <div className="aboutus_intro_img">
             <img
               src={background}
-              alt="Hotel himalaya"
+              alt="Hotel Himalaya INN Khona Khona INN Khona"
               className="aboutus_img"
             />
           </div>
@@ -33,15 +33,15 @@ const AboutUs = () => {
 
         <div className="aboutus_intro_hotel">
           <p>
-            HOTEL himalaya <br />
-            INN 
-            <span> KHOKANA</span>
+            Hotel Himalaya INN <br />
+              
+            <span> Khona</span>
           </p>
         </div>
 
         <div className="aboutus_intro_first">
           <p>
-            Hotel himalaya is more than just a place to stay. It is a peaceful retreat where you can escape the hustle and bustle of everyday life and immerse yourself in the beauty of nature. Our hotel is nestled in a serene location, surrounded by breathtaking landscapes that offer a perfect blend of tranquility and natural splendor.
+            Hotel Himalaya INN Khona Khona INN Khona is more than just a place to stay. It is a peaceful retreat where you can escape the hustle and bustle of everyday life and immerse yourself in the beauty of nature. Our hotel is nestled in a serene location, surrounded by breathtaking landscapes that offer a perfect blend of tranquility and natural splendor.
           </p>
         </div>
       </main>

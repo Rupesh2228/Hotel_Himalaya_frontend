@@ -159,7 +159,7 @@ const Service = () => {
           </div>
 
           <p className="service-description">
-            At Hotel Khokana, we go beyond comfort. Discover a range of
+            At Hotel Himalaya INN Khona Khona INN Khona, we go beyond comfort. Discover a range of
             services designed to make your stay relaxing, memorable and truly
             exceptional.
           </p>
@@ -284,11 +284,11 @@ const Service = () => {
         </div>
         <div className='margin_last-service-content'>
             <div className='last-service-content'>
-          <h2>Experience Unmatched Hospitality at Hotel Khokana</h2>
+          <h2>Experience Unmatched Hospitality at Hotel Himalaya INN khona</h2>
 
            </div>
           <p className='hotel_des'>
-          At Hotel Khokana, we are dedicated to providing an unforgettable hospitality experience that combines comfort, warmth, and exceptional service. Nestled in a peaceful and culturally rich environment, our hotel offers guests the perfect place to relax, unwind, and create lasting memories. From our comfortable and well-appointed rooms to our carefully designed facilities, every aspect of our hotel is focused on ensuring a pleasant and enjoyable stay. Our commitment goes beyond providing accommodation. We take pride in delivering personalized service through our friendly and attentive staff, who are always ready to assist with your needs and make you feel at home. 
+          At Hotel Himalaya INN Khona, we are dedicated to providing an unforgettable hospitality experience that combines comfort, warmth, and exceptional service. Nestled in a peaceful and culturally rich environment, our hotel offers guests the perfect place to relax, unwind, and create lasting memories. From our comfortable and well-appointed rooms to our carefully designed facilities, every aspect of our hotel is focused on ensuring a pleasant and enjoyable stay. Our commitment goes beyond providing accommodation. We take pride in delivering personalized service through our friendly and attentive staff, who are always ready to assist with your needs and make you feel at home. 
           </p>
        
       </div>

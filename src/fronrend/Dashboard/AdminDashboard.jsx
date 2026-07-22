@@ -1090,6 +1090,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Delete this user?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/admin/users/${userId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to delete user.');
+      }
+      setUsers((current) => current.filter((u) => u._id !== userId));
+      setAdminMessage('User deleted.');
+    } catch (error) {
+      setAdminError(error.message || 'Unable to delete user.');
+    }
+  };
+
   const renderPanel = () => {
     switch (activeSection) {
 
@@ -1899,7 +1920,7 @@ const AdminDashboard = () => {
             <FaBed />
           </div>
           <div>
-            <h2>himalaya Inn</h2>
+            <h2>Hotel Himalaya INN Khona</h2>
             <p>Admin Console</p>
           </div>
         </div>

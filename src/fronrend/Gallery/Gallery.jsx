@@ -43,14 +43,14 @@ const Gallery = () => {
       <section className="gallery-hero">
         <div className="gallery-overlay">
           <span className="gallery-tag">
-            Discover Hotel Khokana
+            Discover Hotel Himalaya INN Khona
           </span>
 
           <h1 className="gallery-heading">Gallery</h1>
 
           <p>
             Explore the beauty, luxury, and warm Nepali hospitality
-            of Hotel Khokana through our gallery collection.
+            of Hotel Himalaya INN Khona through our gallery collection.
           </p>
         </div>
       </section>
@@ -71,7 +71,7 @@ const Gallery = () => {
         <h2>Experience Luxury & Comfort</h2>
 
         <p>
-          Every corner of Hotel Khokana reflects elegance,
+          Every corner of Hotel Himalaya INN Khona reflects elegance,
           culture, and hospitality. From luxurious rooms to
           unforgettable dining experiences.
         </p>

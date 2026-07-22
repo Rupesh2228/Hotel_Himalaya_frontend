@@ -88,7 +88,7 @@ const DashboardRoute = () => {
 function App() {
   return (
     <div>
-      <Suspense fallback={<Loader fullScreen message="Loading himalaya Inn..." />}>
+      <Suspense fallback={<Loader fullScreen message="Loading Hotel Himalaya INN Khona Khona INN Khona..." />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />

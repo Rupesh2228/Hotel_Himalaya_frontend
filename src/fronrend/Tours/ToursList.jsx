@@ -48,9 +48,9 @@ const ToursList = () => {
         <div className="tours_hero_overlay"></div>
         <div className="tours_hero_content">
           <span className="tours_subtitle">Unparalleled Alpine Journeys</span>
-          <h1 className="tours_title">himalaya Expedition Packages</h1>
+          <h1 className="tours_title">Hotel Himalaya INN Khona  Expedition Packages</h1>
           <p className="tours_desc">
-            Explore the world's most spectacular mountain ranges with himalaya Travel & Tours. 
+            Explore the world's most spectacular mountain ranges with Hotel Himalaya INN Khona Travel & Tours. 
             Luxury lodges, certified Sherpa guides, and high-altitude security standard.
           </p>
         </div>

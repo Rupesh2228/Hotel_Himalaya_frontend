@@ -124,7 +124,7 @@ const Events = () => {
       
       <section className="events-hero">
         <div className="hero-content">
-          <h1>Exclusive himalaya Events & Gatherings</h1>
+          <h1>Exclusive Hotel Himalaya INN Khona  Events & Gatherings</h1>
           <p>Unforgettable experiences nestled in the clouds. Join us for premium local concerts, bonfire nights, guided treks, and cultural culinary dining.</p>
         </div>
       </section>

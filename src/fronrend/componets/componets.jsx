@@ -46,9 +46,9 @@ const Components = () => {
       <header className="site-header">
         <div className="nav-header">
           <h1 className="logo">
-            <NavLink to="/" onClick={closeMenu} aria-label="Hotel Himalayan home">
-              <img src={logo} alt="Hotel Himalayan" />
-              <span className="logo-wordmark">Hotel Himalayan</span>
+            <NavLink to="/" onClick={closeMenu} aria-label="Hotel Himalaya INN Khona ">
+              <img src={logo} alt="Hotel Himalaya INN Khona" />
+              <span className="logo-wordmark">Hotel Himalaya INN Khona </span>
             </NavLink>
           </h1>
 
@@ -68,9 +68,9 @@ const Components = () => {
 
         <nav className={isMenuOpen ? 'nav open' : 'nav'} aria-label="Main navigation">
           <div className="nav-drawer-header">
-            <img src={logo} alt="Hotel Himalayan" className="drawer-logo" />
+            <img src={logo} alt="Hotel Himalaya INN Khona Khona INN Khona" className="drawer-logo" />
             <div className="drawer-hotel-name">
-              <span className="drawer-title">Hotel Himalayan</span>
+              <span className="drawer-title">Hotel Himalaya INN Khona </span>
               <span className="drawer-subtitle">Luxury & Comfort</span>
             </div>
             <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
