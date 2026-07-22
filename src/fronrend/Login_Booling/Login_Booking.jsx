@@ -331,19 +331,18 @@ const Login_Booking = () => {
                     <div>
                       <h2>Reset Password</h2>
                       <p className="form-subtitle">Enter your email to receive a reset OTP.</p>
-                      <div className="form-group">
-                        <label>Email address</label>
-                        <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" />
-                      </div>
-                      {forgotStep === 0 && (
+                      {forgotStep === 0 ? (
                         <form onSubmit={handleRequestReset}>
+                          <div className="form-group">
+                            <label>Email address</label>
+                            <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" />
+                          </div>
                           <div className="form-actions">
                             <button type="submit" className="btn">Send OTP</button>
                             <button type="button" className="btn" onClick={() => { setForgotMode(false); setForgotStep(0); }}>Cancel</button>
                           </div>
                         </form>
-                      )}
-                      {forgotStep === 1 && (
+                      ) : (
                         <form onSubmit={handleVerifyReset}>
                           <div className="form-group">
                             <label>OTP</label>
