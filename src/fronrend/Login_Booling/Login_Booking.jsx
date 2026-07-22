@@ -120,7 +120,9 @@ const Login_Booking = () => {
           window.isGoogleInitialized = true;
         }
 
-        const btnContainer = document.getElementById("google-btn-container");
+        // Render button into the currently visible container
+        const containerId = !isLogin ? 'google-btn-container-signup' : 'google-btn-container-login';
+        const btnContainer = document.getElementById(containerId);
         if (btnContainer) {
           btnContainer.innerHTML = '';
           window.google.accounts.id.renderButton(btnContainer, {
@@ -334,10 +336,12 @@ const Login_Booking = () => {
                         <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" />
                       </div>
                       {forgotStep === 0 && (
-                        <div className="form-actions">
-                          <button className="btn" onClick={handleRequestReset}>Send OTP</button>
-                          <button className="btn" onClick={() => { setForgotMode(false); setForgotStep(0); }}>Cancel</button>
-                        </div>
+                        <form onSubmit={handleRequestReset}>
+                          <div className="form-actions">
+                            <button type="submit" className="btn">Send OTP</button>
+                            <button type="button" className="btn" onClick={() => { setForgotMode(false); setForgotStep(0); }}>Cancel</button>
+                          </div>
+                        </form>
                       )}
                       {forgotStep === 1 && (
                         <form onSubmit={handleVerifyReset}>
@@ -411,7 +415,7 @@ const Login_Booking = () => {
                         <div className="auth-divider"><span>Or continue with</span></div>
                         <div className="google-card google-card-simple">
                           <div className="google">
-                            <div id="google-btn-container"></div>
+                            <div id="google-btn-container-login"></div>
                           </div>
                         </div>
                       </div>
@@ -483,7 +487,7 @@ const Login_Booking = () => {
                             <p>Create your account with Google in one step.</p>
                           </div>
                           <div className="google">
-                            <div id="google-btn-container"></div>
+                            <div id="google-btn-container-signup"></div>
                           </div>
                         </div>
                       </div>
