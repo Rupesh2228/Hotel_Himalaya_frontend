@@ -4,7 +4,8 @@ import { getApiUrl } from '../config/api';
 
 const AuthContext = createContext();
 
-const API_URL = getApiUrl();
+// Always call getApiUrl() at request time so it picks up window.location correctly.
+const apiUrl = () => getApiUrl();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     if (!token) return null;
 
     try {
-      const res = await fetch(`${API_URL}/api/auth/me`, {
+      const res = await fetch(`${apiUrl()}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(`${apiUrl()}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +112,7 @@ export const AuthProvider = ({ children }) => {
       return data.user;
     } catch (err) {
       const msg = (err && err.message && err.message.includes('Failed to fetch'))
-        ? `Unable to reach server at ${API_URL}. Is the backend running?`
+        ? `Unable to reach server at ${apiUrl()}. Is the backend running?`
         : (err.message || 'Login failed');
       setError(msg);
       throw new Error(msg, { cause: err });
@@ -122,7 +123,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (name, email, password) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/signup`, {
+      const res = await fetch(`${apiUrl()}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +142,7 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (err) {
       const msg = (err && err.message && err.message.includes('Failed to fetch'))
-        ? `Unable to reach server at ${API_URL}. Is the backend running?`
+        ? `Unable to reach server at ${apiUrl()}. Is the backend running?`
         : (err.message || 'Signup failed');
       setError(msg);
       throw new Error(msg, { cause: err });
@@ -152,7 +153,7 @@ export const AuthProvider = ({ children }) => {
   const verifySignupOTP = async (email, otp) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/verify-signup-otp`, {
+      const res = await fetch(`${apiUrl()}/api/auth/verify-signup-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -166,7 +167,7 @@ export const AuthProvider = ({ children }) => {
       return data.user;
     } catch (err) {
       const msg = (err && err.message && err.message.includes('Failed to fetch'))
-        ? `Unable to reach server at ${API_URL}. Is the backend running?`
+        ? `Unable to reach server at ${apiUrl()}. Is the backend running?`
         : (err.message || 'Verification failed');
       setError(msg);
       throw new Error(msg, { cause: err });
@@ -177,7 +178,7 @@ export const AuthProvider = ({ children }) => {
   const requestPasswordReset = async (email) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/request-reset`, {
+      const res = await fetch(`${apiUrl()}/api/auth/request-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -187,7 +188,7 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (err) {
       const msg = (err && err.message && err.message.includes('Failed to fetch'))
-        ? `Unable to reach server at ${API_URL}. Is the backend running?`
+        ? `Unable to reach server at ${apiUrl()}. Is the backend running?`
         : (err.message || 'Request failed');
       setError(msg);
       throw new Error(msg, { cause: err });
@@ -198,7 +199,7 @@ export const AuthProvider = ({ children }) => {
   const verifyPasswordReset = async (email, otp, newPassword) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/verify-reset`, {
+      const res = await fetch(`${apiUrl()}/api/auth/verify-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword }),
@@ -208,7 +209,7 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (err) {
       const msg = (err && err.message && err.message.includes('Failed to fetch'))
-        ? `Unable to reach server at ${API_URL}. Is the backend running?`
+        ? `Unable to reach server at ${apiUrl()}. Is the backend running?`
         : (err.message || 'Reset failed');
       setError(msg);
       throw new Error(msg, { cause: err });
@@ -219,7 +220,7 @@ export const AuthProvider = ({ children }) => {
   const googleLogin = async (credential) => {
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/google`, {
+      const res = await fetch(`${apiUrl()}/api/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +238,7 @@ export const AuthProvider = ({ children }) => {
       return data.user;
     } catch (err) {
       const msg = (err && err.message && err.message.includes('Failed to fetch'))
-        ? `Unable to reach server at ${API_URL}. Is the backend running?`
+        ? `Unable to reach server at ${apiUrl()}. Is the backend running?`
         : (err.message || 'Google login failed');
       setError(msg);
       throw new Error(msg, { cause: err });

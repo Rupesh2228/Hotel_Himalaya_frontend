@@ -163,8 +163,8 @@ const Login_Booking = () => {
       setLocalError("Please enter all fields");
       return;
     }
-    if (signupPassword.length < 6) {
-      setLocalError("Password must be at least 6 characters");
+    if (signupPassword.length < 8) {
+      setLocalError("Password must be at least 8 characters");
       return;
     }
     try {
@@ -193,8 +193,13 @@ const Login_Booking = () => {
     e.preventDefault();
     setLocalError("");
     setLocalSuccess("");
+    const emailToUse = (forgotEmail || loginEmail).trim();
+    if (!emailToUse) {
+      setLocalError("Please enter your email address to receive the OTP.");
+      return;
+    }
     try {
-      const resp = await requestPasswordReset(forgotEmail || loginEmail);
+      const resp = await requestPasswordReset(emailToUse);
       setLocalSuccess(resp.message || 'If that email exists, an OTP was sent');
       setForgotStep(1);
     } catch (err) {
