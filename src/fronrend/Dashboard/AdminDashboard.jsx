@@ -29,6 +29,12 @@ const initialGalleryForm = {
   description: ''
 };
 
+const initialPastEventForm = {
+  imageUrl: '',
+  title: '',
+  description: ''
+};
+
 const initialAttractionForm = {
   title: '',
   description: '',
@@ -121,7 +127,8 @@ const sectionTitleMap = {
   rooms: 'Rooms',
   tours: 'Manage Tours',
   attractions: 'Attractions',
-  events: 'Events'
+  events: 'Events',
+  pastEvents: 'Completed Events'
 };
 
 const slugify = (value) =>
@@ -350,6 +357,8 @@ const AdminDashboard = () => {
   const [roomForm, setRoomForm] = useState(initialRoomForm);
   const [editingRoomId, setEditingRoomId] = useState('');
   const [galleryForm, setGalleryForm] = useState(initialGalleryForm);
+  const [pastEvents, setPastEvents] = useState([]);
+  const [pastEventForm, setPastEventForm] = useState(initialPastEventForm);
   const [attractionForm, setAttractionForm] = useState(initialAttractionForm);
   const [editingAttractionId, setEditingAttractionId] = useState('');
   const [eventForm, setEventForm] = useState(initialEventForm);
@@ -500,7 +509,7 @@ const AdminDashboard = () => {
       const authHeaders = { Authorization: `Bearer ${token}` };
 
       try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes] = await Promise.all([
+        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
           fetch(apiPath('/api/bookings')),
           fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
           fetch(apiPath('/api/rooms')),
@@ -509,7 +518,8 @@ const AdminDashboard = () => {
           fetch(apiPath('/api/events')),
           fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
           fetch(apiPath('/api/messages'), { headers: authHeaders }),
-          fetch(apiPath('/api/reviews'))
+          fetch(apiPath('/api/reviews')),
+          fetch(apiPath('/api/past-events'))
         ]);
 
         const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
@@ -521,6 +531,7 @@ const AdminDashboard = () => {
         const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
         const messagesData = messagesRes.ok ? await messagesRes.json() : [];
         const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
+        const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
         setRoomBookings(bookingsData || []);
         setUsers(usersData || []);
@@ -531,6 +542,7 @@ const AdminDashboard = () => {
         setEventBookings(eventBookingsData || []);
         setMessages(messagesData || []);
         setReviews(reviewsData || []);
+        setPastEvents(pastEventsData || []);
       } catch (error) {
         console.error(error);
         setEventBookingsError('Could not load admin dashboard data right now.');
@@ -735,6 +747,51 @@ const AdminDashboard = () => {
       setAdminMessage('Review deleted.');
     } catch (error) {
       setAdminError(error.message || 'Unable to delete review.');
+    }
+  };
+
+  
+  const handlePastEventSubmit = async (event) => {
+    event.preventDefault();
+    if (!pastEventForm.imageUrl) return setAdminError('Please upload an image.');
+    setAdminError(''); setAdminMessage('');
+    try {
+      const response = await fetch(apiPath('/api/past-events'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(pastEventForm)
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to add past event.');
+      setPastEvents((current) => [data, ...current]);
+      setPastEventForm(initialPastEventForm);
+      setAdminMessage('Completed event added.');
+    } catch (error) {
+      console.error(error);
+      setAdminError(error.message || 'Unable to add past event.');
+    }
+  };
+
+  const handleDeletePastEvent = async (eventId) => {
+    if (!window.confirm('Remove this completed event?')) return;
+    setAdminError(''); setAdminMessage('');
+    try {
+      const response = await fetch(apiPath(`/api/past-events/${eventId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Unable to delete past event.');
+      }
+      setPastEvents((current) => current.filter((ev) => ev._id !== eventId));
+      setAdminMessage('Completed event removed.');
+    } catch (error) {
+      console.error(error);
+      setAdminError(error.message || 'Unable to delete past event.');
     }
   };
 
@@ -1232,6 +1289,60 @@ const AdminDashboard = () => {
             )}
           </div>
         );
+      
+      case 'pastEvents':
+        return (
+          <div className="tab-pane fade-in active">
+            <div className="tab-header">
+              <h2>Completed Events</h2>
+              <button className="btn-primary" onClick={() => fetchDashboardData()}>
+                <FaSync /> Refresh
+              </button>
+            </div>
+            
+            <div className="admin-grid two-cols">
+              <div className="card">
+                <h3><FaPlus /> Add Completed Event</h3>
+                <form onSubmit={handlePastEventSubmit} className="form-grid">
+                  <div className="form-group full-width">
+                    <label>Event Image (Required)</label>
+                    <DragAndDropUploader value={pastEventForm.imageUrl} onChange={(imageUrl) => setPastEventForm({ ...pastEventForm, imageUrl })} />
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Event Title</label>
+                    <input type="text" value={pastEventForm.title} onChange={(e) => setPastEventForm({ ...pastEventForm, title: e.target.value })} required placeholder="e.g. New Year Party 2025" />
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Description / Details</label>
+                    <textarea value={pastEventForm.description} onChange={(e) => setPastEventForm({ ...pastEventForm, description: e.target.value })} required rows="3" placeholder="Briefly describe the completed event..." />
+                  </div>
+                  <div className="form-group full-width form-actions">
+                    <button type="submit" className="btn-primary">Add Completed Event</button>
+                  </div>
+                </form>
+              </div>
+
+              <div className="card">
+                <h3>Completed Events List</h3>
+                <div className="gallery-grid">
+                  {pastEvents.map((ev) => (
+                    <div className="gallery-item" key={ev._id}>
+                      {ev.imageUrl && <img src={ev.imageUrl} alt={ev.title} />}
+                      <div className="gallery-item-actions">
+                        <button type="button" className="btn-danger" onClick={() => handleDeletePastEvent(ev._id)}>
+                          <FaTrash />
+                        </button>
+                      </div>
+                      <div style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold' }}>{ev.title}</div>
+                    </div>
+                  ))}
+                  {pastEvents.length === 0 && <p className="empty-state">No completed events added yet.</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       case 'gallery':
         return (
           <div className="admin-panel-slot">
@@ -1933,6 +2044,7 @@ const AdminDashboard = () => {
             { id: 'bookings', label: 'Room Bookings', icon: <FaCalendarAlt /> },
             { id: 'rooms', label: 'Manage Rooms', icon: <FaBed /> },
             { id: 'events', label: 'Manage Events', icon: <FaCalendarAlt /> },
+            { id: 'pastEvents', label: 'Completed Events', icon: <FaCalendarAlt /> },
             { id: 'attractions', label: 'Attractions', icon: <FaPlus /> },
             { id: 'gallery', label: 'Gallery Images', icon: <FaPlus /> },
             { id: 'messages', label: 'Messages', icon: <FaEnvelope /> },

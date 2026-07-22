@@ -137,3 +137,17 @@
   font-size: 0.9rem;
   flex-wrap: wrap;
 }
+/* Past Events Styles */
+.past-events-section { margin-top: 60px; padding-top: 40px; border-top: 1px solid rgba(99, 71, 49, 0.12); }
+.past-events-header { text-align: center; margin-bottom: 40px; }
+.past-events-header h2 { font-size: 2rem; color: #2f241d; margin-bottom: 10px; }
+.past-events-header p { color: #5d4a3a; font-size: 1.1rem; }
+.past-events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+.past-event-card { border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 10px 24px rgba(47, 36, 29, 0.06); transition: transform 0.3s ease; }
+.past-event-card:hover { transform: translateY(-5px); box-shadow: 0 16px 32px rgba(47, 36, 29, 0.1); }
+.past-event-image-wrapper { position: relative; height: 200px; }
+.past-event-image { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); }
+.past-event-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+.past-event-details { padding: 20px; }
+.past-event-title { font-size: 1.2rem; font-weight: 700; color: #2f241d; margin-bottom: 8px; }
+.past-event-desc { color: #5d4a3a; font-size: 0.95rem; line-height: 1.5; }

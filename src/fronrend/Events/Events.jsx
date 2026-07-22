@@ -10,6 +10,7 @@ const API_URL = getApiUrl();
 const Events = () => {
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -47,6 +48,13 @@ const Events = () => {
       if (!res.ok) throw new Error('Failed to fetch events');
       const data = await res.json();
       setEvents(data);
+
+      // Fetch past events
+      const pastRes = await fetch(`${API_URL}/api/past-events`);
+      if (pastRes.ok) {
+        const pastData = await pastRes.json();
+        setPastEvents(pastData);
+      }
     } catch (err) {
       console.error(err);
       setError('Could not load events. Please try again later.');
@@ -196,6 +204,30 @@ const Events = () => {
           </div>
         )}
       </main>
+
+      {pastEvents.length > 0 && (
+        <section className="past-events-section">
+          <div className="past-events-header">
+            <h2>Memories from Past Events</h2>
+            <p>Take a look at some of the incredible experiences we've hosted recently.</p>
+          </div>
+          <div className="past-events-grid">
+            {pastEvents.map((pe) => (
+              <div key={pe._id} className="past-event-card">
+                <div className="past-event-image-wrapper">
+                  <img src={pe.imageUrl} alt={pe.title} className="past-event-image" />
+                  <div className="past-event-badge">Completed</div>
+                </div>
+                <div className="past-event-details">
+                  <h3 className="past-event-title">{pe.title}</h3>
+                  <p className="past-event-desc">{pe.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
 
       {/* Booking Modal */}
       {showBookingModal && selectedEvent && (
