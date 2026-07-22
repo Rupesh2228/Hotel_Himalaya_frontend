@@ -34,6 +34,7 @@ const Login_Booking = () => {
   const [forgotStep, setForgotStep] = useState(0);
   const [forgotOTP, setForgotOTP] = useState("");
   const [forgotNewPassword, setForgotNewPassword] = useState("");
+  const [isRequestingOTP, setIsRequestingOTP] = useState(false);
   const handleGoogleResponseRef = useRef(null);
 
   // Booking states
@@ -200,12 +201,15 @@ const Login_Booking = () => {
       setLocalError("Please enter your email address to receive the OTP.");
       return;
     }
+    setIsRequestingOTP(true);
     try {
       const resp = await requestPasswordReset(emailToUse);
       setLocalSuccess(resp.message || 'If that email exists, an OTP was sent');
       setForgotStep(1);
     } catch (err) {
       setLocalError(err.message || 'Request failed');
+    } finally {
+      setIsRequestingOTP(false);
     }
   };
 
@@ -338,8 +342,10 @@ const Login_Booking = () => {
                             <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" />
                           </div>
                           <div className="form-actions">
-                            <button type="submit" className="btn">Send OTP</button>
-                            <button type="button" className="btn" onClick={() => { setForgotMode(false); setForgotStep(0); }}>Cancel</button>
+                            <button type="submit" className="btn" disabled={isRequestingOTP}>
+                              {isRequestingOTP ? "Sending..." : "Send OTP"}
+                            </button>
+                            <button type="button" className="btn" disabled={isRequestingOTP} onClick={() => { setForgotMode(false); setForgotStep(0); }}>Cancel</button>
                           </div>
                         </form>
                       ) : (
