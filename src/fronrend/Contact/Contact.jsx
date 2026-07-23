@@ -90,8 +90,7 @@ const Contact = () => {
               Plan your stay at Hotel Himalaya INN Khona and enjoy comfort, culture, and caring service in the heart of Nepal.
             </p>
           </div>
-          <button className="btn-cta">Learn More</button>
-        </section>
+                </section>
 
         <footer className="contact-footer">
           <LastComponent />
