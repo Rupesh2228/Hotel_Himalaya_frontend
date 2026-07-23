@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import Components from "../componets/componets";
 
 const OTP_EXPIRY_SECONDS = 5 * 60; // 5 minutes
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -134,41 +135,42 @@ export default function VerifyOTP() {
     }
   };
 
-  const expiryColor = expiryLeft <= 60 ? "#ef4444" : expiryLeft <= 120 ? "#f97316" : "#22c55e";
+  const expiryColor = expiryLeft <= 60 ? "#dc2626" : expiryLeft <= 120 ? "#ea580c" : "#16a34a";
 
   return (
     <>
+      <Components />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.6} }
-        .auth-page { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#0f1a16 0%,#1a2d26 50%,#0f1a16 100%); padding:80px 16px 40px; font-family:'Inter',sans-serif; }
-        .auth-card { width:min(440px,100%); background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:40px; backdrop-filter:blur(20px); animation:fadeUp 0.5s ease; }
+        .auth-page { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f9fafb; padding:120px 16px 40px; font-family:'Inter',sans-serif; }
+        .auth-card { width:min(440px,100%); background:#ffffff; border:1px solid #e5e7eb; border-radius:20px; padding:40px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01); animation:fadeUp 0.5s ease; }
         .auth-logo { text-align:center; margin-bottom:24px; }
-        .auth-logo-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(246,209,148,0.1); border:1px solid rgba(246,209,148,0.25); border-radius:999px; padding:6px 14px; color:#f6d194; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
-        .auth-title { text-align:center; margin:0 0 6px; font-family:'Playfair Display',serif; font-size:26px; color:#fff; }
-        .auth-subtitle { text-align:center; margin:0 0 6px; color:rgba(255,255,255,0.5); font-size:14px; }
-        .email-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(36,70,60,0.4); border:1px solid rgba(36,70,60,0.6); border-radius:999px; padding:6px 14px; color:#a7f3d0; font-size:13px; font-weight:600; margin:0 auto 24px; }
+        .auth-logo-badge { display:inline-flex; align-items:center; gap:8px; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 14px; color:#4b5563; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+        .auth-title { text-align:center; margin:0 0 6px; font-family:'Playfair Display',serif; font-size:26px; color:#111827; }
+        .auth-subtitle { text-align:center; margin:0 0 6px; color:#6b7280; font-size:14px; }
+        .email-badge { display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:999px; padding:6px 14px; color:#065f46; font-size:13px; font-weight:600; margin:0 auto 24px; }
         .otp-row { display:flex; gap:10px; justify-content:center; margin:0 0 20px; }
-        .otp-digit { width:52px; height:60px; background:rgba(255,255,255,0.06); border:2px solid rgba(255,255,255,0.12); border-radius:12px; color:#fff; font-size:24px; font-weight:700; text-align:center; font-family:'Courier New',monospace; outline:none; transition:border-color 0.2s,box-shadow 0.2s; }
-        .otp-digit:focus { border-color:rgba(246,209,148,0.6); box-shadow:0 0 0 3px rgba(246,209,148,0.1); }
-        .otp-digit.filled { border-color:rgba(34,197,94,0.5); background:rgba(34,197,94,0.06); }
+        .otp-digit { width:52px; height:60px; background:#ffffff; border:2px solid #d1d5db; border-radius:12px; color:#111827; font-size:24px; font-weight:700; text-align:center; font-family:'Courier New',monospace; outline:none; transition:border-color 0.2s,box-shadow 0.2s; }
+        .otp-digit:focus { border-color:#24463c; box-shadow:0 0 0 3px rgba(36,70,60,0.1); }
+        .otp-digit.filled { border-color:#22c55e; background:#f0fdf4; }
         .otp-digit.has-error { border-color:#ef4444; }
-        .timer { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:20px; font-size:13px; color:rgba(255,255,255,0.5); }
+        .timer { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:20px; font-size:13px; color:#6b7280; }
         .timer-value { font-family:'Courier New',monospace; font-size:15px; font-weight:700; }
         .verify-btn { width:100%; padding:14px; border:none; border-radius:10px; background:linear-gradient(135deg,#24463c,#1a3329); color:#f6d194; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; transition:opacity 0.2s,transform 0.2s; display:flex; align-items:center; justify-content:center; }
-        .verify-btn:hover:not(:disabled) { opacity:0.9; transform:translateY(-1px); }
+        .verify-btn:hover:not(:disabled) { opacity:0.92; transform:translateY(-1px); box-shadow:0 4px 12px rgba(36,70,60,0.2); }
         .verify-btn:disabled { opacity:0.5; cursor:not-allowed; }
         .resend-section { text-align:center; margin-top:20px; }
-        .resend-btn { background:none; border:none; font-family:inherit; font-size:13px; cursor:pointer; color:#f6d194; font-weight:600; padding:0; }
-        .resend-btn:disabled { color:rgba(255,255,255,0.3); cursor:not-allowed; }
-        .resend-info { font-size:12px; color:rgba(255,255,255,0.35); margin-top:4px; }
-        .error-box { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:12px 14px; color:#fca5a5; font-size:13px; margin-bottom:16px; }
-        .success-box { background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:10px; padding:12px 14px; color:#86efac; font-size:13px; margin-bottom:16px; }
+        .resend-btn { background:none; border:none; font-family:inherit; font-size:13px; cursor:pointer; color:#24463c; font-weight:600; padding:0; }
+        .resend-btn:disabled { color:#9ca3af; cursor:not-allowed; }
+        .resend-info { font-size:12px; color:#9ca3af; margin-top:4px; }
+        .error-box { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px 14px; color:#b91c1c; font-size:13px; margin-bottom:16px; }
+        .success-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 14px; color:#15803d; font-size:13px; margin-bottom:16px; }
         .expired-notice { text-align:center; padding:20px; }
-        .auth-footer { text-align:center; margin-top:20px; font-size:13px; color:rgba(255,255,255,0.4); }
-        .auth-link { color:#f6d194; font-weight:600; text-decoration:none; }
+        .auth-footer { text-align:center; margin-top:20px; font-size:13px; color:#6b7280; }
+        .auth-link { color:#24463c; font-weight:600; text-decoration:none; }
         .auth-link:hover { text-decoration:underline; }
       `}</style>
 
@@ -220,8 +222,8 @@ export default function VerifyOTP() {
             </form>
           ) : (
             <div className="expired-notice">
-              <p style={{ color: "#fca5a5", fontWeight: 600, marginBottom: 8 }}>⏰ Code Expired</p>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Request a new code below.</p>
+              <p style={{ color: "#dc2626", fontWeight: 600, marginBottom: 8 }}>⏰ Code Expired</p>
+              <p style={{ color: "#6b7280", fontSize: 14 }}>Request a new code below.</p>
             </div>
           )}
 
@@ -233,7 +235,7 @@ export default function VerifyOTP() {
               onClick={handleResend}
               disabled={resendCooldown > 0 || resendAttempts >= MAX_RESEND_ATTEMPTS || resending}
             >
-              {resending && <Spinner size={14} color="#f6d194" />}
+              {resending && <Spinner size={14} color="#24463c" />}
               {resending
                 ? "Sending…"
                 : resendCooldown > 0
