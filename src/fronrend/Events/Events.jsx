@@ -213,12 +213,12 @@ const Events = () => {
           </div>
           <div className="past-events-grid">
             {pastEvents.map((pe) => (
-              <div key={pe._id} className="past-event-card">
+              <div key={pe._id} className="past-event-card horizontal-card">
                 <div className="past-event-image-wrapper">
                   <img src={pe.imageUrl} alt={pe.title} className="past-event-image" />
-                  <div className="past-event-badge">Completed</div>
                 </div>
                 <div className="past-event-details">
+                  <span className="past-event-tag">Completed</span>
                   <h3 className="past-event-title">{pe.title}</h3>
                   <p className="past-event-desc">{pe.description}</p>
                 </div>
