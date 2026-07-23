@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt } from 'react-icons/fa';
+import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaRedo } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -756,6 +756,7 @@ const AdminDashboard = () => {
     if (!pastEventForm.imageUrl) return setAdminError('Please upload an image.');
     setAdminError(''); setAdminMessage('');
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(apiPath('/api/past-events'), {
         method: 'POST',
         headers: {
@@ -779,6 +780,7 @@ const AdminDashboard = () => {
     if (!window.confirm('Remove this completed event?')) return;
     setAdminError(''); setAdminMessage('');
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(apiPath(`/api/past-events/${eventId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
@@ -1295,8 +1297,8 @@ const AdminDashboard = () => {
           <div className="tab-pane fade-in active">
             <div className="tab-header">
               <h2>Completed Events</h2>
-              <button className="btn-primary" onClick={() => fetchDashboardData()}>
-                <FaSync /> Refresh
+              <button className="btn-primary" onClick={() => window.location.reload()}>
+                <FaRedo /> Refresh
               </button>
             </div>
             

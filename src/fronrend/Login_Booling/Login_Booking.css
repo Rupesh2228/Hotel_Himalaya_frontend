@@ -508,3 +508,127 @@
     width: 100%;
   }
 }
+
+/* ── Google-Only Sign-In ── */
+.google-only-signin {
+  display: grid;
+  gap: 20px;
+}
+
+.google-only-signin h2 {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  color: var(--auth-ink);
+  font-size: clamp(1.9rem, 3vw, 2.55rem);
+  line-height: 1.12;
+}
+
+.google-only-signin .form-subtitle {
+  margin: -10px 0 0;
+  color: var(--auth-muted);
+  line-height: 1.7;
+}
+
+.google-signin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 36px 28px;
+  border: 1px solid rgba(66, 133, 244, 0.22);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(66, 133, 244, 0.06), rgba(255, 255, 255, 0.98)),
+    radial-gradient(circle at 20% 10%, rgba(66, 133, 244, 0.12), transparent 45%);
+  box-shadow:
+    0 20px 60px rgba(66, 133, 244, 0.12),
+    0 4px 16px rgba(32, 38, 35, 0.06);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.google-signin-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335);
+}
+
+.google-signin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(66, 133, 244, 0.2);
+  border: 1px solid rgba(66, 133, 244, 0.15);
+}
+
+.google-signin-card h3 {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--auth-ink);
+}
+
+.google-signin-card > p {
+  margin: -8px 0 0;
+  color: var(--auth-muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  max-width: 300px;
+}
+
+.google-btn-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+#google-btn-container,
+#google-btn-container > div {
+  width: 100%;
+}
+
+#google-btn-container {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+}
+
+#google-btn-container iframe {
+  border-radius: 999px !important;
+  box-shadow: 0 10px 24px rgba(66, 133, 244, 0.22);
+}
+
+.google-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--auth-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.google-loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(66, 133, 244, 0.25);
+  border-top-color: #4285f4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
