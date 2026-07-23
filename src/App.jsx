@@ -10,7 +10,14 @@ const Service = lazy(() => import('./fronrend/Service/Service'))
 const Contact = lazy(() => import('./fronrend/Contact/Contact'))
 const Gallery = lazy(() => import('./fronrend/Gallery/Gallery'))
 const Events = lazy(() => import('./fronrend/Events/Events'))
-const Login_Booking = lazy(() => import('./fronrend/Login_Booling/Login_Booking'))
+
+// Auth routes
+const Login = lazy(() => import('./fronrend/auth/Login'))
+const Signup = lazy(() => import('./fronrend/auth/Signup'))
+const VerifyOTP = lazy(() => import('./fronrend/auth/VerifyOTP'))
+const ForgotPassword = lazy(() => import('./fronrend/auth/ForgotPassword'))
+const ResetPassword = lazy(() => import('./fronrend/auth/ResetPassword'))
+
 const AdminDashboard = lazy(() => import('./fronrend/Dashboard/AdminDashboard'))
 const UserDashboard = lazy(() => import('./fronrend/Dashboard/UserDashboard'))
 const AttractionDetail = lazy(() => import('./fronrend/Attraction/AttractionDetail'))
@@ -99,7 +106,14 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/tours" element={<ToursList />} />
           <Route path="/tours/:slug" element={<TourDetails />} />
-          <Route path="/login" element={<Login_Booking />} />
+          
+          {/* Auth Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
           <Route path="/admin" element={<AdminRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/attraction/:id" element={<AttractionDetail />} />
@@ -112,3 +126,4 @@ function App() {
 }
 
 export default App
+
