@@ -560,7 +560,7 @@ const UserDashboard = () => {
 
             {activeTab === 'tour-bookings' && (
               <section className="tab-pane">
-                <h2>🏔️ My Tour Bookings</h2>
+                <h2> My Tour Bookings</h2>
                 {tourBookings.length === 0 ? (
                   <div className="empty-state">
                     No tours booked yet. Explore our breathtaking packages on the{' '}

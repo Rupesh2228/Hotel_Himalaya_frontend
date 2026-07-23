@@ -1297,9 +1297,6 @@ const AdminDashboard = () => {
           <div className="tab-pane fade-in active">
             <div className="tab-header">
               <h2>Completed Events</h2>
-              <button className="btn-primary" onClick={() => window.location.reload()}>
-                <FaRedo /> Refresh
-              </button>
             </div>
             
             <div className="admin-grid two-cols">
