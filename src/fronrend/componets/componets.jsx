@@ -93,28 +93,27 @@ const Components = () => {
               </li>
             ))}
 
-            {user ? (
-              <li
-                className="profile-nav-item"
-                onMouseEnter={() => setIsProfileOpen(true)}
-                onMouseLeave={() => setIsProfileOpen(false)}
-              >
+            {user?.role === 'admin' ? (
+              <li>
                 <NavLink
-                  to={user.role === 'admin' ? '/admin' : '/dashboard'}
+                  to="/admin"
                   onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link profile-link active' : 'menu__link profile-link'}
+                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
+                >
+                  <LockKeyhole className="nav-link-icon" aria-hidden="true" />
+                  <span>Admin Panel</span>
+                </NavLink>
+              </li>
+            ) : (
+              <li>
+                <NavLink
+                  to="/dashboard"
+                  onClick={closeMenu}
+                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >
                   <UserRound className="nav-link-icon" aria-hidden="true" />
-                  <span>{user.name || 'Profile'}</span>
+                  <span>Dashboard</span>
                 </NavLink>
-                {isProfileOpen && (
-                  <div className="profile-dropdown-menu">
-                    <div className="profile-user-info">
-                      Logged in as:<br />
-                      <strong>{user.name}</strong>
-                    </div>
-                  </div>
-                )}
               </li>
             )}
           </ul>
