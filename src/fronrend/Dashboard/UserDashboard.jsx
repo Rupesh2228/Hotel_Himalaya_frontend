@@ -101,7 +101,8 @@ const UserDashboard = () => {
   const [reviewText, setReviewText] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-
+  const [formErrors, setFormErrors] = useState({})
+  const [reviewErrors, setReviewErrors] = useState({})
   const selectedRoom = rooms.find((room) => room._id === selectedRoomId)
   const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
@@ -200,28 +201,38 @@ const UserDashboard = () => {
   const handleRoomBooking = async (e) => {
     e.preventDefault()
 
-    if (!selectedRoomId || !checkIn || !checkOut) {
-      alert('Please select a room and fill in the booking dates.')
-      return
-    }
+    const errors = {}
+
+    if (!selectedRoomId) errors.room = 'Please select a room.'
+    if (!checkIn) errors.checkIn = 'Check-in date is required.'
+    if (!checkOut) errors.checkOut = 'Check-out date is required.'
+
+    if (fullName.trim().length < 2) errors.fullName = 'Full Name must be at least 2 characters.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Please enter a valid email address.'
+    if (phone && !/^\+?[0-9\s\-()]{7,15}$/.test(phone)) errors.phone = 'Please enter a valid phone number.'
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const parsedCheckIn = parseBookingDate(checkIn);
-    if (!parsedCheckIn || parsedCheckIn < today) {
-      alert('Check-in date cannot be in the past.');
-      return;
+    if (checkIn && (!parsedCheckIn || parsedCheckIn < today)) {
+      errors.checkIn = 'Check-in date cannot be in the past.'
     }
+
     const parsedCheckOut = parseBookingDate(checkOut);
-    if (!parsedCheckOut || parsedCheckOut <= parsedCheckIn) {
-      alert('Check-out date must be after the check-in date.');
-      return;
+    if (checkIn && checkOut && (!parsedCheckOut || parsedCheckOut <= parsedCheckIn)) {
+      errors.checkOut = 'Check-out date must be after the check-in date.'
     }
 
     if (!selectedRoom) {
-      alert('Please choose a valid room.')
+      errors.room = 'Please choose a valid room.'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
       return
     }
+
+    setFormErrors({})
 
     const existingBookings = bookings
     const conflictingBooking = existingBookings.find((booking) =>
@@ -297,10 +308,18 @@ const UserDashboard = () => {
   const handleReviewSubmit = async (e) => {
     e.preventDefault()
 
-    if (!reviewText.trim() || !rating) {
-      alert('Please write a review and select a rating')
+    const errors = {}
+
+    if (!fullName.trim()) errors.fullName = 'Please enter your name.'
+    if (!rating) errors.rating = 'Please select a rating.'
+    if (reviewText.trim().length < 5) errors.reviewText = 'Review must be at least 5 characters long.'
+
+    if (Object.keys(errors).length > 0) {
+      setReviewErrors(errors)
       return
     }
+
+    setReviewErrors({})
 
     setSubmitting(true)
     try {
@@ -360,7 +379,7 @@ const UserDashboard = () => {
             <div className="avatar" style={{ cursor: 'default' }}>{user?.name ? user.name[0].toUpperCase() : 'U'}</div>
 
             <div>
-              <h1>Welcome, {user?.name || 'Guest'}</h1>
+              <h1>Welcome</h1>
               <p>Manage your reservations, tickets, and feedback in your personal portal.</p>
             </div>
           </div>
@@ -398,7 +417,14 @@ const UserDashboard = () => {
                 <form className="form-container" onSubmit={handleRoomBooking}>
                   <div className="form-group">
                     <label>Select Room</label>
-                    <select value={selectedRoomId} onChange={(e) => setSelectedRoomId(e.target.value)}>
+                    <select 
+                      className={formErrors.room ? 'input-error' : ''}
+                      value={selectedRoomId} 
+                      onChange={(e) => {
+                        setSelectedRoomId(e.target.value)
+                        setFormErrors(prev => ({...prev, room: ''}))
+                      }}
+                    >
                       <option value="">Choose a room</option>
                       {rooms.map((room) => (
                         <option key={room._id} value={room._id}>
@@ -406,6 +432,7 @@ const UserDashboard = () => {
                         </option>
                       ))}
                     </select>
+                    {formErrors.room && <span className="error-text">{formErrors.room}</span>}
                   </div>
 
                   <div className="form-group">
@@ -439,53 +466,76 @@ const UserDashboard = () => {
                   <div className="form-group">
                     <label>Full Name</label>
                     <input
+                      className={formErrors.fullName ? 'input-error' : ''}
                       type="text"
                       placeholder="e.g. John Doe"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
+                      onChange={(e) => {
+                        setFullName(e.target.value)
+                        setFormErrors(prev => ({...prev, fullName: ''}))
+                      }}
                     />
+                    {formErrors.fullName && <span className="error-text">{formErrors.fullName}</span>}
                   </div>
 
                   <div className="form-group">
                     <label>Email Address</label>
                     <input
+                      className={formErrors.email ? 'input-error' : ''}
                       type="email"
                       placeholder="e.g. john@example.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        setFormErrors(prev => ({...prev, email: ''}))
+                      }}
                     />
+                    {formErrors.email && <span className="error-text">{formErrors.email}</span>}
                   </div>
 
                   <div className="form-group">
                     <label>Check-in Date</label>
                     <input 
+                      className={formErrors.checkIn ? 'input-error' : ''}
                       type="date" 
                       min={new Date().toISOString().split('T')[0]} 
                       value={checkIn} 
-                      onChange={(e) => setCheckIn(e.target.value)} 
+                      onChange={(e) => {
+                        setCheckIn(e.target.value)
+                        setFormErrors(prev => ({...prev, checkIn: ''}))
+                      }} 
                     />
+                    {formErrors.checkIn && <span className="error-text">{formErrors.checkIn}</span>}
                   </div>
 
                   <div className="form-group">
                     <label>Phone Number</label>
                     <input
+                      className={formErrors.phone ? 'input-error' : ''}
                       type="tel"
                       placeholder="e.g. +977-9800000000"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setPhone(e.target.value)
+                        setFormErrors(prev => ({...prev, phone: ''}))
+                      }}
                     />
+                    {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
                   </div>
 
                   <div className="form-group">
                     <label>Check-out Date</label>
                     <input 
+                      className={formErrors.checkOut ? 'input-error' : ''}
                       type="date" 
                       min={checkIn || new Date().toISOString().split('T')[0]} 
                       value={checkOut} 
-                      onChange={(e) => setCheckOut(e.target.value)} 
+                      onChange={(e) => {
+                        setCheckOut(e.target.value)
+                        setFormErrors(prev => ({...prev, checkOut: ''}))
+                      }} 
                     />
+                    {formErrors.checkOut && <span className="error-text">{formErrors.checkOut}</span>}
                   </div>
 
                   {selectedRoom && checkIn && checkOut && (
@@ -657,19 +707,47 @@ const UserDashboard = () => {
                 <form className="form-container" onSubmit={handleReviewSubmit}>
                   <div className="form-group">
                     <label>Your Name</label>
-                    <input type="text" placeholder="e.g. John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                    <input 
+                      className={reviewErrors.fullName ? 'input-error' : ''}
+                      type="text" 
+                      placeholder="e.g. John Doe" 
+                      value={fullName} 
+                      onChange={(e) => {
+                        setFullName(e.target.value)
+                        setReviewErrors(prev => ({...prev, fullName: ''}))
+                      }} 
+                    />
+                    {reviewErrors.fullName && <span className="error-text">{reviewErrors.fullName}</span>}
                   </div>
                   <div className="form-group">
                     <label>Your Rating</label>
-                    <select value={rating} onChange={(e) => setRating(e.target.value)}>
+                    <select 
+                      className={reviewErrors.rating ? 'input-error' : ''}
+                      value={rating} 
+                      onChange={(e) => {
+                        setRating(e.target.value)
+                        setReviewErrors(prev => ({...prev, rating: ''}))
+                      }}
+                    >
                       {[5,4,3,2,1].map((r) => (
                         <option key={r} value={r}>{r} ⭐ {r === 5 ? 'Excellent' : r === 4 ? 'Very Good' : r === 3 ? 'Good' : r === 2 ? 'Fair' : 'Poor'}</option>
                       ))}
                     </select>
+                    {reviewErrors.rating && <span className="error-text">{reviewErrors.rating}</span>}
                   </div>
                   <div className="form-group">
                     <label>Your Review</label>
-                    <textarea placeholder="Tell us about your experience at Hotel Himalaya INN Khona Khona INN Khona..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} rows={4} />
+                    <textarea 
+                      className={reviewErrors.reviewText ? 'input-error' : ''}
+                      placeholder="Tell us about your experience at Hotel Himalaya INN Khona Khona INN Khona..." 
+                      value={reviewText} 
+                      onChange={(e) => {
+                        setReviewText(e.target.value)
+                        setReviewErrors(prev => ({...prev, reviewText: ''}))
+                      }} 
+                      rows={4} 
+                    />
+                    {reviewErrors.reviewText && <span className="error-text">{reviewErrors.reviewText}</span>}
                   </div>
                   <button className="btn gold" type="submit" disabled={submitting}>
                     {submitting ? '⏳ Submitting...' : '✓ Submit Review'}
