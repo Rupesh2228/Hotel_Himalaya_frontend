@@ -26,12 +26,7 @@ const TourDetails = lazy(() => import('./fronrend/Tours/TourDetails'))
 const NotFound = lazy(() => import('./fronrend/componets/NotFound'))
 const ServerError = lazy(() => import('./fronrend/componets/ServerError'))
 
-const AdminExternalRedirect = () => {
-  useEffect(() => {
-    window.location.href = 'https://hotel-himalaya-frontend.vercel.app/admin-hotel-himalaya'
-  }, [])
-  return <Loader fullScreen message="Redirecting to Admin Dashboard..." />
-}
+
 
 const AdminRoute = () => {
   const { user, loading, refreshUser } = useAuth()
@@ -62,8 +57,7 @@ const AdminRoute = () => {
 
   if (loading || checkingRole) return <Loader fullScreen message="Checking access..." />
   if (!user) {
-    window.location.href = 'https://hotel-himalaya-frontend.vercel.app/admin-hotel-himalaya'
-    return null
+    return <Navigate to="/admin/admin/" state={{ from: '/admin' }} replace />
   }
   if (currentUser?.role !== 'admin') return <Navigate to="/dashboard" replace />
   return <AdminDashboard />
@@ -117,7 +111,7 @@ function App() {
           <Route path="/tours/:slug" element={<TourDetails />} />
           
           {/* Admin Auth Route */}
-          <Route path="/admin/admin/" element={<AdminExternalRedirect />} />
+          <Route path="/admin/admin/" element={<Login />} />
           <Route path="/admin" element={<AdminRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/attraction/:id" element={<AttractionDetail />} />

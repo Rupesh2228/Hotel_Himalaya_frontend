@@ -47,7 +47,7 @@ export default function Login() {
         if (loggedInUser?.role === 'admin') {
           navigate('/admin', { replace: true });
         } else {
-          setError("Your account is pending admin approval.");
+          setError("Wait until main admin approve and you can access admin dashboard.");
         }
       } catch (err) {
         setError(err.message || "Google Login failed");
