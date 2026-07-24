@@ -855,20 +855,24 @@ const AdminDashboard = () => {
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     if (!categoryName) return;
+    setAdminError('');
+    setAdminMessage('');
+    const token = localStorage.getItem('token');
+    if (!token) { setAdminError('Please sign in as admin first.'); return; }
     try {
       const response = await fetch(apiPath('/api/admin/gallery-categories'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ name: categoryName })
       });
-      if (!response.ok) throw new Error('Unable to add category.');
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to add category.');
       setGalleryCategories((prev) => [data, ...prev]);
       setCategoryName('');
-      setAdminMessage('Category added.');
+      setAdminMessage('Category added successfully.');
     } catch (error) {
       setAdminError(error.message);
     }
@@ -876,10 +880,12 @@ const AdminDashboard = () => {
 
   const handleDeleteCategory = async (id) => {
     if (!window.confirm('Delete this category?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
     try {
       const response = await fetch(apiPath(`/api/admin/gallery-categories/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (!response.ok) throw new Error('Unable to delete category.');
       setGalleryCategories((prev) => prev.filter((c) => c._id !== id));
