@@ -388,14 +388,6 @@ const UserDashboard = () => {
               </button>
             ))}
 
-            <button 
-              type="button" 
-              onClick={() => { logout(); navigate('/'); }} 
-              className="sidebar-logout-btn"
-              style={{ marginTop: '24px' }}
-            >
-              <FaSignOutAlt /> Sign Out
-            </button>
           </aside>
 
           {/* Tab Content */}
