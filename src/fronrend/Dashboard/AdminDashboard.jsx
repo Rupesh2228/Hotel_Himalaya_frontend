@@ -835,13 +835,15 @@ const AdminDashboard = () => {
 
   const handleDeleteGalleryImage = async (imageId) => {
     if (!window.confirm('Remove this image from the gallery?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) { setAdminError('Please sign in as admin first.'); return; }
     try {
       setAdminError('');
       setAdminMessage('');
       const response = await fetch(apiPath(`/api/admin/gallery/${imageId}`), {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${user.token}`
+          Authorization: `Bearer ${token}`
         }
       });
       if (!response.ok) throw new Error('Unable to delete image.');
