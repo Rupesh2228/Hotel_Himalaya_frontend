@@ -1223,10 +1223,54 @@ const AdminDashboard = () => {
     switch (activeSection) {
 
       case 'users':
+        const pendingAdmins = users.filter(u => u.role === 'pending_admin');
         return (
           <div className="admin-panel-slot">
             {adminError ? <div className="message error">{adminError}</div> : null}
             {adminMessage ? <div className="message">{adminMessage}</div> : null}
+            
+            {pendingAdmins.length > 0 && (
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem', color: '#b91c1c' }}>⚠️ Pending Admin Approvals</h3>
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th></tr>
+                    </thead>
+                    <tbody>
+                      {pendingAdmins.map((u) => {
+                        const isUpdating = updatingRoleUserId === u._id;
+                        const providerLabel = u.provider || 'local';
+                        return (
+                          <tr key={u._id} style={{ backgroundColor: '#fff5f5' }}>
+                            <td>{u.name}</td>
+                            <td>{u.email}</td>
+                            <td><span className={`badge ${providerLabel === 'google' ? 'badge-google' : 'badge-local'}`}>{providerLabel}</span></td>
+                            <td><span className={`badge badge-warning`}>{u.role}</span></td>
+                            <td>
+                              <select
+                                className="role-select"
+                                value={u.role || 'user'}
+                                disabled={isUpdating}
+                                onChange={(event) => handleUserRoleChange(u, event.target.value)}
+                                aria-label={`Change role for ${u.name || u.email}`}
+                              >
+                                <option value="user">User</option>
+                                <option value="pending_admin">Pending Admin</option>
+                                <option value="admin">Approve as Admin</option>
+                              </select>
+                              {isUpdating ? <span className="role-updating">Saving...</span> : null}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <h3 style={{ marginBottom: '1rem' }}>All Registered Users</h3>
             <div className="table-wrapper">
               <table>
                 <thead>
@@ -1241,7 +1285,7 @@ const AdminDashboard = () => {
                         <td>{u.name}</td>
                         <td>{u.email}</td>
                         <td><span className={`badge ${providerLabel === 'google' ? 'badge-google' : 'badge-local'}`}>{providerLabel}</span></td>
-                        <td><span className={`badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}`}>{u.role}</span></td>
+                        <td><span className={`badge ${u.role === 'admin' ? 'badge-admin' : (u.role === 'pending_admin' ? 'badge-warning' : 'badge-user')}`}>{u.role}</span></td>
                         <td>
                           <select
                             className="role-select"

@@ -43,7 +43,7 @@ export default function Login() {
     handleGoogleResponseRef.current = async (response) => {
       try {
         setError("");
-        const loggedInUser = await googleLogin(response.credential);
+        const loggedInUser = await googleLogin(response.credential, true);
         if (loggedInUser?.role === 'admin') {
           navigate('/admin', { replace: true });
         } else {

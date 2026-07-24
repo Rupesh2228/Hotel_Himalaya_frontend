@@ -155,12 +155,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ── 5. Google Login ──────────────────────────────────────────────────────────
-  const googleLogin = async (credential) => {
+  const googleLogin = async (credential, isAdminLogin = false) => {
     setError(null);
     const res = await fetch(`${apiUrl()}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify({ credential, isAdminLogin }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Google login failed");

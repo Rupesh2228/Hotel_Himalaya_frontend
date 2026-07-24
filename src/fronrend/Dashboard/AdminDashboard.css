@@ -591,6 +591,7 @@ button,
 .badge-active { background-color: #dbeafe; color: #1d4ed8; }
 .badge-completed { background-color: #d1fae5; color: #047857; }
 .badge-admin { background-color: rgba(239, 68, 68, 0.08); color: #ef4444; }
+.badge-warning { background-color: rgba(245, 158, 11, 0.1); color: #b45309; }
 .badge-user { background-color: rgba(109, 40, 217, 0.08); color: #6d28d9; }
 .badge-google { background-color: rgba(59, 130, 246, 0.08); color: #2563eb; }
 .badge-local { background-color: rgba(16, 185, 129, 0.08); color: #059669; }
