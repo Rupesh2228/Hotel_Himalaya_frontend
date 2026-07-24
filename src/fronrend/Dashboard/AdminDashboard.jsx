@@ -611,6 +611,23 @@ const AdminDashboard = () => {
     }
   };
 
+  const markAllNotificationsRead = async () => {
+    const token = localStorage.getItem('token');
+    if (!token || unreadNotificationCount === 0) return;
+
+    try {
+      const response = await fetch(apiPath('/api/notifications/read-all'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
+      }
+    } catch (error) {
+      console.error('Could not mark all notifications as read:', error);
+    }
+  };
+
   const unreadNotificationCount = notifications.filter((notification) => !notification.read).length;
 
   const stats = useMemo(() => [
@@ -2322,7 +2339,14 @@ const AdminDashboard = () => {
               </button>
               {showNotifications && (
                 <div className="notification-dropdown">
-                  <div className="notification-dropdown-title">Notifications</div>
+                  <div className="notification-dropdown-header">
+                    <div className="notification-dropdown-title">All alerts ({unreadNotificationCount} unread)</div>
+                    {unreadNotificationCount > 0 && (
+                      <button type="button" className="mark-all-notifications" onClick={markAllNotificationsRead}>
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
                   {notifications.length === 0 ? (
                     <p className="notification-empty">No notifications yet.</p>
                   ) : (
