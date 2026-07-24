@@ -665,6 +665,35 @@ const AdminDashboard = () => {
     }
   };
 
+  const disableDeviceNotifications = async () => {
+    try {
+      const registration = await navigator.serviceWorker.getRegistration('/sw.js');
+      const subscription = registration ? await registration.pushManager.getSubscription() : null;
+      const token = localStorage.getItem('token');
+      if (subscription) {
+        await fetch(apiPath('/api/notifications/push/subscribe'), {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+        });
+        await subscription.unsubscribe();
+      }
+      setPushEnabled(false);
+      setAdminMessage('Device notifications are disabled on this device.');
+    } catch (error) {
+      setAdminError('Could not disable device notifications.');
+    }
+  };
+
+  useEffect(() => {
+    const checkDeviceNotificationStatus = async () => {
+      if (!('serviceWorker' in navigator)) return;
+      const registration = await navigator.serviceWorker.getRegistration('/sw.js');
+      if (registration && await registration.pushManager.getSubscription()) setPushEnabled(true);
+    };
+    checkDeviceNotificationStatus();
+  }, []);
+
   const unreadNotificationCount = notifications.filter((notification) => !notification.read).length;
 
   const stats = useMemo(() => [
@@ -2362,8 +2391,12 @@ const AdminDashboard = () => {
           </div>
           
           <div className="topbar-right">
-            <button type="button" className="btn-back-to-site" onClick={enableDeviceNotifications}>
-              {pushEnabled ? 'Device alerts enabled' : 'Enable device alerts'}
+            <button
+              type="button"
+              className="btn-back-to-site"
+              onClick={pushEnabled ? disableDeviceNotifications : enableDeviceNotifications}
+            >
+              {pushEnabled ? 'Disable device alerts' : 'Enable device alerts'}
             </button>
             <div className="notification-menu">
               <button
