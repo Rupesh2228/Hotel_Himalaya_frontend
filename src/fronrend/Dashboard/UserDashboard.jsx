@@ -80,6 +80,7 @@ const UserDashboard = () => {
   const [memberCount, setMemberCount] = useState(1)
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
+  const [phone, setPhone] = useState('')
   const deviceId = getDeviceId();
   const bookingOwnerId = user?.email || deviceId;
   const bookingsCacheKey = getBookingsCacheKey(bookingOwnerId)
@@ -258,6 +259,7 @@ const UserDashboard = () => {
           bookedBy: bookingOwnerId,
           bookedByName: user?.name || 'Guest',
           bookedByEmail: user?.email || '',
+          phone: phone || '',
         }),
       })
 
@@ -278,6 +280,7 @@ const UserDashboard = () => {
       setCheckIn('')
       setCheckOut('')
       setMemberCount(1)
+      setPhone('')
     } catch (error) {
       alert(error.message || 'Failed to book room')
     }
@@ -447,6 +450,16 @@ const UserDashboard = () => {
                       min={new Date().toISOString().split('T')[0]} 
                       value={checkIn} 
                       onChange={(e) => setCheckIn(e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input
+                      type="tel"
+                      placeholder="e.g. +977-9800000000"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
 

@@ -512,7 +512,7 @@ const AdminDashboard = () => {
       const authHeaders = { Authorization: `Bearer ${token}` };
 
       try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
+        const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
           fetch(apiPath('/api/bookings')),
           fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
           fetch(apiPath('/api/rooms')),
@@ -530,7 +530,7 @@ const AdminDashboard = () => {
         const usersData = usersRes.ok ? await usersRes.json() : [];
         const roomsData = roomsRes.ok ? await roomsRes.json() : [];
         const galleryData = galleryRes.ok ? await galleryRes.json() : [];
-        const galleryCatsData = attractionsRes.ok ? await (await fetch(apiPath('/api/gallery/categories'))).json() : [];
+        const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
         const attractionsData = attractionsRes.ok ? await attractionsRes.json() : [];
         const eventsData = eventsRes.ok ? await eventsRes.json() : [];
         const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
@@ -2055,7 +2055,7 @@ const AdminDashboard = () => {
                 <div className="table-wrapper">
                   <table>
                     <thead>
-                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Price</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Code</th><th>Actions</th></tr>
+                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Phone</th><th>Price</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Code</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {roomBookings.map((b) => (
@@ -2063,6 +2063,7 @@ const AdminDashboard = () => {
                           <td>{b.roomTitle}</td>
                           <td>{b.bookedByName}</td>
                           <td>{b.bookedByEmail || '—'}</td>
+                          <td>{b.phone || '—'}</td>
                           <td>Rs. {b.roomPrice}</td>
                           <td>{b.checkIn || '—'}</td>
                           <td>{b.checkOut || '—'}</td>
