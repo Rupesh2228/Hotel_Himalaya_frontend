@@ -485,7 +485,7 @@ const UserDashboard = () => {
 
             {activeTab === 'my-bookings' && (
               <section className="tab-pane">
-                <h2>📋 Booked Rooms History</h2>
+                <h2> Booked Rooms History</h2>
                 {bookings.length === 0 ? (
                   <div className="empty-state">No rooms booked yet. Your bookings will appear here with room details.</div>
                 ) : (
@@ -527,7 +527,7 @@ const UserDashboard = () => {
 
             {activeTab === 'event-bookings' && (
               <section className="tab-pane">
-                <h2>🎟️ My Event Tickets</h2>
+                <h2> My Event Tickets</h2>
                 {eventBookings.length === 0 ? (
                   <div className="empty-state">No events booked yet. Discover and book exciting experiences on the <a href="/events" style={{ color: '#d4af37', textDecoration: 'underline' }}>Events Page</a>!</div>
                 ) : (

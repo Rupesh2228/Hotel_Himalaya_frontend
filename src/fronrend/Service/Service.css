@@ -56,7 +56,7 @@
 .service-card p { font-size: 0.92rem; line-height: 1.75; color: #5d4a3a; }
 .card-tag { display: inline-block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-400); font-weight: 700; margin-bottom: 12px; padding: 5px 10px; border: 1px solid rgba(181, 107, 47, 0.2); border-radius: 999px; background: rgba(181, 107, 47, 0.08); }
 .last-img-service, .last-service-content, .hotel_des, .last-finished_footer { padding: 40px clamp(20px, 6%, 100px); }
-.hotel_des { margin-top: -40px; font-family: 'Playfair Display', serif; font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 700; letter-spacing: -0.3px; color: #2f241d; }
+.hotel_des { margin-top: -40px; font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 700; letter-spacing: -0.3px; color: #2f241d; }
 .last-service-content { font-size: 1rem; color: #5d4a3a; line-height: 1.85; max-width: 900px; }
 @media (max-width: 992px) { .service-hero { height: clamp(360px, 45vh, 480px); } .services-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) { .services-section { padding: 60px 20px; } .services-grid { grid-template-columns: 1fr; } .service-card { min-height: 320px; padding: 28px 24px; } }
