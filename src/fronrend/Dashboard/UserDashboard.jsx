@@ -200,6 +200,10 @@ const UserDashboard = () => {
 
   const handleRoomBooking = async (e) => {
     e.preventDefault()
+    
+    console.log('[ROOM-BOOKING] Form submission started')
+    console.log('[ROOM-BOOKING] Selected room:', selectedRoom)
+    console.log('[ROOM-BOOKING] Check-in:', checkIn, 'Check-out:', checkOut)
 
     const errors = {}
 
@@ -228,6 +232,7 @@ const UserDashboard = () => {
     }
 
     if (Object.keys(errors).length > 0) {
+      console.log('[ROOM-BOOKING] Validation errors:', errors)
       setFormErrors(errors)
       return
     }
@@ -240,6 +245,7 @@ const UserDashboard = () => {
     )
 
     if (conflictingBooking) {
+      console.log('[ROOM-BOOKING] Room conflict detected:', conflictingBooking)
       alert(`This room is already booked for the selected time.\nRoom:`)
       return
     }
@@ -253,30 +259,39 @@ const UserDashboard = () => {
     }
 
     try {
+      setSubmitting(true)
+      console.log('[ROOM-BOOKING] Sending booking request to API...')
+      
       const cIn = new Date(checkIn);
       const cOut = new Date(checkOut);
       const days = Math.ceil(Math.abs(cOut - cIn) / (1000 * 60 * 60 * 24)) || 1;
       const computedTotalPrice = selectedRoom.price * days;
 
+      const bookingPayload = {
+        roomId: selectedRoom._id,
+        roomTitle: selectedRoom.title,
+        roomPrice: computedTotalPrice,
+        totalMembers: selectedRoom.totalMembers,
+        members: memberCount,
+        checkIn,
+        checkOut,
+        bookedBy: bookingOwnerId,
+        bookedByName: fullName || user?.name || 'Guest',
+        bookedByEmail: email || user?.email || '',
+        phone: phone || '',
+      }
+      
+      console.log('[ROOM-BOOKING] Payload:', bookingPayload)
+
       const response = await fetch(BOOKINGS_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomId: selectedRoom._id,
-          roomTitle: selectedRoom.title,
-          roomPrice: computedTotalPrice,
-          totalMembers: selectedRoom.totalMembers,
-          members: memberCount,
-          checkIn,
-          checkOut,
-          bookedBy: bookingOwnerId,
-          bookedByName: fullName || user?.name || 'Guest',
-          bookedByEmail: email || user?.email || '',
-          phone: phone || '',
-        }),
+        body: JSON.stringify(bookingPayload),
       })
 
+      console.log('[ROOM-BOOKING] Response status:', response.status)
       const data = await response.json()
+      console.log('[ROOM-BOOKING] Response data:', data)
 
       if (!response.ok) {
         if (response.status === 409) {
@@ -298,8 +313,13 @@ const UserDashboard = () => {
         setFullName('')
         setEmail('')
       }
+      
+      console.log('[ROOM-BOOKING] Booking completed successfully')
     } catch (error) {
+      console.error('[ROOM-BOOKING] Error:', error)
       alert(error.message || 'Failed to book room')
+    } finally {
+      setSubmitting(false)
     }
   }
 
