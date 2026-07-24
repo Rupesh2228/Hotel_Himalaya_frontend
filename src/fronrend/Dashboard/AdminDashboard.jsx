@@ -327,6 +327,7 @@ const AdminDashboard = () => {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -625,6 +626,42 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Could not mark all notifications as read:', error);
+    }
+  };
+
+  const enableDeviceNotifications = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      setAdminError('This browser does not support device notifications.');
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setAdminError('Please allow notifications in your browser settings.');
+        return;
+      }
+      const token = localStorage.getItem('token');
+      const keyResponse = await fetch(apiPath('/api/notifications/push/public-key'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!keyResponse.ok) throw new Error('Push notifications are not configured on the server.');
+      const { publicKey } = await keyResponse.json();
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      const existingSubscription = await registration.pushManager.getSubscription();
+      const subscription = existingSubscription || await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: Uint8Array.from(atob(publicKey.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0)),
+      });
+      const response = await fetch(apiPath('/api/notifications/push/subscribe'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(subscription),
+      });
+      if (!response.ok) throw new Error('Could not save this device for notifications.');
+      setPushEnabled(true);
+      setAdminMessage('Device notifications are enabled.');
+    } catch (error) {
+      setAdminError(error.message || 'Could not enable device notifications.');
     }
   };
 
@@ -2325,6 +2362,9 @@ const AdminDashboard = () => {
           </div>
           
           <div className="topbar-right">
+            <button type="button" className="btn-back-to-site" onClick={enableDeviceNotifications}>
+              {pushEnabled ? 'Device alerts enabled' : 'Enable device alerts'}
+            </button>
             <div className="notification-menu">
               <button
                 type="button"
