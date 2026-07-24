@@ -96,7 +96,7 @@ const Components = () => {
             {user?.role === 'admin' ? (
               <li>
                 <NavLink
-                  to="/admin"
+                  to="/hh-cp-9f3m2q"
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >

@@ -72,7 +72,7 @@ const Login_Booking = () => {
         setLocalError("");
         const loggedInUser = await googleLogin(response.credential);
         setLocalSuccess("Logged in successfully with Google!");
-        const dest = loggedInUser?.role === 'admin' ? '/admin' : (location.state?.from || '/dashboard');
+        const dest = loggedInUser?.role === 'admin' ? '/hh-cp-9f3m2q' : (location.state?.from || '/dashboard');
         navigate(dest);
       } catch (err) {
         setLocalError(err.message || "Google Login failed");

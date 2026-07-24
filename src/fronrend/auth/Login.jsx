@@ -45,7 +45,7 @@ export default function Login() {
         setError("");
         const loggedInUser = await googleLogin(response.credential, true);
         if (loggedInUser?.role === 'admin') {
-          navigate('/admin', { replace: true });
+          navigate('/hh-cp-9f3m2q', { replace: true });
         } else {
           setError("Wait until main admin approve and you can access admin dashboard.");
         }

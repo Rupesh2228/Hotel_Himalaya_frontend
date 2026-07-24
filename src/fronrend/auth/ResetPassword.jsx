@@ -81,7 +81,7 @@ export default function ResetPassword() {
       const user = await resetPassword(token, form.password, form.confirmPassword);
       setSuccess("Password reset successfully! Redirecting...");
       setTimeout(() => {
-        navigate(user?.role === "admin" ? "/admin" : "/dashboard", { replace: true });
+        navigate(user?.role === "admin" ? "/hh-cp-9f3m2q" : "/dashboard", { replace: true });
       }, 1500);
     } catch (err) {
       setError(err.message || "Failed to reset password. The link might be expired.");

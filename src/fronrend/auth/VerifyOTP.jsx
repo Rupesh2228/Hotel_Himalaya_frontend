@@ -104,7 +104,7 @@ export default function VerifyOTP() {
       const user = await verifyOTP(email, code);
       setSuccess("Email verified! Redirecting to your dashboard…");
       setTimeout(() => {
-        navigate(user?.role === "admin" ? "/admin" : "/dashboard", { replace: true });
+        navigate(user?.role === "admin" ? "/hh-cp-9f3m2q" : "/dashboard", { replace: true });
       }, 1200);
     } catch (err) {
       setError(err.message || "Verification failed. Please check the code.");
