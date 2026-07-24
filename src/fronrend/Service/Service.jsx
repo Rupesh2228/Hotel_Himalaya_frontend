@@ -181,7 +181,7 @@ const Service = () => {
           {/* Room */}
           <div className="service-card room-card">
             <div className="icon">
-              <FaBed style={{ fontSize: '53px', color: 'black' }}/>
+              <FaBed className="service-icon" />
             </div>
 
             <h3>Comfortable Rooms</h3>
@@ -195,7 +195,7 @@ const Service = () => {
           {/* Environment */}
           <div className="service-card environment-card">
             <div className="icon">
-              <FaLeaf style={{ fontSize: '53px', color: 'black' }}/>
+              <FaLeaf className="service-icon" />
             </div>
 
             <h3>Fresh Environment</h3>
@@ -209,12 +209,12 @@ const Service = () => {
           {/* WiFi */}
           <div className="service-card wifi-card">
             <div className="icon">
-              <FaWifi style={{ fontSize: '53px', color: 'black' }}/>
+              <FaWifi className="service-icon" />
             </div>
 
             <h3>Free WiFi</h3>
 
-            <p style={{ color: '#000000' }}>
+            <p>
               Stay connected with high-speed internet access available
               throughout the hotel.
             </p>
@@ -223,12 +223,12 @@ const Service = () => {
                     {/* Reception */}
           <div className="service-card reception-card">
             <div className="icon">
-              <FaBell style={{ fontSize: '53px', color: 'black' }}/>
+              <FaBell className="service-icon" />
             </div>
 
             <h3>24/7 Reception</h3>
 
-            <p style={{ color: '#000000' }}>
+            <p>
               Our friendly reception team is available around the clock to
               assist guests.
             </p>
@@ -237,12 +237,12 @@ const Service = () => {
           {/* BBQ */}
           <div className="service-card bbq-card">
             <div className="icon">
-              <FaFire style={{ fontSize: '53px', color: 'black' }} />
+              <FaFire className="service-icon" />
             </div>
 
             <h3>BBQ Area</h3>
 
-            <p style={{ color: '#000000' }}>
+            <p>
               Enjoy outdoor gatherings and delicious barbecue experiences with
               family and friends.
             </p>
@@ -250,7 +250,7 @@ const Service = () => {
 
               <div className="service-card hall-card">
   <div className="icon">
-    <FaBuilding style={{ fontSize: '53px', color: 'black' }} />
+    <FaBuilding className="service-icon" />
   </div>
 
   <h3>Event Hall</h3>
@@ -280,7 +280,7 @@ const Service = () => {
 
       <div className="last-service-card">
         <div className='last-img-service'>
-           <img src={background} alt="Last Service" height="300" width="40%" />
+           <img src={background} alt="Last Service" />
         </div>
         <div className='margin_last-service-content'>
             <div className='last-service-content'>
