@@ -1235,7 +1235,7 @@ const AdminDashboard = () => {
                 <div className="table-wrapper">
                   <table>
                     <thead>
-                      <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th></tr>
+                      <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {pendingAdmins.map((u) => {
@@ -1261,6 +1261,16 @@ const AdminDashboard = () => {
                               </select>
                               {isUpdating ? <span className="role-updating">Saving...</span> : null}
                             </td>
+                            <td>
+                              <button 
+                                type="button" 
+                                className="btn-danger btn-sm" 
+                                onClick={() => handleDeleteUser(u._id)}
+                                title="Remove User"
+                              >
+                                <FaTrash />
+                              </button>
+                            </td>
                           </tr>
                         );
                       })}
@@ -1274,7 +1284,7 @@ const AdminDashboard = () => {
             <div className="table-wrapper">
               <table>
                 <thead>
-                  <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th></tr>
+                  <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {users.map((u) => {
@@ -1299,6 +1309,16 @@ const AdminDashboard = () => {
                             <option value="admin">Admin</option>
                           </select>
                           {isUpdating ? <span className="role-updating">Saving...</span> : null}
+                        </td>
+                        <td>
+                          <button 
+                            type="button" 
+                            className="btn-danger btn-sm" 
+                            onClick={() => handleDeleteUser(u._id)}
+                            title="Remove User"
+                          >
+                            <FaTrash />
+                          </button>
                         </td>
                       </tr>
                     );
