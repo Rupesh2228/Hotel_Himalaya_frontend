@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaRedo } from 'react-icons/fa';
+import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaRedo } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -325,6 +325,8 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -564,6 +566,52 @@ const AdminDashboard = () => {
 
     fetchAdminData();
   }, []);
+
+  const loadNotifications = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath('/api/notifications'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) setNotifications(await response.json());
+    } catch (error) {
+      console.error('Could not load admin notifications:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadNotifications();
+    const timer = window.setInterval(loadNotifications, 30000);
+    window.addEventListener('focus', loadNotifications);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', loadNotifications);
+    };
+  }, [loadNotifications]);
+
+  const markNotificationRead = async (notificationId) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(apiPath(`/api/notifications/${notificationId}/read`), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        setNotifications((current) => current.map((notification) => (
+          notification._id === notificationId ? { ...notification, read: true } : notification
+        )));
+      }
+    } catch (error) {
+      console.error('Could not mark notification as read:', error);
+    }
+  };
+
+  const unreadNotificationCount = notifications.filter((notification) => !notification.read).length;
 
   const stats = useMemo(() => [
     { label: 'Room bookings', value: roomBookings.length, icon: <FaBed />, tone: 'gold' },
@@ -2260,6 +2308,42 @@ const AdminDashboard = () => {
           </div>
           
           <div className="topbar-right">
+            <div className="notification-menu">
+              <button
+                type="button"
+                className="notification-button"
+                aria-label="Show notifications"
+                onClick={() => setShowNotifications((visible) => !visible)}
+              >
+                <FaBell />
+                {unreadNotificationCount > 0 && (
+                  <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>
+                )}
+              </button>
+              {showNotifications && (
+                <div className="notification-dropdown">
+                  <div className="notification-dropdown-title">Notifications</div>
+                  {notifications.length === 0 ? (
+                    <p className="notification-empty">No notifications yet.</p>
+                  ) : (
+                    <div className="notification-list">
+                      {notifications.slice(0, 8).map((notification) => (
+                        <button
+                          type="button"
+                          key={notification._id}
+                          className={`notification-item ${notification.read ? '' : 'unread'}`}
+                          onClick={() => markNotificationRead(notification._id)}
+                        >
+                          <strong>{notification.title}</strong>
+                          <span>{notification.message}</span>
+                          <small>{new Date(notification.createdAt).toLocaleString()}</small>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <NavLink to="/" className="btn-back-to-site">
               Return to Website
             </NavLink>
