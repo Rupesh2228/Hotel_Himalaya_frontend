@@ -3,80 +3,21 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Components from "../componets/componets";
 
-// ── Eye icon ──────────────────────────────────────────────────────────────────
-const EyeIcon = ({ open }) =>
-  open ? (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-5 0-9.27-3-11-7 1.04-2.28 2.8-4.18 4.88-5.32"/>
-      <path d="M1 1l22 22"/>
-    </svg>
-  ) : (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/>
-      <circle cx="12" cy="12" r="2.3"/>
-    </svg>
-  );
 
-// ── Spinner ───────────────────────────────────────────────────────────────────
-const Spinner = ({ size = 18, color = "#fff" }) => (
-  <span style={{
-    display: "inline-block", width: size, height: size,
-    border: `2.5px solid rgba(255,255,255,0.25)`,
-    borderTopColor: color, borderRadius: "50%",
-    animation: "spin 0.7s linear infinite",
-    verticalAlign: "middle", marginRight: 8,
-  }} />
-);
+
+
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { googleLogin } = useAuth();
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+
   
   const [googleReady, setGoogleReady] = useState(false);
   const handleGoogleResponseRef = useRef(null);
 
-  const set = (field) => (e) => {
-    setForm((f) => ({ ...f, [field]: e.target.value }));
-    setError("");
-    setUnverifiedEmail("");
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.email || !form.password) {
-      setError("Please enter both email and password.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setUnverifiedEmail("");
-    
-    try {
-      const data = await login(form.email.trim(), form.password);
-      
-      // Check if unverified
-      if (data && data.unverified) {
-        setUnverifiedEmail(data.email);
-        setError("Please verify your email first.");
-        setLoading(false);
-        return;
-      }
-
-      // Success
-      navigate(data.role === "admin" ? "/admin" : "/dashboard", { replace: true });
-    } catch (err) {
-      setError(err.message || "Login failed. Please check your credentials.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Google setup
   useEffect(() => {
@@ -103,7 +44,11 @@ export default function Login() {
       try {
         setError("");
         const loggedInUser = await googleLogin(response.credential);
-        navigate(loggedInUser?.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+        if (loggedInUser?.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          setError("Your account is pending admin approval.");
+        }
       } catch (err) {
         setError(err.message || "Google Login failed");
       }
@@ -185,76 +130,19 @@ export default function Login() {
           <div className="auth-logo">
                      </div>
 
-          <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to manage your bookings</p>
+          <h1 className="auth-title">Admin Portal</h1>
+          <p className="auth-subtitle">Sign in to manage the hotel</p>
 
           {error && (
             <div className="error-box">
               <span>{error}</span>
-              {unverifiedEmail && (
-                <button 
-                  type="button"
-                  className="resend-btn-small" 
-                  onClick={() => navigate("/verify-otp", { state: { email: unverifiedEmail } })}
-                >
-                  Verify Email Now
-                </button>
-              )}
             </div>
           )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input 
-                id="login-email" 
-                className="form-input" 
-                type="email" 
-                placeholder="you@email.com" 
-                value={form.email} 
-                onChange={set("email")} 
-                required 
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">
-                Password
-                <Link to="/forgot-password" style={{ color: "#24463c", textDecoration: "none" }}>Forgot?</Link>
-              </label>
-              <div className="input-wrap">
-                <input 
-                  id="login-password" 
-                  className="form-input" 
-                  type={showPw ? "text" : "password"} 
-                  placeholder="Your password" 
-                  value={form.password} 
-                  onChange={set("password")} 
-                  required 
-                />
-                <button type="button" className="eye-btn" onClick={() => setShowPw((s) => !s)} aria-label="Toggle password">
-                  <EyeIcon open={showPw} />
-                </button>
-              </div>
-            </div>
-
-            <button id="login-submit" type="submit" className="submit-btn" disabled={loading}>
-              {loading && <Spinner />}
-              {loading ? "Signing In…" : "Sign In"}
-            </button>
-          </form>
-
-          <div className="divider">or</div>
 
           <div className="google-wrap">
             <div id="google-btn-container" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
               {!googleReady && <span style={{ color: "#6b7280", fontSize: 13 }}>Loading Google...</span>}
             </div>
-          </div>
-
-          <div className="auth-footer">
-            Don't have an account?{" "}
-            <Link to="/signup" className="auth-link">Create Account</Link>
           </div>
         </div>
       </div>

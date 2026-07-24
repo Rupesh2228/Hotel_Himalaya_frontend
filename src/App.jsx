@@ -54,7 +54,7 @@ const AdminRoute = () => {
   const currentUser = freshUser || user
 
   if (loading || checkingRole) return <Loader fullScreen message="Checking access..." />
-  if (!user) return <Navigate to="/login" state={{ from: '/admin' }} replace />
+  if (!user) return <Navigate to="/admin/admin/" state={{ from: '/admin' }} replace />
   if (currentUser?.role !== 'admin') return <Navigate to="/dashboard" replace />
   return <AdminDashboard />
 }
@@ -106,13 +106,8 @@ function App() {
           <Route path="/tours" element={<ToursList />} />
           <Route path="/tours/:slug" element={<TourDetails />} />
           
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/verify-otp" element={<VerifyOTP />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+          {/* Admin Auth Route */}
+          <Route path="/admin/admin/" element={<Login />} />
           <Route path="/admin" element={<AdminRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/attraction/:id" element={<AttractionDetail />} />

@@ -1251,6 +1251,7 @@ const AdminDashboard = () => {
                             aria-label={`Change role for ${u.name || u.email}`}
                           >
                             <option value="user">User</option>
+                            <option value="pending_admin">Pending Admin</option>
                             <option value="admin">Admin</option>
                           </select>
                           {isUpdating ? <span className="role-updating">Saving...</span> : null}
