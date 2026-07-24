@@ -57,7 +57,7 @@ const AdminRoute = () => {
 
   if (loading || checkingRole) return <Loader fullScreen message="Checking access..." />
   if (!user) {
-    return <Navigate to="/admin-hotel-himalaya" state={{ from: '/admin' }} replace />
+    return <Navigate to="/hh-secure-portal-x7k2" state={{ from: '/hh-cp-9f3m2q' }} replace />
   }
   if (currentUser?.role !== 'admin') return <Navigate to="/dashboard" replace />
   return <AdminDashboard />
@@ -91,7 +91,7 @@ const DashboardRoute = () => {
   const currentUser = freshUser || user
 
   if (loading || checkingRole) return <Loader fullScreen message="Opening dashboard..." />
-  if (currentUser?.role === 'admin') return <Navigate to="/admin" replace />
+  if (currentUser?.role === 'admin') return <Navigate to="/hh-cp-9f3m2q" replace />
   return <UserDashboard />
 }
 
@@ -110,9 +110,9 @@ function App() {
           <Route path="/tours" element={<ToursList />} />
           <Route path="/tours/:slug" element={<TourDetails />} />
           
-          {/* Admin Auth Route */}
-          <Route path="/admin-hotel-himalaya" element={<Login />} />
-          <Route path="/admin" element={<AdminRoute />} />
+          {/* Admin Auth Route - Obfuscated URLs */}
+          <Route path="/hh-secure-portal-x7k2" element={<Login />} />
+          <Route path="/hh-cp-9f3m2q" element={<AdminRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/attraction/:id" element={<AttractionDetail />} />
           <Route path="/500" element={<ServerError />} />
