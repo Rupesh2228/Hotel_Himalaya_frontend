@@ -54,7 +54,6 @@ const ReviewsList = () => {
   const handleLove = useCallback(async (reviewId) => {
     if (!user) {
       alert('Please login to react to reviews.');
-      navigate('/login');
       return;
     }
 

@@ -116,17 +116,6 @@ const Components = () => {
                   </div>
                 )}
               </li>
-            ) : (
-              <li>
-                <NavLink
-                  to="/login"
-                  onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link login-link active' : 'menu__link login-link'}
-                >
-                  <LockKeyhole className="nav-link-icon" aria-hidden="true" />
-                  <span>Login / Book Now</span>
-                </NavLink>
-              </li>
             )}
           </ul>
         </nav>

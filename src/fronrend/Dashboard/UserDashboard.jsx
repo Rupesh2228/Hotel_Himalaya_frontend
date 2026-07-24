@@ -81,6 +81,8 @@ const UserDashboard = () => {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [phone, setPhone] = useState('')
+  const [fullName, setFullName] = useState(user?.name || '')
+  const [email, setEmail] = useState(user?.email || '')
   const deviceId = getDeviceId();
   const bookingOwnerId = user?.email || deviceId;
   const bookingsCacheKey = getBookingsCacheKey(bookingOwnerId)
@@ -257,8 +259,8 @@ const UserDashboard = () => {
           checkIn,
           checkOut,
           bookedBy: bookingOwnerId,
-          bookedByName: user?.name || 'Guest',
-          bookedByEmail: user?.email || '',
+          bookedByName: fullName || user?.name || 'Guest',
+          bookedByEmail: email || user?.email || '',
           phone: phone || '',
         }),
       })
@@ -281,6 +283,10 @@ const UserDashboard = () => {
       setCheckOut('')
       setMemberCount(1)
       setPhone('')
+      if (!user) {
+        setFullName('')
+        setEmail('')
+      }
     } catch (error) {
       alert(error.message || 'Failed to book room')
     }
@@ -290,11 +296,6 @@ const UserDashboard = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault()
-    
-    if (!user) {
-      alert('You must be logged in to submit a review')
-      return
-    }
 
     if (!reviewText.trim() || !rating) {
       alert('Please write a review and select a rating')
@@ -307,8 +308,8 @@ const UserDashboard = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          author: user.name || user.email,
-          email: user.email,
+          author: fullName || user?.name || 'Guest',
+          email: email || user?.email || 'guest@example.com',
           rating: Number(rating),
           text: reviewText.trim(),
         })
@@ -442,6 +443,28 @@ const UserDashboard = () => {
                       </div>
                     </div>
                   )}
+
+                  <div className="form-group">
+                    <label>Full Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="e.g. john@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
 
                   <div className="form-group">
                     <label>Check-in Date</label>
@@ -640,6 +663,10 @@ const UserDashboard = () => {
               <section className="tab-pane">
                 <h2>⭐ Share Your Experience</h2>
                 <form className="form-container" onSubmit={handleReviewSubmit}>
+                  <div className="form-group">
+                    <label>Your Name</label>
+                    <input type="text" placeholder="e.g. John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                  </div>
                   <div className="form-group">
                     <label>Your Rating</label>
                     <select value={rating} onChange={(e) => setRating(e.target.value)}>

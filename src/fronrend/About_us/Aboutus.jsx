@@ -9,7 +9,7 @@ const CtaButton = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   return (
-    <button className="btn-cta" onClick={() => navigate(user ? '/dashboard' : '/login')}>
+    <button className="btn-cta" onClick={() => navigate('/dashboard')}>
       Book Now
     </button>
   )

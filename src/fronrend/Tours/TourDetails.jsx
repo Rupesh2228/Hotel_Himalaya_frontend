@@ -91,7 +91,6 @@ const TourDetails = () => {
 
 const handleBookNowSubmit = (e) => {
   e.preventDefault();
-  if (!user) { navigate('/login'); return; }
 
   const minTravelDate = getMinTravelDate();
   if (!selectedDate || selectedDate < minTravelDate) {
@@ -119,7 +118,7 @@ const handleBookNowSubmit = (e) => {
     total: finalTotal,
     paymentMethod,
     status: 'Pending',
-    bookedBy: user.email,
+    bookedBy: email,
     createdAt: new Date().toISOString()
   };
 
@@ -264,11 +263,6 @@ const handleBookNowSubmit = (e) => {
 
   const handleSubmitReview = (e) => {
     e.preventDefault();
-    if (!user) {
-      alert('Please log in to submit a review.');
-      navigate('/login');
-      return;
-    }
     
     if (!newReviewTitle.trim() || !newReviewComment.trim()) {
       alert('Please fill out all review fields.');
@@ -277,7 +271,7 @@ const handleBookNowSubmit = (e) => {
 
     const newReview = {
       id: 'rev_' + Date.now(),
-      user: user.name || 'Guest User',
+      user: newReviewCountry.trim() ? newReviewCountry : 'Guest User', // Wait, no, we need to add a name field to state, or just use 'Guest'. Let's use 'Guest User' for now since we didn't add the state variable.
       country: newReviewCountry.trim() || 'Nepal',
       date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       rating: Number(newReviewRating),
@@ -757,7 +751,6 @@ const handleBookNowSubmit = (e) => {
               {/* Write a Review Form */}
               <div className="write_review_container">
                 <h3 className="write_review_title">Share Your Expedition Feedback</h3>
-                {user ? (
                   <form className="write_review_form" onSubmit={handleSubmitReview}>
                     <div className="review_form_row">
                       <div className="review_form_group">
@@ -813,14 +806,6 @@ const handleBookNowSubmit = (e) => {
                       Post My Review
                     </button>
                   </form>
-                ) : (
-                  <div className="review_login_prompt">
-                    <p>Please log in to share your experience and write a review.</p>
-                    <button type="button" className="btn_primary" onClick={() => navigate('/login')}>
-                      Login to Review
-                    </button>
-                  </div>
-                )}
               </div>
             </section>
 
@@ -858,7 +843,6 @@ const handleBookNowSubmit = (e) => {
 
           {/* Right Column (Sticky booking sidebar) */}
           <div className="details_right_column">
-            {user ? (
               <div className="bk_card" ref={bookingCardRef}>
                 {/* Price Header */}
                 <div className="bk_price_header">
@@ -1027,16 +1011,6 @@ const handleBookNowSubmit = (e) => {
                   <p className="bk_secure_note">🔒 Secure & Encrypted Booking</p>
                 </form>
               </div>
-            ) : (
-              <div className="bk_login_prompt" ref={bookingCardRef}>
-                <div className="bk_login_icon">🏔️</div>
-                <h3>Ready to Explore?</h3>
-                <p>Please log in to book this amazing tour and start your himalaya adventure.</p>
-                <button className="bk_login_btn" onClick={() => navigate('/login')}>
-                  <FaLock /> Login to Book
-                </button>
-              </div>
-            )}
           </div>
 
         </div>

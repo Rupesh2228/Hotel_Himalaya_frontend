@@ -165,7 +165,7 @@ const Gallery = () => {
           unforgettable dining experiences.
         </p>
 
-        <button className="btn-cta" onClick={() => navigate(user ? '/dashboard' : '/login')}>Book Your Stay</button>
+        <button className="btn-cta" onClick={() => navigate('/dashboard')}>Book Your Stay</button>
       </section>
       <div className="gallery_footer">
         <LastComponent />

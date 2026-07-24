@@ -130,7 +130,7 @@ const Home = () => {
           <p>Book your unforgettable stay with us today.</p>
           <button
             className="btn-cta"
-            onClick={() => navigate(user ? '/dashboard' : '/login')}
+            onClick={() => navigate('/dashboard')}
           >
             Book Now
           </button>

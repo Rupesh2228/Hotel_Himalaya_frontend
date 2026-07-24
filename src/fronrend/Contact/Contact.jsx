@@ -134,23 +134,6 @@ function ContactForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!user) {
-      // save pending message so user can resume after login
-      const pending = {
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        message: messageText.trim()
-      }
-      try {
-        sessionStorage.setItem('pending_contact', JSON.stringify(pending))
-      } catch (err) {
-        console.error('Failed to save pending contact', err)
-      }
-      navigate('/login', { state: { from: '/contact' } })
-      return
-    }
-
     if (!name.trim() || !email.trim() || !messageText.trim()) {
       setStatus('Please fill in all fields')
       return

@@ -87,7 +87,6 @@ const DashboardRoute = () => {
   const currentUser = freshUser || user
 
   if (loading || checkingRole) return <Loader fullScreen message="Opening dashboard..." />
-  if (!user) return <Navigate to="/login" state={{ from: '/dashboard' }} replace />
   if (currentUser?.role === 'admin') return <Navigate to="/admin" replace />
   return <UserDashboard />
 }
