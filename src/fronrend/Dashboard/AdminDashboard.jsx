@@ -26,7 +26,8 @@ const initialRoomForm = {
 const initialGalleryForm = {
   url: '',
   title: '',
-  description: ''
+  description: '',
+  category: '',
 };
 
 const initialPastEventForm = {
@@ -348,6 +349,8 @@ const AdminDashboard = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [reviewsError, setReviewsError] = useState('');
   const [galleryImages, setGalleryImages] = useState([]);
+  const [galleryCategories, setGalleryCategories] = useState([]);
+  const [categoryName, setCategoryName] = useState('');
   const [roomList, setRoomList] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [events, setEvents] = useState([]);
@@ -514,6 +517,7 @@ const AdminDashboard = () => {
           fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
           fetch(apiPath('/api/rooms')),
           fetch(apiPath('/api/gallery')),
+          fetch(apiPath('/api/gallery/categories')),
           fetch(apiPath('/api/attractions')),
           fetch(apiPath('/api/events')),
           fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
@@ -526,6 +530,7 @@ const AdminDashboard = () => {
         const usersData = usersRes.ok ? await usersRes.json() : [];
         const roomsData = roomsRes.ok ? await roomsRes.json() : [];
         const galleryData = galleryRes.ok ? await galleryRes.json() : [];
+        const galleryCatsData = attractionsRes.ok ? await (await fetch(apiPath('/api/gallery/categories'))).json() : [];
         const attractionsData = attractionsRes.ok ? await attractionsRes.json() : [];
         const eventsData = eventsRes.ok ? await eventsRes.json() : [];
         const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
@@ -537,6 +542,7 @@ const AdminDashboard = () => {
         setUsers(usersData || []);
         setRoomList(roomsData || []);
         setGalleryImages(galleryData || []);
+        setGalleryCategories(galleryCatsData || []);
         setAttractions(attractionsData || []);
         setEvents(eventsData || []);
         setEventBookings(eventBookingsData || []);
@@ -829,22 +835,57 @@ const AdminDashboard = () => {
 
   const handleDeleteGalleryImage = async (imageId) => {
     if (!window.confirm('Remove this image from the gallery?')) return;
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     try {
+      setAdminError('');
+      setAdminMessage('');
       const response = await fetch(apiPath(`/api/admin/gallery/${imageId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
       });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Unable to delete image.');
-      }
+      if (!response.ok) throw new Error('Unable to delete image.');
       setGalleryImages((current) => current.filter((image) => image._id !== imageId));
-      setAdminMessage('Image removed.');
+      setAdminMessage('Gallery image removed.');
     } catch (error) {
       setAdminError(error.message || 'Unable to delete image.');
+    }
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    if (!categoryName) return;
+    try {
+      const response = await fetch(apiPath('/api/admin/gallery-categories'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ name: categoryName })
+      });
+      if (!response.ok) throw new Error('Unable to add category.');
+      const data = await response.json();
+      setGalleryCategories((prev) => [data, ...prev]);
+      setCategoryName('');
+      setAdminMessage('Category added.');
+    } catch (error) {
+      setAdminError(error.message);
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Delete this category?')) return;
+    try {
+      const response = await fetch(apiPath(`/api/admin/gallery-categories/${id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      if (!response.ok) throw new Error('Unable to delete category.');
+      setGalleryCategories((prev) => prev.filter((c) => c._id !== id));
+      setAdminMessage('Category deleted.');
+    } catch (error) {
+      setAdminError(error.message);
     }
   };
 
@@ -1344,28 +1385,68 @@ const AdminDashboard = () => {
 
       case 'gallery':
         return (
-          <div className="admin-panel-slot">
-            {adminError ? <div className="message error">{adminError}</div> : null}
-            {adminMessage ? <div className="message">{adminMessage}</div> : null}
-            <div className="booking-form-wrap">
-              <h3><FaPlus /> Add gallery image</h3>
-              <form onSubmit={handleGallerySubmit} className="form-grid">
-                <div className="form-group">
-                  <label>Image</label>
-                  <DragAndDropUploader value={galleryForm.url} onChange={(url) => setGalleryForm({ ...galleryForm, url })} />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="btn-primary">Save image</button>
-                </div>
-              </form>
+          <div className="admin-content animate-fade-in">
+            <div className="admin-content-header">
+              <h2>Gallery Management</h2>
+              <p>Add and remove images from the main hotel gallery.</p>
             </div>
-            <div className="gallery-grid">
+            
+            <div className="gallery-admin-container">
+              <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '300px' }}>
+                  <h3><FaPlus /> Add Gallery Category</h3>
+                  <form onSubmit={handleCategorySubmit} className="form-grid" style={{ marginBottom: '20px' }}>
+                    <div className="form-group">
+                      <label>Category Name</label>
+                      <input type="text" placeholder="e.g. Interior" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
+                    </div>
+                    <button type="submit" className="btn-primary" style={{ height: 'fit-content', alignSelf: 'flex-end' }}>Add Category</button>
+                  </form>
+                  <h4>Existing Categories</h4>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {galleryCategories.map(cat => (
+                      <li key={cat._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #ddd' }}>
+                        <span>{cat.name}</span>
+                        <button type="button" className="btn-danger" style={{ padding: '5px 10px' }} onClick={() => handleDeleteCategory(cat._id)}>Delete</button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div style={{ flex: 1, minWidth: '300px' }}>
+                  <h3><FaPlus /> Add Gallery Image</h3>
+                  <form onSubmit={handleGallerySubmit} className="form-grid">
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label>Image URL</label>
+                      <DragAndDropUploader value={galleryForm.url} onChange={(url) => setGalleryForm({ ...galleryForm, url })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Title (Optional)</label>
+                      <input type="text" placeholder="e.g. Swimming Pool" value={galleryForm.title} onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Category</label>
+                      <select value={galleryForm.category} onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}>
+                        <option value="">No Category</option>
+                        {galleryCategories.map(c => (
+                          <option key={c._id} value={c._id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button type="submit" className="btn-primary" style={{ gridColumn: '1 / -1' }}>Upload Image</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div className="gallery-grid" style={{ marginTop: '40px' }}>
               {galleryImages.map((image) => (
                 <div className="gallery-item" key={image._id}>
                   {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
                   <div className="gallery-item-actions">
+                    <span style={{color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px', borderRadius: '5px'}}>{image.category?.name || 'Uncategorized'}</span>
                     <button type="button" className="btn-danger" onClick={() => handleDeleteGalleryImage(image._id)}>
-                      <FaTrash />
+                      <FaTrash /> Remove
                     </button>
                   </div>
                 </div>

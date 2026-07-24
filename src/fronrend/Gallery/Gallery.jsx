@@ -12,28 +12,42 @@ const API_URL = getApiUrl();
 
 const Gallery = () => {
   const [galleryImages, setGalleryImages] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchGalleryData = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/gallery`);
-        if (!res.ok) throw new Error('Failed to fetch gallery');
-        const data = await res.json();
-        if (Array.isArray(data) && data.length) {
-          setGalleryImages(data.map(d => d.url));
+        const [imagesRes, catsRes] = await Promise.all([
+          fetch(`${API_URL}/api/gallery`),
+          fetch(`${API_URL}/api/gallery/categories`)
+        ]);
+        
+        const imagesData = imagesRes.ok ? await imagesRes.json() : [];
+        const catsData = catsRes.ok ? await catsRes.json() : [];
+
+        if (Array.isArray(imagesData) && imagesData.length) {
+          setGalleryImages(imagesData);
         } else {
-          setGalleryImages([imgFallback, imgFallback, imgFallback]);
+          setGalleryImages([]);
+        }
+        
+        if (Array.isArray(catsData)) {
+          setCategories(catsData);
         }
       } catch (err) {
         console.error(err);
-        setGalleryImages([imgFallback, imgFallback, imgFallback]);
       }
     };
 
-    fetchImages();
+    fetchGalleryData();
   }, []);
+
+  const filteredImages = selectedCategory === 'ALL' 
+    ? galleryImages 
+    : galleryImages.filter(img => img.category?.name === selectedCategory || (selectedCategory === 'Uncategorized' && !img.category));
  
   return (
     <>
@@ -55,14 +69,35 @@ const Gallery = () => {
         </div>
       </section>
 
+      {/* Gallery Filters */}
+      <div className="gallery-filters">
+        <button 
+          className={`filter-btn ${selectedCategory === 'ALL' ? 'active' : ''}`} 
+          onClick={() => setSelectedCategory('ALL')}
+        >
+          ALL
+        </button>
+        {categories.map(cat => (
+          <button 
+            key={cat._id}
+            className={`filter-btn ${selectedCategory === cat.name ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(cat.name)}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
       {/* Gallery Grid */}
       <section className="gallery-section">
-        <div className="gallery-grid">
-          {galleryImages.map((img, index) => (
-            <div className="gallery-card" key={index}>
-              <img src={img} alt={`Hotel Gallery ${index}`} />
+        <div className="gallery-grid-new">
+          {filteredImages.length > 0 ? filteredImages.map((img, index) => (
+            <div className="gallery-card-new" key={index}>
+              <img src={img.url || imgFallback} alt={img.title || `Gallery Image ${index}`} />
             </div>
-          ))}
+          )) : (
+            <p style={{ textAlign: 'center', width: '100%', gridColumn: '1 / -1' }}>No images found for this category.</p>
+          )}
         </div>
       </section>
 
