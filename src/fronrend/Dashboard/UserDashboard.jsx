@@ -415,7 +415,7 @@ const UserDashboard = () => {
               <section className="tab-pane">
                 <h2>🏨 Book a Luxury Room</h2>
                 <form className="form-container" onSubmit={handleRoomBooking}>
-                  <div className="form-group">
+                  <div className="form-group full-width">
                     <label>Select Room</label>
                     <select 
                       className={formErrors.room ? 'input-error' : ''}
@@ -435,7 +435,7 @@ const UserDashboard = () => {
                     {formErrors.room && <span className="error-text">{formErrors.room}</span>}
                   </div>
 
-                  <div className="form-group">
+                  <div className="form-group full-width">
                     <label>Number of Guests</label>
                     <input
                       type="number"
@@ -556,7 +556,9 @@ const UserDashboard = () => {
                     })()
                   )}
 
-                  <button className="btn gold" type="submit">Complete Reservation</button>
+                  <div className="form-group full-width">
+                    <button className="btn gold" type="submit" style={{ marginTop: '10px' }}>Complete Reservation</button>
+                  </div>
                 </form>
               </section>
             )}

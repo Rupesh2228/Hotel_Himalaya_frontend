@@ -18,6 +18,11 @@ import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
 import './TourDetails.css'
 import { useAuth } from '../../context/AuthContext'
+import { isValidPhoneNumber } from 'libphonenumber-js'
+import * as isoCountries from 'i18n-iso-countries'
+import enLocale from 'i18n-iso-countries/langs/en.json'
+
+isoCountries.registerLocale(enLocale)
 
 // Dynamic icon mapper for highlight cards and travel advice
 const iconMap = {
@@ -101,6 +106,31 @@ const handleBookNowSubmit = (e) => {
   const totalPeople = numAdults + numChildren;
   const bookingId = createTourBookingId();
   
+  if (country) {
+    const customCountryMap = {
+      "Eswatini (fmr. Swaziland)": "SZ",
+      "Myanmar (formerly Burma)": "MM",
+      "Palestine State": "PS",
+      "Congo (Congo-Brazzaville)": "CG",
+      "Democratic Republic of the Congo": "CD",
+      "United States of America": "US",
+      "Holy See": "VA",
+    };
+    const isoCode = customCountryMap[country] || isoCountries.getAlpha2Code(country, 'en');
+    
+    if (isoCode) {
+      if (!isValidPhoneNumber(phoneNumber, isoCode)) {
+        alert(`Please enter a valid phone number for ${country}.`);
+        return;
+      }
+    } else {
+      if (!isValidPhoneNumber(phoneNumber)) {
+        alert(`Please enter a valid phone number starting with + and country code.`);
+        return;
+      }
+    }
+  }
+
   const bookingInfo = {
     _id: bookingId,
     tourId: tour._id,
