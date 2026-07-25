@@ -35,41 +35,63 @@ const ReviewsList = () => {
   const [author, setAuthor] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [submissionState, setSubmissionState] = useState({ loading: false, error: '', success: '' });
+  const [validationErrors, setValidationErrors] = useState({ author: '', email: '', rating: '', reviewText: '' });
 
-  const fetchReviews = useCallback(async () => {
-    try {
-      const response = await fetch(API_URL);
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data.filter((review) => !isLegacyGoogleReview(review)));
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          setReviews(data.filter((review) => !isLegacyGoogleReview(review)));
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadReviews();
   }, []);
-
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
-
-  useEffect(() => {
-    if (user) {
-      setAuthor(user.name || '');
-      setEmail(user.email || '');
-    }
-  }, [user]);
 
   const handleSubmitReview = async (event) => {
     event.preventDefault();
-    if (!reviewText.trim()) {
-      setSubmissionState({ loading: false, error: 'Please enter your review.', success: '' });
+    const trimmedAuthor = author.trim();
+    const trimmedEmail = email.trim();
+    const trimmedReview = reviewText.trim();
+    const errors = {
+      author: '',
+      email: '',
+      rating: '',
+      reviewText: ''
+    };
+ 
+    if (!trimmedAuthor && !user) {
+      errors.author = 'Please enter your name or sign in to submit a review.';
+    }
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = 'Please enter a valid email address or leave it blank.';
+    }
+    if (!rating) {
+      errors.rating = 'Please select a rating for your review.';
+    }
+    if (!trimmedReview) {
+      errors.reviewText = 'Please enter your review.';
+    } else if (trimmedReview.length < 10) {
+      errors.reviewText = 'Review must be at least 10 characters long.';
+    }
+ 
+    const hasErrors = Object.values(errors).some((message) => message);
+    if (hasErrors) {
+      setValidationErrors(errors);
+      setSubmissionState({ loading: false, error: '', success: '' });
       return;
     }
-
+ 
+    setValidationErrors({ author: '', email: '', rating: '', reviewText: '' });
     setSubmissionState({ loading: true, error: '', success: '' });
-
+ 
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -77,10 +99,10 @@ const ReviewsList = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          author: author.trim() || 'Guest',
-          email: email.trim(),
+          author: trimmedAuthor || 'Guest',
+          email: trimmedEmail,
           rating,
-          text: reviewText.trim(),
+          text: trimmedReview,
         }),
       });
 
@@ -96,7 +118,11 @@ const ReviewsList = () => {
       setSubmissionState({ loading: false, error: '', success: 'Thank you! Your review has been submitted.' });
     } catch (err) {
       console.error('Review submit error:', err);
-      setSubmissionState({ loading: false, error: 'Failed to submit review. Please try again later.', success: '' });
+      setSubmissionState({
+        loading: false,
+        error: err?.message ? `Failed to submit review: ${err.message}` : 'Failed to submit review. Please try again later.',
+        success: ''
+      });
     }
   };
 
@@ -141,8 +167,9 @@ const ReviewsList = () => {
               onChange={(e) => setAuthor(e.target.value)}
               placeholder="Your name"
             />
+            {validationErrors.author && <span className="field-error">{validationErrors.author}</span>}
           </div>
-
+ 
           <div className="review-form-row">
             <label htmlFor="review-email">Email (optional)</label>
             <input
@@ -152,6 +179,7 @@ const ReviewsList = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email"
             />
+            {validationErrors.email && <span className="field-error">{validationErrors.email}</span>}
           </div>
 
           <div className="review-form-row rating-row">
@@ -169,6 +197,7 @@ const ReviewsList = () => {
                 </button>
               ))}
             </div>
+            {validationErrors.rating && <span className="field-error">{validationErrors.rating}</span>}
           </div>
 
           <div className="review-form-row">
@@ -180,6 +209,7 @@ const ReviewsList = () => {
               placeholder="Tell us about your stay"
               rows={5}
             />
+            {validationErrors.reviewText && <span className="field-error">{validationErrors.reviewText}</span>}
           </div>
 
           {submissionState.error && <p className="review-error">{submissionState.error}</p>}

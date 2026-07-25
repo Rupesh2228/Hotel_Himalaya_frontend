@@ -521,6 +521,12 @@ body {
   border-radius: 12px;
 }
 
+.field-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
 .review-error {
   color: #c0392b;
   background: rgba(192, 57, 43, 0.1);
