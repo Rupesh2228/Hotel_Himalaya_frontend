@@ -137,21 +137,6 @@ ul { list-style: none; }
   }
 }
 
-/* Global CTA button used across pages */
-.btn-cta {
-  padding: 12px 26px;
-  background: linear-gradient(135deg, var(--gold-300) 0%, var(--gold-400) 100%);
-  color: #ffffff;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  display: inline-block;
-  transition: transform 0.12s var(--ease-smooth), box-shadow 0.12s var(--ease-smooth);
-  box-shadow: var(--shadow-gold-sm);
-}
-.btn-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(181, 107, 47, 0.2); }
-
 /* Global experience polish */
 :root {
   --accent-strong: #8c4b1f;
@@ -200,29 +185,6 @@ input, textarea, select, button {
   color: var(--text-primary) !important;
   border: 1px solid var(--card-border) !important;
   box-shadow: var(--shadow-sm) !important;
-}
-
-.btn-cta,
-.btn_primary,
-.btn_book_now,
-.book-button,
-.btn_view_details,
-.btn-secondary,
-button[class*="btn"] {
-  background: linear-gradient(135deg, var(--gold-300) 0%, var(--gold-400) 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid var(--gold-400) !important;
-  box-shadow: 0 8px 18px rgba(181, 107, 47, 0.18);
-}
-
-button[class*="btn"]:hover,
-.btn-cta:hover,
-.btn_primary:hover,
-.btn_book_now:hover,
-.book-button:hover,
-.btn_view_details:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(181, 107, 47, 0.2);
 }
 
 section,
