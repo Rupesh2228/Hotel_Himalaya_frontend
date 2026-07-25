@@ -605,8 +605,7 @@ tbody tr:hover {
 
 .event-ticket-card:hover,
 .review-card:hover,
-.tour-booking-card:hover,
-.tab-pane:hover {
+.tour-booking-card:hover {
   transform: translateY(-2px);
 }
 
