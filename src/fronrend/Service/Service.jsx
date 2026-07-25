@@ -5,7 +5,6 @@ import Components from "../componets/componets";
 import background from "../../img/background.jpg";
 import LastComponent from '../componets/LastComponents';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { getApiUrl } from '../../config/api';
 
 const API_URL = `${getApiUrl()}/api/reviews`;
@@ -28,10 +27,14 @@ const getDeviceId = () => {
 // ── Reviews List Component ──
 const ReviewsList = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deviceId] = useState(() => getDeviceId());
+  const [rating, setRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [author, setAuthor] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [submissionState, setSubmissionState] = useState({ loading: false, error: '', success: '' });
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -51,11 +54,57 @@ const ReviewsList = () => {
     fetchReviews();
   }, [fetchReviews]);
 
+  useEffect(() => {
+    if (user) {
+      setAuthor(user.name || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    if (!reviewText.trim()) {
+      setSubmissionState({ loading: false, error: 'Please enter your review.', success: '' });
+      return;
+    }
+
+    setSubmissionState({ loading: true, error: '', success: '' });
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          author: author.trim() || 'Guest',
+          email: email.trim(),
+          rating,
+          text: reviewText.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Unable to submit review.');
+      }
+
+      const createdReview = await response.json();
+      setReviews((prevReviews) => [createdReview, ...prevReviews]);
+      setReviewText('');
+      setRating(5);
+      setSubmissionState({ loading: false, error: '', success: 'Thank you! Your review has been submitted.' });
+    } catch (err) {
+      console.error('Review submit error:', err);
+      setSubmissionState({ loading: false, error: 'Failed to submit review. Please try again later.', success: '' });
+    }
+  };
+
   const handleLove = useCallback(async (reviewId) => {
     const identifier = user?.email || deviceId;
     if (!identifier) {
-      alert('Cannot react to reviews at this time.');
-      return;
+     alert('Cannot react to reviews at this time.');
+     return;
     }
 
     try {
@@ -72,10 +121,76 @@ const ReviewsList = () => {
     } catch (error) {
       console.error('Error updating review:', error);
     }
-  }, [user, navigate]);
+  }, [user, deviceId]);
 
   return (
     <div className="reviews-content">
+      <div className="review-form-card service-review-card">
+        <div className="review-form-header">
+          <h3>Share your experience</h3>
+          <p>Help other guests by leaving your honest feedback about our services.</p>
+        </div>
+
+        <form className="review-form" onSubmit={handleSubmitReview}>
+          <div className="review-form-row">
+            <label htmlFor="review-author">Name</label>
+            <input
+              id="review-author"
+              type="text"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="Your name"
+            />
+          </div>
+
+          <div className="review-form-row">
+            <label htmlFor="review-email">Email (optional)</label>
+            <input
+              id="review-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Your email"
+            />
+          </div>
+
+          <div className="review-form-row rating-row">
+            <label>Rating</label>
+            <div className="rating-picker">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={value <= rating ? 'star-btn active' : 'star-btn'}
+                  onClick={() => setRating(value)}
+                  aria-label={`${value} star${value > 1 ? 's' : ''}`}
+                >
+                  <FaStar />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="review-form-row">
+            <label htmlFor="review-text">Review</label>
+            <textarea
+              id="review-text"
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              placeholder="Tell us about your stay"
+              rows={5}
+            />
+          </div>
+
+          {submissionState.error && <p className="review-error">{submissionState.error}</p>}
+          {submissionState.success && <p className="review-success">{submissionState.success}</p>}
+
+          <button type="submit" className="review-submit-btn" disabled={submissionState.loading}>
+            {submissionState.loading ? 'Submitting...' : 'Submit Review'}
+          </button>
+        </form>
+      </div>
+
       {/* Reviews Grid */}
       {loading ? (
         <div className="reviews-loading">
