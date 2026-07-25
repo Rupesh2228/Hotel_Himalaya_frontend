@@ -200,7 +200,7 @@ const DragAndDropUploader = ({ value, onChange, multiple = false }) => {
 
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        setError('Only image files are allowed.');
+        setError('Only image files are allowed (JPEG, PNG, WEBP, GIF).');
         continue;
       }
       
@@ -215,18 +215,19 @@ const DragAndDropUploader = ({ value, onChange, multiple = false }) => {
           body: formData,
         });
 
+        const data = await response.json().catch(() => ({}));
+
         if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || 'Upload failed');
+          throw new Error(data.error || `Upload failed (${response.status})`);
         }
 
-        const data = await response.json();
         uploadedUrls.push(data.url);
       } catch (err) {
-        setError('Failed to upload image. Please try again.');
+        setError(err.message || 'Failed to upload image. Please try again.');
+        setUploading(false);
+        return;
       }
     }
-
 
     if (uploadedUrls.length > 0) {
       if (multiple) {
