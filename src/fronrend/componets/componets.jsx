@@ -20,7 +20,6 @@ import { useAuth } from '../../context/AuthContext'
 const Components = () => {
   const { user } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   const toggleMenu = () => setIsMenuOpen((open) => !open)
   const closeMenu = () => setIsMenuOpen(false)

@@ -1,4 +1,3 @@
-import React from 'react'
 import './Loader.css'
 
 const Loader = ({ fullScreen = false, message = "Loading..." }) => {

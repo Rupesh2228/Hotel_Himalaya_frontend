@@ -5,7 +5,6 @@ import "./Gallery.css";
 import { useEffect, useState, useCallback } from 'react';
 import imgFallback from "../../img/images.jpg";
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
 import { getApiUrl } from '../../config/api'
 
 const API_URL = getApiUrl();
@@ -16,7 +15,6 @@ const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [lightbox, setLightbox] = useState(null); // { index, images[] }
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   useEffect(() => {
     const fetchGalleryData = async () => {

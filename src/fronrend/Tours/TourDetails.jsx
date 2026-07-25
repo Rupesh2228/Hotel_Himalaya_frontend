@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { 
   FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, 
   FaCheckCircle, FaTimesCircle, FaPlus, FaMinus, FaChevronDown, FaChevronUp, 
   FaMountain, FaUserCheck, FaCar, FaGlobe, FaSun, FaBed, FaHiking, FaCompass, 
-  FaCalendarWeek, FaArrowUp, FaCalendarDay, FaUserPlus, FaTicketAlt, FaShieldAlt, 
-  FaEnvelope, FaLock, FaPen, FaSave, FaEye, FaArrowLeft, FaSuitcase, FaCloudSun, 
+  FaCalendarWeek, FaCalendarDay, FaUserPlus, FaShieldAlt, 
+  FaEnvelope, FaSuitcase, FaCloudSun, 
   FaPray, FaFirstAid, FaMoneyBillWave, FaHelicopter
 } from 'react-icons/fa';
 
@@ -17,7 +17,6 @@ import { getStoredTours, subscribeToTourChanges, updateTour } from './ToursData'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
 import './TourDetails.css'
-import { useAuth } from '../../context/AuthContext'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import * as isoCountries from 'i18n-iso-countries'
 import enLocale from 'i18n-iso-countries/langs/en.json'
@@ -65,20 +64,15 @@ const TourDetails = () => {
   const [selectedDate, setSelectedDate] = useState('')
   const [numAdults, setNumAdults] = useState(2)
   const [numChildren, setNumChildren] = useState(0)
-  const [promoCode, setPromoCode] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState(0)
-  const [promoMessage, setPromoMessage] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
-  const BOOKINGS_API_URL = '/api/bookings';
   
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState(''); 
   const [country, setCountry] = useState('');
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [adminTourData, setAdminTourData] = useState(null);
+  const [, setAdminTourData] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('pay_at_site');
-  const { user } = useAuth();
 
   const createTourBookingId = () => {
     const randomPart = Math.random().toString(36).slice(2, 10)
@@ -175,9 +169,7 @@ const handleBookNowSubmit = (e) => {
   setCountry('');
   setNumAdults(2);
   setNumChildren(0);
-  setPromoCode('');
   setAppliedDiscount(0);
-  setPromoMessage('');
   setPaymentMethod('pay_at_site');
   
   if (tour.availableDates && tour.availableDates.length > 0) {
@@ -270,19 +262,6 @@ const handleBookNowSubmit = (e) => {
   // Handlers
   // wishlist and share handlers removed
 
-  const applyPromo = () => {
-    const cleanCode = promoCode.trim().toUpperCase()
-    if (cleanCode === 'HIMALAYA10') {
-      setAppliedDiscount(10)
-      setPromoMessage('Promo code HIMALAYA10 applied! Extra 10% Off.')
-    } else if (cleanCode === 'TREK20') {
-      setAppliedDiscount(20)
-      setPromoMessage('Promo code TREK20 applied! Extra 20% Off.')
-    } else {
-      setAppliedDiscount(0)
-      setPromoMessage('Invalid promo code. Try HIMALAYA10 or TREK20')
-    }
-  }
 
   const toggleItineraryDay = (day) => {
     setOpenItineraryDays(prev => ({
@@ -347,34 +326,6 @@ const handleBookNowSubmit = (e) => {
   };
 
   // Admin edits persistence
-  const handleAdminInputChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setAdminTourData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value)
-    }))
-  }
-
-  const handleAdminItineraryChange = (idx, field, value) => {
-    const updatedItinerary = [...adminTourData.itinerary]
-    updatedItinerary[idx] = { ...updatedItinerary[idx], [field]: value }
-    setAdminTourData(prev => ({
-      ...prev,
-      itinerary: updatedItinerary
-    }))
-  }
-
-  const saveAdminChanges = () => {
-    // Save to local storage DB
-    const success = updateTour(adminTourData)
-    if (success) {
-      setTour({ ...adminTourData })
-      alert("Changes saved successfully to Local Storage DB! Your live web page has been updated instantly.")
-      setShowAdminPanel(false)
-    } else {
-      alert("Failed to save changes.")
-    }
-  }
 
   // Similar tours (filter out current tour)
   const similarTours = tours.filter(t => t._id !== tour._id).slice(0, 2)

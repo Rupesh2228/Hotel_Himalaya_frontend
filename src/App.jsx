@@ -13,10 +13,6 @@ const Events = lazy(() => import('./fronrend/Events/Events'))
 
 // Auth routes
 const Login = lazy(() => import('./fronrend/auth/Login'))
-const Signup = lazy(() => import('./fronrend/auth/Signup'))
-const VerifyOTP = lazy(() => import('./fronrend/auth/VerifyOTP'))
-const ForgotPassword = lazy(() => import('./fronrend/auth/ForgotPassword'))
-const ResetPassword = lazy(() => import('./fronrend/auth/ResetPassword'))
 
 const AdminDashboard = lazy(() => import('./fronrend/Dashboard/AdminDashboard'))
 const UserDashboard = lazy(() => import('./fronrend/Dashboard/UserDashboard'))

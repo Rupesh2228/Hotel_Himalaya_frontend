@@ -342,9 +342,8 @@ tbody tr:hover {
 
 .badge,
 .event-ticket-badge,
-.tour-booking-badge,
-.dash-love-btn {
-  border-radius: 999px;
+.tour-booking-badge {
+border-radius: 999px;
 }
 
 .badge {
@@ -358,25 +357,22 @@ tbody tr:hover {
 .badge-completed { background: #dcfce7; color: #047857; }
 
 .event-ticket-list,
-.user-reviews-grid,
 .tour-booking-list {
-  display: grid;
-  gap: 18px;
+display: grid;
+gap: 18px;
 }
 
 .event-ticket-card,
-.review-card,
 .tour-booking-card {
-  background: #fff;
-  border: 1px solid var(--hotel-border);
-  border-radius: 18px;
-  box-shadow: var(--shadow-soft);
-  transition: var(--transition);
+background: #fff;
+border: 1px solid var(--hotel-border);
+border-radius: 18px;
+box-shadow: var(--shadow-soft);
+transition: var(--transition);
 }
 
-.event-ticket-card,
-.review-card {
-  padding: 20px;
+.event-ticket-card {
+padding: 20px;
 }
 
 .tour-booking-card {
@@ -385,27 +381,23 @@ tbody tr:hover {
 }
 
 .event-ticket-card:hover,
-.review-card:hover,
 .tour-booking-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
+transform: translateY(-2px);
+box-shadow: var(--shadow-card);
 }
 
 .event-ticket-header,
 .tour-booking-header,
-.review-header,
-.review-footer-row,
 .tour-booking-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+display: flex;
+justify-content: space-between;
+align-items: center;
 }
 
 .event-ticket-header,
-.tour-booking-header,
-.review-header {
-  align-items: flex-start;
-  gap: 12px;
+.tour-booking-header {
+align-items: flex-start;
+gap: 12px;
 }
 
 .event-ticket-title,
@@ -424,11 +416,10 @@ tbody tr:hover {
 }
 
 .event-ticket-subtitle,
-.tour-booking-subtitle,
-.review-date {
-  margin-top: 4px;
-  color: #6b7280;
-  font-size: 0.8rem;
+.tour-booking-subtitle {
+margin-top: 4px;
+color: #6b7280;
+font-size: 0.8rem;
 }
 
 .event-ticket-badge,
@@ -501,57 +492,8 @@ tbody tr:hover {
   color: #6b7280;
 }
 
-.reviews-section-divider {
-  margin-top: 40px;
-  padding-top: 28px;
-  border-top: 1px solid var(--hotel-border);
-}
 
-.reviews-section-divider h3 {
-  margin-bottom: 18px;
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-}
 
-.review-rating {
-  color: var(--hotel-gold);
-}
-
-.review-text {
-  color: #374151;
-  line-height: 1.6;
-  font-size: 0.92rem;
-}
-
-.review-footer-row {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed #e5e7eb;
-}
-
-.dash-love-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--hotel-border);
-  background: #fff;
-  color: #9ca3af;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.dash-love-btn:hover,
-.dash-love-btn.loved {
-  background: #FFFFFF;
-  color: #ef4444;
-  border-color: #fca5a5;
-}
-
-.dash-love-btn.loved svg {
-  fill: currentColor;
-}
 
 .sidebar-logout-btn {
   display: flex;
@@ -604,9 +546,8 @@ tbody tr:hover {
 }
 
 .event-ticket-card:hover,
-.review-card:hover,
 .tour-booking-card:hover {
-  transform: translateY(-2px);
+transform: translateY(-2px);
 }
 
 @media (max-width: 1024px) {
@@ -637,7 +578,6 @@ tbody tr:hover {
   .tab-pane,
   .user-dashboard-tabs,
   .event-ticket-card,
-  .review-card,
   .tour-booking-card {
     border-radius: 16px;
   }

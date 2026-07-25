@@ -1,4 +1,3 @@
-import React from 'react'
 import './ServerError.css'
 import Components from './componets'
 import LastComponents from './LastComponents'

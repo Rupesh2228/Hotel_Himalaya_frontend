@@ -17,5 +17,5 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const link = (event.notification && event.notification.data && event.notification.data.link) ? event.notification.data.link : '/';
   // support action clicks in notifications
-  event.waitUntil(clients.openWindow(link));
+  event.waitUntil(self.clients.openWindow(link));
 });

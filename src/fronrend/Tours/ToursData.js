@@ -423,7 +423,7 @@ const normalizeTour = (tour) => {
     } else {
       normalizedTour.galleryImages = normalizedTour.galleryImages ? [toAbsoluteImage(normalizedTour.galleryImages)] : [];
     }
-  } catch (e) {
+  } catch {
     // ignore image normalization failures
   }
 

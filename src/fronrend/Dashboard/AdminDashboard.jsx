@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaRedo, FaCheck, FaTimes } from 'react-icons/fa';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -12,6 +12,14 @@ import {
 import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
+
+const normalizeTourBookingModule = (booking) => {
+  const bookingId = booking?._id || booking?.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  if (bookingId.startsWith('tb_')) {
+    return { ...booking, _id: bookingId.replace(/^tb_/, 'tour_') };
+  }
+  return { ...booking, _id: bookingId };
+};
 
 const API_BASE_URL = getApiUrl();
 const apiPath = (path) => `${API_BASE_URL}${path}`;
@@ -326,17 +334,11 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   const [typed, setTyped] = useState('');
 
@@ -382,16 +384,9 @@ const AdminDashboard = () => {
 
   const TOUR_BOOKING_STORAGE_KEYS = ['himalaya_tour_bookings', 'hotel_tour_bookings', 'tour_bookings'];
 
-  const normalizeTourBooking = (booking) => {
-    const bookingId = booking?._id || booking?.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    if (bookingId.startsWith('tb_')) {
-      return { ...booking, _id: bookingId.replace(/^tb_/, 'tour_') };
-    }
-    return { ...booking, _id: bookingId };
-  };
 
   const persistTourBookings = (bookings) => {
-    const normalized = bookings.map(normalizeTourBooking);
+    const normalized = bookings.map(normalizeTourBookingModule);
     const payload = JSON.stringify(normalized);
     TOUR_BOOKING_STORAGE_KEYS.forEach((storageKey) => {
       localStorage.setItem(storageKey, payload);
@@ -412,7 +407,7 @@ const AdminDashboard = () => {
           if (!Array.isArray(parsedValue)) return;
 
           parsedValue.forEach((booking) => {
-            const normalized = normalizeTourBooking(booking);
+            const normalized = normalizeTourBookingModule(booking);
             if (!bookingMap.has(normalized._id)) {
               bookingMap.set(normalized._id, normalized);
             }
@@ -466,10 +461,10 @@ const AdminDashboard = () => {
           if (!mounted) return;
           local += msg[i];
           setTyped(local);
-          // eslint-disable-next-line no-await-in-loop
+           
           await new Promise((resolve) => setTimeout(resolve, 20));
         }
-        // eslint-disable-next-line no-await-in-loop
+         
         await new Promise((resolve) => setTimeout(resolve, 600));
       }
     })();
@@ -652,7 +647,7 @@ const AdminDashboard = () => {
           await navigator.serviceWorker.register('/sw.js');
           setPushEnabled(true);
           setAdminMessage('Push is not configured on the server. Registered service worker for local notifications.');
-        } catch (swErr) {
+        } catch {
           setAdminError('Push notifications are not configured on the server and service worker registration failed.');
         }
         return;
@@ -692,7 +687,7 @@ const AdminDashboard = () => {
       }
       setPushEnabled(false);
       setAdminMessage('Device notifications are disabled on this device.');
-    } catch (error) {
+    } catch {
       setAdminError('Could not disable device notifications.');
     }
   };

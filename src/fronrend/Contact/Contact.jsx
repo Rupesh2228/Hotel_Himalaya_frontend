@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import Components from "../componets/componets"
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope, FaClock } from "react-icons/fa";
 import "./Contact.css"
@@ -102,35 +100,26 @@ const Contact = () => {
 
 export default Contact
 
-const MESSAGES_KEY = 'hotel_messages'
 
 function ContactForm() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [messageText, setMessageText] = useState('')
-  const [status, setStatus] = useState('')
-  const { user } = useAuth()
-  const navigate = useNavigate()
-
-  // If user returned from login, prefill form from pending data
-  useEffect(() => {
+  const readPending = () => {
     try {
       const raw = sessionStorage.getItem('pending_contact')
-      if (raw) {
-        const pending = JSON.parse(raw)
-        if (pending) {
-          setName(pending.name || '')
-          setEmail(pending.email || '')
-          setPhone(pending.phone || '')
-          setMessageText(pending.message || '')
-        }
-        sessionStorage.removeItem('pending_contact')
-      }
+      if (!raw) return null
+      const pending = JSON.parse(raw)
+      sessionStorage.removeItem('pending_contact')
+      return pending
     } catch (err) {
       console.error('Failed to restore pending contact', err)
+      return null
     }
-  }, [])
+  }
+  const pending = readPending()
+  const [name, setName] = useState(pending?.name || '')
+  const [email, setEmail] = useState(pending?.email || '')
+  const [phone, setPhone] = useState(pending?.phone || '')
+  const [messageText, setMessageText] = useState(pending?.message || '')
+  const [status, setStatus] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()

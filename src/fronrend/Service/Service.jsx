@@ -30,7 +30,7 @@ const ReviewsList = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deviceId] = useState(() => getDeviceId());
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [author, setAuthor] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -92,7 +92,7 @@ const ReviewsList = () => {
       const createdReview = await response.json();
       setReviews((prevReviews) => [createdReview, ...prevReviews]);
       setReviewText('');
-      setRating(5);
+      setRating(0);
       setSubmissionState({ loading: false, error: '', success: 'Thank you! Your review has been submitted.' });
     } catch (err) {
       console.error('Review submit error:', err);

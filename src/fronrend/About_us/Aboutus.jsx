@@ -3,11 +3,9 @@ import './Aboutus.css'
 import background from '../../img/background.jpg'
 import LastComponent from '../componets/LastComponents'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
 
 const CtaButton = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
   return (
     <button className="btn-cta" onClick={() => navigate('/dashboard')}>
       Book Now

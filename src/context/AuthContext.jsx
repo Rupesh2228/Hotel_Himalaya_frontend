@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-    } catch (_) {
+    } catch {
       // best-effort
     } finally {
       clearToken();

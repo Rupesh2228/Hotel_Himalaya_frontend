@@ -1,13 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
-import { FaHeart, FaRegHeart, FaTicketAlt, FaStar, FaHistory, FaCalendarPlus, FaSignOutAlt, FaSuitcase } from 'react-icons/fa'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { FaTicketAlt, FaHistory, FaCalendarPlus, FaSuitcase } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import Components from '../componets/componets'
-import Loader from '../componets/Loader'
 import './UserDashboard.css'
 import { getApiUrl } from '../../config/api'
 
-const API_URL = `${getApiUrl()}/api/reviews`
 const ROOMS_API_URL = `${getApiUrl()}/api/rooms`
 const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
 const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
@@ -57,9 +54,6 @@ const normalizeTourBooking = (booking) => {
   return { ...booking, _id: bookingId }
 }
 
-const isLegacyGoogleReview = (review) =>
-  /google review/i.test(review?.author || '') ||
-  /welcome to hotel hi khokana/i.test(review?.text || '')
 
 const getDeviceId = () => {
   let id = localStorage.getItem('hotel_device_id')
@@ -71,8 +65,7 @@ const getDeviceId = () => {
 }
 
 const UserDashboard = () => {
-  const { user, token, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user, token } = useAuth()
   
   const getTodayStr = () => new Date().toISOString().split('T')[0]
   const getTomorrowStr = () => {
@@ -82,7 +75,6 @@ const UserDashboard = () => {
   }
 
   const [activeTab, setActiveTab] = useState('book-room')
-  const [reviews, setReviews] = useState([])
   const [rooms, setRooms] = useState([])
   const [allBookings, setAllBookings] = useState([])
   const [selectedRoomId, setSelectedRoomId] = useState('')
@@ -107,12 +99,8 @@ const UserDashboard = () => {
   })
   const [eventBookings, setEventBookings] = useState([])
   const [tourBookings, setTourBookings] = useState([])
-  const [rating, setRating] = useState(5)
-  const [reviewText, setReviewText] = useState('')
-  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState({})
-  const [reviewErrors, setReviewErrors] = useState({})
   const selectedRoom = rooms.find((room) => room._id === selectedRoomId)
   const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
@@ -133,16 +121,10 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [reviewsResponse, roomsResponse, bookingsResponse] = await Promise.all([
-          fetch(API_URL),
+        const [roomsResponse, bookingsResponse] = await Promise.all([
           fetch(ROOMS_API_URL),
           fetch(BOOKINGS_API_URL)
         ])
-
-        if (reviewsResponse.ok) {
-          const data = await reviewsResponse.json()
-          setReviews(data.filter((review) => !isLegacyGoogleReview(review)))
-        }
 
         if (roomsResponse.ok) {
           const data = await roomsResponse.json()
@@ -158,8 +140,6 @@ const UserDashboard = () => {
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
-      } finally {
-        setLoading(false)
       }
     }
     fetchDashboardData()
@@ -378,72 +358,7 @@ const UserDashboard = () => {
 
 
 
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault()
 
-    const errors = {}
-
-    if (!fullName.trim()) errors.fullName = 'Please enter your name.'
-    if (!rating) errors.rating = 'Please select a rating.'
-    if (reviewText.trim().length < 5) errors.reviewText = 'Review must be at least 5 characters long.'
-
-    if (Object.keys(errors).length > 0) {
-      setReviewErrors(errors)
-      return
-    }
-
-    setReviewErrors({})
-
-    setSubmitting(true)
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          author: fullName || user?.name || 'Guest',
-          email: email || user?.email || 'guest@example.com',
-          rating: Number(rating),
-          text: reviewText.trim(),
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to submit review')
-      
-      const newReview = await response.json()
-      setReviews([newReview, ...reviews])
-      setReviewText('')
-      setRating(5)
-      alert('Thank you — your review has been submitted')
-    } catch (error) {
-      console.error('Error submitting review:', error)
-      alert('Failed to submit review. Please try again.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleLove = useCallback(async (reviewId) => {
-    const identifier = user?.email || deviceId;
-    if (!identifier) {
-      alert('Cannot react to reviews at this time.')
-      return
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/${reviewId}/love`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier })
-      })
-
-      if (response.ok) {
-        const updatedReview = await response.json()
-        setReviews(prev => prev.map(r => r._id === reviewId ? updatedReview : r))
-      }
-    } catch (error) {
-      console.error('Error updating review:', error)
-    }
-  }, [user])
   return (
     <>
       <Components />
@@ -468,7 +383,6 @@ const UserDashboard = () => {
               { id: 'my-bookings', label: 'Room Bookings', icon: <FaHistory /> },
               { id: 'event-bookings', label: 'Event Tickets', icon: <FaTicketAlt /> },
               { id: 'tour-bookings', label: 'Tour Bookings', icon: <FaSuitcase /> },
-              { id: 'reviews', label: 'Reviews & Feedback', icon: <FaStar /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -820,101 +734,6 @@ const UserDashboard = () => {
               </section>
             )}
 
-            {activeTab === 'reviews' && (
-              <section className="tab-pane">
-                <h2>⭐ Share Your Experience</h2>
-                <form className="form-container" onSubmit={handleReviewSubmit}>
-                  <div className="form-group">
-                    <label>Your Name</label>
-                    <input 
-                      className={reviewErrors.fullName ? 'input-error' : ''}
-                      type="text" 
-                      placeholder="e.g. John Doe" 
-                      value={fullName} 
-                      onChange={(e) => {
-                        setFullName(e.target.value)
-                        setReviewErrors(prev => ({...prev, fullName: ''}))
-                      }} 
-                    />
-                    {reviewErrors.fullName && <span className="error-text">{reviewErrors.fullName}</span>}
-                  </div>
-                  <div className="form-group">
-                    <label>Your Rating</label>
-                    <select 
-                      className={reviewErrors.rating ? 'input-error' : ''}
-                      value={rating} 
-                      onChange={(e) => {
-                        setRating(e.target.value)
-                        setReviewErrors(prev => ({...prev, rating: ''}))
-                      }}
-                    >
-                      {[5,4,3,2,1].map((r) => (
-                        <option key={r} value={r}>{r} ⭐ {r === 5 ? 'Excellent' : r === 4 ? 'Very Good' : r === 3 ? 'Good' : r === 2 ? 'Fair' : 'Poor'}</option>
-                      ))}
-                    </select>
-                    {reviewErrors.rating && <span className="error-text">{reviewErrors.rating}</span>}
-                  </div>
-                  <div className="form-group">
-                    <label>Your Review</label>
-                    <textarea 
-                      className={reviewErrors.reviewText ? 'input-error' : ''}
-                      placeholder="Tell us about your experience at Hotel Himalaya INN Khona Khona INN Khona..." 
-                      value={reviewText} 
-                      onChange={(e) => {
-                        setReviewText(e.target.value)
-                        setReviewErrors(prev => ({...prev, reviewText: ''}))
-                      }} 
-                      rows={4} 
-                    />
-                    {reviewErrors.reviewText && <span className="error-text">{reviewErrors.reviewText}</span>}
-                  </div>
-                  <button className="btn gold" type="submit" disabled={submitting}>
-                    {submitting ? '⏳ Submitting...' : '✓ Submit Review'}
-                  </button>
-                </form>
-
-                <div className="reviews-section-divider">
-                  <h3>💬 Guest Reviews ({reviews.length})</h3>
-                  {loading ? (
-                    <Loader message="Loading reviews..." />
-                  ) : reviews.length === 0 ? (
-                    <div className="empty-state">No reviews yet. Be the first to share your experience!</div>
-                  ) : (
-                    <div className="user-reviews-grid">
-                      {reviews.map((r) => {
-                        const isLoved = (r.lovedBy || []).includes(user?.email || deviceId)
-                        const loveCount = (r.lovedBy || []).length || 0
-
-                        return (
-                          <div key={r._id} className="review-card">
-                            <div className="review-header">
-                              <div>
-                                <strong>{r.author}</strong>
-                              </div>
-                              <span className="review-rating">
-                                {'⭐'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
-                              </span>
-                            </div>
-                            <div className="review-text">{r.text}</div>
-                            <div className="review-footer-row">
-                              <div className="review-date">{new Date(r.createdAt).toLocaleDateString()}</div>
-                              <button
-                                className={`dash-love-btn ${isLoved ? 'loved' : ''}`}
-                                onClick={() => handleLove(r._id)}
-                                aria-label={isLoved ? 'Unlike this review' : 'Love this review'}
-                              >
-                                {isLoved ? <FaHeart /> : <FaRegHeart />}
-                                <span className="dash-love-count">{loveCount > 0 ? loveCount : ''}</span>
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
           </main>
         </div>
       </div>

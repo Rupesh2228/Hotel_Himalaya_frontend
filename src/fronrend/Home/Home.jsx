@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import './Home.css'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
-import { useAuth } from '../../context/AuthContext'
 import { subscribeToAttractionChanges } from '../Attraction/attractionEvents'
 import home from '../../img/home.jpg'
 import { getApiUrl } from '../../config/api'
@@ -12,7 +11,6 @@ const API_URL = getApiUrl()
 
 const Home = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [attractions, setAttractions] = useState([])
 
   useEffect(() => {

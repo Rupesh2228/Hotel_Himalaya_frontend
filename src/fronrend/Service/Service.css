@@ -494,23 +494,23 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  background: #ffffff;
-  color: var(--gold-primary);
+  border: 1px solid rgba(156, 163, 175, 0.2); /* subtle gray border */
+  background: #ffffff; /* white circle before click */
+  color: #9CA3AF; /* gray star icon before click */
   cursor: pointer;
   transition: var(--transition-smooth);
 }
 
 .star-btn:hover {
   background: #ffffff;
-  color: var(--gold-secondary);
+  color: #6B7280; /* darker gray on hover */
 }
 
 .star-btn.active,
 .star-btn.active:hover {
-  background: var(--gold-primary);
-  border-color: var(--gold-secondary);
-  color: #ffffff;
+  background: var(--color-success, #22C55E); /* green when active */
+  border-color: #16a34a;
+  color: #ffffff; /* white star on green */
 }
 
 .review-error,
