@@ -52,8 +52,9 @@ const ReviewsList = () => {
   }, [fetchReviews]);
 
   const handleLove = useCallback(async (reviewId) => {
-    if (!user) {
-      alert('Please login to react to reviews.');
+    const identifier = user?.email || deviceId;
+    if (!identifier) {
+      alert('Cannot react to reviews at this time.');
       return;
     }
 
@@ -61,7 +62,7 @@ const ReviewsList = () => {
       const response = await fetch(`${API_URL}/${reviewId}/love`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: user.email }),
+        body: JSON.stringify({ identifier }),
       });
 
       if (response.ok) {
