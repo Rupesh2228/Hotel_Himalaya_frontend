@@ -660,7 +660,9 @@ button,
 }
 
 .btn-success.btn-icon svg {
-  background-color: rgba(16, 185, 129, 0.12);
+  /* Use blue for save buttons */
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
 }
 
 .btn-warning.btn-icon svg {
@@ -719,17 +721,17 @@ button,
 }
 
 .btn-success {
-  background: #fff !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  color: #047857 !important;
+  background: #2563eb !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
+  color: #ffffff !important;
   background-image: none !important;
-  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.08);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.12);
 }
 
 .btn-success:hover {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.35) !important;
-  color: #065f46 !important;
+  background: rgba(37, 99, 235, 0.12) !important;
+  border-color: rgba(37, 99, 235, 0.35) !important;
+  color: #ffffff !important;
   transform: translateY(-1px);
 }
 
@@ -1073,8 +1075,8 @@ button.btn-info svg {
 .admin-main button.btn-success,
 .admin-main .btn-success,
 button.btn-success {
-  background: var(--admin-btn-success-bg) !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
+  background: #2563eb !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
   color: #fff !important;
 }
 
