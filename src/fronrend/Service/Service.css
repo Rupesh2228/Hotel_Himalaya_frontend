@@ -494,18 +494,21 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: #ffffff;
-  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(212, 175, 55, 0.18);
+  color: #ffffff;
   cursor: pointer;
   transition: var(--transition-smooth);
 }
 
-.star-btn:hover,
+.star-btn:hover {
+  background: rgba(212, 175, 55, 0.28);
+}
+
 .star-btn.active {
-  background: var(--gold-primary);
+  background: #ffffff;
   border-color: var(--gold-secondary);
-  color: #ffffff;
+  color: var(--gold-primary);
 }
 
 .review-error,
