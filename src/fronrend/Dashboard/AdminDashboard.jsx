@@ -452,6 +452,23 @@ const AdminDashboard = () => {
     return 'badge-inactive';
   };
 
+  const getEventBookingStatusClass = (status) => {
+    const normalized = String(status || 'Upcoming').toLowerCase();
+    if (normalized === 'ongoing') return 'ongoing';
+    if (normalized === 'completed') return 'completed';
+    return 'upcoming';
+  };
+
+  const eventBookingStatusCounts = useMemo(() => {
+    const counts = { upcoming: 0, ongoing: 0, completed: 0 };
+    eventBookings.forEach((booking) => {
+      const key = String(booking.status || 'Upcoming').toLowerCase();
+      if (counts[key] !== undefined) counts[key] += 1;
+      else counts.upcoming += 1;
+    });
+    return counts;
+  }, [eventBookings]);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -1872,38 +1889,45 @@ const AdminDashboard = () => {
             ) : eventBookings.length === 0 ? (
               <div className="empty-state">No event bookings yet. New reservations will appear here with a QR ticket.</div>
             ) : (
-              <div className="eb-grid">
-                {eventBookings.map((booking) => (
-                  <div className="eb-card" key={booking._id}>
-                    <div className="eb-card-accent" />
-                    <div className="eb-card-body">
-                      <div className="eb-card-top">
-                        <div>
-                          <div className="eb-card-event">{booking.eventTitle}</div>
-                          <div className="eb-card-guest">by {booking.bookedByName || 'Guest'}</div>
+              <>
+                <div className="eb-status-summary">
+                  <div className="eb-status-pill upcoming">Upcoming: {eventBookingStatusCounts.upcoming}</div>
+                  <div className="eb-status-pill ongoing">Ongoing: {eventBookingStatusCounts.ongoing}</div>
+                  <div className="eb-status-pill completed">Completed: {eventBookingStatusCounts.completed}</div>
+                </div>
+                <div className="eb-grid">
+                  {eventBookings.map((booking) => (
+                    <div className="eb-card" key={booking._id}>
+                      <div className="eb-card-accent" />
+                      <div className="eb-card-body">
+                        <div className="eb-card-top">
+                          <div>
+                            <div className="eb-card-event">{booking.eventTitle}</div>
+                            <div className="eb-card-guest">by {booking.bookedByName || 'Guest'}</div>
+                          </div>
+                          <span className={`eb-status ${getEventBookingStatusClass(booking.status)}`}>{booking.status || 'Upcoming'}</span>
                         </div>
-                        <span className={`eb-status ${booking.status === 'Booked' ? 'booked' : 'done'}`}>{booking.status}</span>
+                        <div className="eb-card-details">
+                          <div className="eb-detail"><span className="eb-detail-label">Email</span><span className="eb-detail-value">{booking.bookedByEmail || '—'}</span></div>
+                          <div className="eb-detail"><span className="eb-detail-label">Phone</span><span className="eb-detail-value">{booking.bookedByPhone || '—'}</span></div>
+                          <div className="eb-detail"><span className="eb-detail-label">Tickets</span><span className="eb-detail-value eb-highlight">{booking.ticketsCount}</span></div>
+                          <div className="eb-detail"><span className="eb-detail-label">Total</span><span className="eb-detail-value eb-highlight">Rs. {Number(booking.eventPrice || 0) * Number(booking.ticketsCount || 0)}</span></div>
+                          <div className="eb-detail"><span className="eb-detail-label">Booked</span><span className="eb-detail-value">{new Date(booking.createdAt).toLocaleDateString()}</span></div>
+                        </div>
                       </div>
-                      <div className="eb-card-details">
-                        <div className="eb-detail"><span className="eb-detail-label">Email</span><span className="eb-detail-value">{booking.bookedByEmail || '—'}</span></div>
-                        <div className="eb-detail"><span className="eb-detail-label">Phone</span><span className="eb-detail-value">{booking.bookedByPhone || '—'}</span></div>
-                        <div className="eb-detail"><span className="eb-detail-label">Tickets</span><span className="eb-detail-value eb-highlight">{booking.ticketsCount}</span></div>
-                        <div className="eb-detail"><span className="eb-detail-label">Total</span><span className="eb-detail-value eb-highlight">Rs. {Number(booking.eventPrice || 0) * Number(booking.ticketsCount || 0)}</span></div>
-                        <div className="eb-detail"><span className="eb-detail-label">Booked</span><span className="eb-detail-value">{new Date(booking.createdAt).toLocaleDateString()}</span></div>
+                      <div className="eb-card-actions">
+                        <button
+                          type="button"
+                          className="btn-sm btn-danger"
+                          onClick={() => handleDeleteEventBooking(booking._id)}
+                        >
+                        <FaTrash /> Delete Booking
+                        </button>
                       </div>
                     </div>
-                    <div className="eb-card-actions">
-                      <button
-                        type="button"
-                        className="btn-sm btn-danger"
-                        onClick={() => handleDeleteEventBooking(booking._id)}
-                      >
-                      <FaTrash /> Delete Booking
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         );

@@ -1223,6 +1223,38 @@ button.btn-danger svg {
   gap: 20px;
 }
 
+.eb-status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.eb-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.eb-status-pill.upcoming {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.eb-status-pill.ongoing {
+  background-color: #cffafe;
+  color: #0f766e;
+}
+
+.eb-status-pill.completed {
+  background-color: #d1fae5;
+  color: #047857;
+}
+
 .eb-card {
   background-color: #ffffff;
   border: 1px solid var(--admin-border);
@@ -1283,11 +1315,18 @@ button.btn-danger svg {
   flex-shrink: 0;
 }
 
-.eb-status.booked {
-  background-color: #dbeafe;
-  color: #1d4ed8;
+.eb-status.booked,
+.eb-status.upcoming {
+  background-color: #fef3c7;
+  color: #b45309;
 }
 
+.eb-status.ongoing {
+  background-color: #cffafe;
+  color: #0f766e;
+}
+
+.eb-status.completed,
 .eb-status.done {
   background-color: #d1fae5;
   color: #047857;

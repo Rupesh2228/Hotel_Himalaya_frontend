@@ -78,8 +78,6 @@ const ReviewsList = () => {
     }
     if (!trimmedReview) {
       errors.reviewText = 'Please enter your review.';
-    } else if (trimmedReview.length < 10) {
-      errors.reviewText = 'Review must be at least 10 characters long.';
     }
  
     const hasErrors = Object.values(errors).some((message) => message);

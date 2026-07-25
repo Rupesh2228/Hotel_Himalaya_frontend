@@ -443,6 +443,21 @@ font-size: 0.8rem;
   color: #b45309;
 }
 
+.event-ticket-badge.upcoming {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.event-ticket-badge.ongoing {
+  background: #cffafe;
+  color: #0f766e;
+}
+
+.event-ticket-badge.completed {
+  background: #dcfce7;
+  color: #047857;
+}
+
 .tour-booking-badge.rejected {
   background: #fee2e2;
   color: #dc2626;

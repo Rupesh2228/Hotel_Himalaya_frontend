@@ -46,6 +46,13 @@ const getTourBookingStatusClass = (status) => {
   return 'rejected'
 }
 
+const getEventBookingStatusClass = (status) => {
+  const normalized = String(status || 'Upcoming').toLowerCase()
+  if (normalized === 'ongoing') return 'ongoing'
+  if (normalized === 'completed') return 'completed'
+  return 'upcoming'
+}
+
 const normalizeTourBooking = (booking) => {
   const bookingId = booking?._id || booking?.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
   if (bookingId.startsWith('tb_')) {
@@ -650,8 +657,8 @@ const UserDashboard = () => {
                             <div className="event-ticket-title">{b.eventTitle}</div>
                             <div className="event-ticket-subtitle">Booked on {new Date(b.createdAt).toLocaleDateString()}</div>
                           </div>
-                          <span className={`event-ticket-badge ${b.status === 'Booked' ? 'active' : 'pending'}`}>
-                            {b.status}
+                          <span className={`event-ticket-badge ${getEventBookingStatusClass(b.status)}`}>
+                            {b.status || 'Upcoming'}
                           </span>
                         </div>
 
