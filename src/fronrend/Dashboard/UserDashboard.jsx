@@ -488,36 +488,7 @@ const UserDashboard = () => {
               <section className="tab-pane">
                 <h2>🏨 Browse & Book Rooms</h2>
                 
-                {/* Horizontal Date & Guest Filters */}
-                <div className="booking-filters-bar">
-                  <div className="filter-item">
-                    <label>Check-in Date</label>
-                    <input 
-                      type="date" 
-                      min={getTodayStr()} 
-                      value={checkIn} 
-                      onChange={(e) => setCheckIn(e.target.value)} 
-                    />
-                  </div>
-                  <div className="filter-item">
-                    <label>Check-out Date</label>
-                    <input 
-                      type="date" 
-                      min={checkIn || getTodayStr()} 
-                      value={checkOut} 
-                      onChange={(e) => setCheckOut(e.target.value)} 
-                    />
-                  </div>
-                  <div className="filter-item">
-                    <label>Guests</label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      value={memberCount} 
-                      onChange={(e) => setMemberCount(Number(e.target.value))} 
-                    />
-                  </div>
-                </div>
+
 
                 {/* Rooms Grid */}
                 <div className="rooms-booking-grid">
@@ -602,6 +573,38 @@ const UserDashboard = () => {
                             }
                             return null;
                           })()}
+                        </div>
+
+                        <div className="form-group">
+                          <label>Check-in Date</label>
+                          <input
+                            className={formErrors.checkIn ? 'input-error' : ''}
+                            type="date"
+                            min={getTodayStr()}
+                            value={checkIn}
+                            onChange={(e) => {
+                              setCheckIn(e.target.value);
+                              setFormErrors(prev => ({...prev, checkIn: ''}));
+                            }}
+                            required
+                          />
+                          {formErrors.checkIn && <span className="error-text">{formErrors.checkIn}</span>}
+                        </div>
+
+                        <div className="form-group">
+                          <label>Check-out Date</label>
+                          <input
+                            className={formErrors.checkOut ? 'input-error' : ''}
+                            type="date"
+                            min={checkIn || getTodayStr()}
+                            value={checkOut}
+                            onChange={(e) => {
+                              setCheckOut(e.target.value);
+                              setFormErrors(prev => ({...prev, checkOut: ''}));
+                            }}
+                            required
+                          />
+                          {formErrors.checkOut && <span className="error-text">{formErrors.checkOut}</span>}
                         </div>
 
                         <div className="form-group">
