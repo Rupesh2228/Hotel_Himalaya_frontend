@@ -85,7 +85,7 @@ const ReviewsList = () => {
     const hasErrors = Object.values(errors).some((message) => message);
     if (hasErrors) {
       setValidationErrors(errors);
-      setSubmissionState({ loading: false, error: '', success: '' });
+      setSubmissionState({ loading: false, error: 'Please correct the highlighted fields before submitting.', success: '' });
       return;
     }
  
