@@ -171,13 +171,14 @@ const ReviewsList = () => {
           </div>
  
           <div className="review-form-row">
-            <label htmlFor="review-email">Email (optional)</label>
+            <label htmlFor="review-email">Email</label>
             <input
               id="review-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email"
+              required
             />
             {validationErrors.email && <span className="field-error">{validationErrors.email}</span>}
           </div>
