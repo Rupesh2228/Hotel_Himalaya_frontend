@@ -494,21 +494,23 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  background: rgba(212, 175, 55, 0.18);
-  color: #ffffff;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: #ffffff;
+  color: var(--gold-primary);
   cursor: pointer;
   transition: var(--transition-smooth);
 }
 
 .star-btn:hover {
-  background: rgba(212, 175, 55, 0.28);
+  background: #ffffff;
+  color: var(--gold-secondary);
 }
 
-.star-btn.active {
-  background: #ffffff;
+.star-btn.active,
+.star-btn.active:hover {
+  background: var(--gold-primary);
   border-color: var(--gold-secondary);
-  color: var(--gold-primary);
+  color: #ffffff;
 }
 
 .review-error,
