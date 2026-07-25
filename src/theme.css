@@ -354,6 +354,97 @@ button[class*="btn"]:hover {
   box-shadow: 0 14px 30px rgba(37, 99, 235, 0.24) !important;
 }
 
+/* Admin-specific button palette using theme variables */
+:root {
+  --admin-btn-info-bg: #6d28d9; /* purple accent */
+  --admin-btn-info-hover: #5b21b6;
+  --admin-btn-success-bg: var(--color-success);
+  --admin-btn-success-hover: #16a34a;
+  --admin-btn-warning-bg: var(--color-warning);
+  --admin-btn-warning-hover: #d97706;
+  --admin-btn-sm-padding: 6px 10px;
+}
+
+/* Admin button classes - use !important to override global button rules when necessary */
+button.btn-info,
+.btn-info {
+  background: var(--admin-btn-info-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 22px rgba(109, 40, 217, 0.12) !important;
+}
+
+button.btn-info:hover,
+.btn-info:hover {
+  background: var(--admin-btn-info-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+button.btn-success,
+.btn-success {
+  background: var(--admin-btn-success-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.12) !important;
+}
+
+button.btn-success:hover,
+.btn-success:hover {
+  background: var(--admin-btn-success-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+button.btn-warning,
+.btn-warning {
+  background: var(--admin-btn-warning-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 22px rgba(245, 158, 11, 0.12) !important;
+}
+
+button.btn-warning:hover,
+.btn-warning:hover {
+  background: var(--admin-btn-warning-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* small variant */
+button.btn-sm,
+.btn-sm {
+  padding: var(--admin-btn-sm-padding) !important;
+  font-size: 0.85rem !important;
+  border-radius: 8px !important;
+}
+
+/* approve/reject small buttons */
+.btn-approve {
+  background: rgba(16,185,129,0.12) !important;
+  border: 1px solid rgba(16,185,129,0.2) !important;
+  color: var(--color-success) !important;
+  padding: var(--admin-btn-sm-padding) !important;
+  font-weight: 700 !important;
+}
+
+.btn-approve:hover {
+  background: var(--color-success) !important;
+  color: #fff !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-reject {
+  background: rgba(239,68,68,0.08) !important;
+  border: 1px solid rgba(239,68,68,0.2) !important;
+  color: var(--color-error) !important;
+  padding: var(--admin-btn-sm-padding) !important;
+  font-weight: 700 !important;
+}
+
+.btn-reject:hover {
+  background: var(--color-error) !important;
+  color: #fff !important;
+  transform: translateY(-1px) !important;
+}
+
 .btn_view_details,
 .btn-secondary,
 .secondary-btn,

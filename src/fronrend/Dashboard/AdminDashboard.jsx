@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaRedo } from 'react-icons/fa';
+import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaRedo, FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -646,7 +646,17 @@ const AdminDashboard = () => {
       const keyResponse = await fetch(apiPath('/api/notifications/push/public-key'), {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!keyResponse.ok) throw new Error('Push notifications are not configured on the server.');
+      if (!keyResponse.ok) {
+        // Server does not expose a VAPID public key — gracefully fall back.
+        try {
+          await navigator.serviceWorker.register('/sw.js');
+          setPushEnabled(true);
+          setAdminMessage('Push is not configured on the server. Registered service worker for local notifications.');
+        } catch (swErr) {
+          setAdminError('Push notifications are not configured on the server and service worker registration failed.');
+        }
+        return;
+      }
       const { publicKey } = await keyResponse.json();
       const registration = await navigator.serviceWorker.register('/sw.js');
       const existingSubscription = await registration.pushManager.getSubscription();
@@ -1490,7 +1500,7 @@ const AdminDashboard = () => {
                             className="btn-danger btn-sm"
                             onClick={() => handleDeleteMessage(m._id || m.id)}
                           >
-                            Delete
+                              <FaTrash /> Delete
                           </button>
                         </td>
                       </tr>
@@ -1528,7 +1538,7 @@ const AdminDashboard = () => {
                             className="btn-danger btn-sm"
                             onClick={() => handleDeleteReview(review._id || review.id)}
                           >
-                            Delete
+                            <FaTrash /> Delete
                           </button>
                         </td>
                       </tr>
@@ -1564,7 +1574,7 @@ const AdminDashboard = () => {
                     <textarea value={pastEventForm.description} onChange={(e) => setPastEventForm({ ...pastEventForm, description: e.target.value })} required rows="3" placeholder="Briefly describe the completed event..." />
                   </div>
                   <div className="form-group full-width form-actions">
-                    <button type="submit" className="btn-primary">Add Completed Event</button>
+                    <button type="submit" className="btn-info"><FaPlus /> Add Completed Event</button>
                   </div>
                 </form>
               </div>
@@ -1607,14 +1617,14 @@ const AdminDashboard = () => {
                       <label>Category Name</label>
                       <input type="text" placeholder="e.g. Interior" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
                     </div>
-                    <button type="submit" className="btn-primary" style={{ height: 'fit-content', alignSelf: 'flex-end' }}>Add Category</button>
+                    <button type="submit" className="btn-success" style={{ height: 'fit-content', alignSelf: 'flex-end' }}><FaPlus /> Add Category</button>
                   </form>
                   <h4>Existing Categories</h4>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
                     {galleryCategories.map(cat => (
                       <li key={cat._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #ddd' }}>
                         <span>{cat.name}</span>
-                        <button type="button" className="btn-danger" style={{ padding: '5px 10px' }} onClick={() => handleDeleteCategory(cat._id)}>Delete</button>
+                        <button type="button" className="btn-danger" style={{ padding: '5px 10px' }} onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
                       </li>
                     ))}
                   </ul>
@@ -1640,7 +1650,7 @@ const AdminDashboard = () => {
                         ))}
                       </select>
                     </div>
-                    <button type="submit" className="btn-primary" style={{ gridColumn: '1 / -1' }}>Upload Image</button>
+                    <button type="submit" className="btn-info" style={{ gridColumn: '1 / -1' }}><FaDownload /> Upload Image</button>
                   </form>
                 </div>
               </div>
@@ -1694,7 +1704,7 @@ const AdminDashboard = () => {
                   <textarea value={roomForm.description} onChange={(e) => setRoomForm({ ...roomForm, description: e.target.value })} />
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn-primary">{editingRoomId ? 'Update room' : 'Add room'}</button>
+                  <button type="submit" className="btn-success">{editingRoomId ? (<><FaEdit /> Update room</>) : (<><FaPlus /> Add room</>)}</button>
                   {editingRoomId ? <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(''); setRoomForm(initialRoomForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -1756,7 +1766,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button type="submit" className="btn-primary">{editingAttractionId ? 'Update attraction' : 'Add attraction'}</button>
+                  <button type="submit" className="btn-success">{editingAttractionId ? (<><FaEdit /> Update attraction</>) : (<><FaPlus /> Add attraction</>)}</button>
                   {editingAttractionId ? <button type="button" className="btn-secondary" onClick={() => { setEditingAttractionId(''); setAttractionForm(initialAttractionForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -1832,7 +1842,7 @@ const AdminDashboard = () => {
                   <DragAndDropUploader value={eventForm.imageUrl} onChange={(url) => setEventForm({ ...eventForm, imageUrl: url })} />
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn-primary">{editingEventId ? 'Update event' : 'Create event'}</button>
+                  <button type="submit" className="btn-warning">{editingEventId ? (<><FaEdit /> Update event</>) : (<><FaCalendarAlt /> Create event</>)}</button>
                   {editingEventId ? <button type="button" className="btn-secondary" onClick={() => { setEditingEventId(''); setEventForm(initialEventForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -1893,7 +1903,7 @@ const AdminDashboard = () => {
                         className="btn-sm btn-danger"
                         onClick={() => handleDeleteEventBooking(booking._id)}
                       >
-                        Delete Booking
+                      <FaTrash /> Delete Booking
                       </button>
                     </div>
                   </div>
@@ -2163,7 +2173,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button type="submit" className="btn-primary">{editingTourId ? 'Update tour' : 'Add tour'}</button>
+                  <button type="submit" className="btn-success">{editingTourId ? (<><FaEdit /> Update tour</>) : (<><FaPlus /> Add tour</>)}</button>
                   {editingTourId ? <button type="button" className="btn-secondary" onClick={() => { setEditingTourId(''); setTourForm(initialTourForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -2234,7 +2244,7 @@ const AdminDashboard = () => {
                               className="btn-sm btn-approve"
                               onClick={() => handleApproveTourBooking(b._id)}
                             >
-                              ✅ Approve
+                              <FaCheck /> Approve
                             </button>
                           )}
                           {b.status !== 'Rejected' && (
@@ -2242,14 +2252,14 @@ const AdminDashboard = () => {
                               className="btn-sm btn-reject"
                               onClick={() => handleRejectTourBooking(b._id)}
                             >
-                              ❌ Reject
+                              <FaTimes /> Reject
                             </button>
                           )}
                           <button
                             className="btn-sm btn-danger"
                             onClick={() => handleDeleteTourBooking(b._id)}
                           >
-                            Delete
+                          <FaTrash /> Delete
                           </button>
                         </td>
                       </tr>
@@ -2306,7 +2316,7 @@ const AdminDashboard = () => {
                               className="btn-sm btn-danger"
                               onClick={() => handleDeleteRoomBooking(b._id)}
                             >
-                              Delete
+                              <FaTrash /> Delete
                             </button>
                           </td>
                         </tr>

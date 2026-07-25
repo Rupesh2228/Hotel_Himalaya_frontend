@@ -675,6 +675,97 @@ button,
   color: #fff;
 }
 
+/* New semantic button colors */
+.btn-info {
+  background-color: var(--tone-blue);
+  color: #ffffff;
+}
+
+.btn-info:hover {
+  background-color: #133ea8; /* slightly darker blue */
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background-color: var(--tone-green);
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #036749; /* slightly darker green */
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background-color: #f59e0b; /* amber */
+  color: #ffffff;
+}
+
+.btn-warning:hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+/* ensure SVG icons inside buttons look correct */
+button svg,
+.btn svg {
+  vertical-align: middle;
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+/* solid buttons: white icons */
+.btn-info svg,
+.btn-success svg,
+.btn-warning svg,
+.btn-primary svg {
+  color: #ffffff;
+}
+
+/* Approve / Reject small buttons */
+.btn-approve {
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #059669;
+  padding: 6px 10px;
+  font-weight: 700;
+}
+
+.btn-approve svg { color: var(--color-success); }
+
+.btn-approve:hover {
+  background-color: #10b981;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-approve:hover svg { color: #fff; }
+
+.btn-reject {
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  padding: 6px 10px;
+  font-weight: 700;
+}
+
+.btn-reject svg { color: var(--color-error); }
+
+.btn-reject:hover {
+  background-color: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-reject:hover svg { color: #fff; }
+
 .form-actions {
   display: flex;
   gap: 12px;
@@ -916,6 +1007,62 @@ button,
 }
 
 /* RESPONSIVE DESIGN */
+/* Ensure admin button classes override global button rules by using higher specificity and !important */
+.admin-main button.btn-info,
+.admin-main .btn-info,
+button.btn-info {
+  background: var(--admin-btn-info-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #fff !important;
+}
+
+.admin-main button.btn-info svg,
+.admin-main .btn-info svg,
+button.btn-info svg {
+  color: #fff !important;
+}
+
+.admin-main button.btn-success,
+.admin-main .btn-success,
+button.btn-success {
+  background: var(--admin-btn-success-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #fff !important;
+}
+
+.admin-main button.btn-success svg,
+.admin-main .btn-success svg,
+button.btn-success svg {
+  color: #fff !important;
+}
+
+.admin-main button.btn-warning,
+.admin-main .btn-warning,
+button.btn-warning {
+  background: var(--admin-btn-warning-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  color: #fff !important;
+}
+
+.admin-main button.btn-warning svg,
+.admin-main .btn-warning svg,
+button.btn-warning svg {
+  color: #fff !important;
+}
+
+/* Keep danger clear but enforce icon color */
+.admin-main button.btn-danger svg,
+.admin-main .btn-danger svg,
+button.btn-danger svg {
+  color: #ef4444 !important;
+}
+
+/* Small approve/reject ensure icon color */
+.admin-main .btn-approve svg { color: var(--color-success) !important; }
+.admin-main .btn-reject svg { color: var(--color-error) !important; }
+
+/* End of admin overrides */
+
 @media (max-width: 1024px) {
   .admin-layout {
     flex-direction: column;
