@@ -73,13 +73,23 @@ const getDeviceId = () => {
 const UserDashboard = () => {
   const { user, token, logout } = useAuth()
   const navigate = useNavigate()
+  
+  const getTodayStr = () => new Date().toISOString().split('T')[0]
+  const getTomorrowStr = () => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().split('T')[0]
+  }
+
   const [activeTab, setActiveTab] = useState('book-room')
   const [reviews, setReviews] = useState([])
   const [rooms, setRooms] = useState([])
+  const [allBookings, setAllBookings] = useState([])
   const [selectedRoomId, setSelectedRoomId] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [memberCount, setMemberCount] = useState(1)
-  const [checkIn, setCheckIn] = useState('')
-  const [checkOut, setCheckOut] = useState('')
+  const [checkIn, setCheckIn] = useState(getTodayStr())
+  const [checkOut, setCheckOut] = useState(getTomorrowStr())
   const [phone, setPhone] = useState('')
   const [fullName, setFullName] = useState(user?.name || '')
   const [email, setEmail] = useState(user?.email || '')
@@ -107,13 +117,26 @@ const UserDashboard = () => {
   const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
 
+  const fetchAllBookings = async () => {
+    try {
+      const response = await fetch(BOOKINGS_API_URL)
+      if (response.ok) {
+        const data = await response.json()
+        setAllBookings(data)
+      }
+    } catch (error) {
+      console.error('Error fetching all bookings:', error)
+    }
+  }
+
   // Fetch reviews from API on mount
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [reviewsResponse, roomsResponse] = await Promise.all([
+        const [reviewsResponse, roomsResponse, bookingsResponse] = await Promise.all([
           fetch(API_URL),
           fetch(ROOMS_API_URL),
+          fetch(BOOKINGS_API_URL)
         ])
 
         if (reviewsResponse.ok) {
@@ -128,6 +151,11 @@ const UserDashboard = () => {
             setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || data[0]._id)
           }
         }
+
+        if (bookingsResponse.ok) {
+          const data = await bookingsResponse.json()
+          setAllBookings(data)
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       } finally {
@@ -136,6 +164,29 @@ const UserDashboard = () => {
     }
     fetchDashboardData()
   }, [])
+
+  const checkRoomAvailability = (roomId) => {
+    if (!checkIn || !checkOut) return true;
+    
+    const targetCheckIn = parseBookingDate(checkIn);
+    const targetCheckOut = parseBookingDate(checkOut);
+    if (!targetCheckIn || !targetCheckOut || targetCheckOut <= targetCheckIn) return true;
+
+    // Filter bookings for this room that are verified or status !== 'Cancelled'
+    const conflicts = allBookings.filter(b => {
+      if (b.roomId !== roomId) return false;
+      if (b.status === 'Cancelled') return false;
+      
+      const existingCheckIn = parseBookingDate(b.checkIn);
+      const existingCheckOut = parseBookingDate(b.checkOut);
+      if (!existingCheckIn || !existingCheckOut) return false;
+      
+      // Overlap condition
+      return existingCheckIn < targetCheckOut && targetCheckIn < existingCheckOut;
+    });
+
+    return conflicts.length === 0;
+  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -303,10 +354,12 @@ const UserDashboard = () => {
 
       setBookings((currentBookings) => [data, ...currentBookings])
       localStorage.setItem(bookingsCacheKey, JSON.stringify([data, ...bookings]))
+      fetchAllBookings()
+      setIsModalOpen(false)
       alert(`Room booked successfully!\nRoom: ${selectedRoom.title}\nPrice: ${formatRoomPrice(selectedRoom)}\nMembers: ${memberCount}\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}`)
 
-      setCheckIn('')
-      setCheckOut('')
+      setCheckIn(getTodayStr())
+      setCheckOut(getTomorrowStr())
       setMemberCount(1)
       setPhone('')
       if (!user) {
@@ -433,153 +486,193 @@ const UserDashboard = () => {
           <main className="user-dashboard-content">
             {activeTab === 'book-room' && (
               <section className="tab-pane">
-                <h2>🏨 Book a Luxury Room</h2>
-                <form className="form-container" onSubmit={handleRoomBooking}>
-                  <div className="form-group full-width">
-                    <label>Select Room</label>
-                    <select 
-                      className={formErrors.room ? 'input-error' : ''}
-                      value={selectedRoomId} 
-                      onChange={(e) => {
-                        setSelectedRoomId(e.target.value)
-                        setFormErrors(prev => ({...prev, room: ''}))
-                      }}
-                    >
-                      <option value="">Choose a room</option>
-                      {rooms.map((room) => (
-                        <option key={room._id} value={room._id}>
-                          {room.title} - {formatRoomPrice(room)} - up to {room.totalMembers || 1} guests
-                        </option>
-                      ))}
-                    </select>
-                    {formErrors.room && <span className="error-text">{formErrors.room}</span>}
-                  </div>
-
-                  <div className="form-group full-width">
-                    <label>Number of Guests</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={memberCount}
-                      onChange={(e) => setMemberCount(Number(e.target.value))}
-                    />
-                  </div>
-
-                  {selectedRoom && memberCount > Number(selectedRoom.totalMembers || 0) && (
-                    <div className="alert-box-warning" style={{ marginBottom: 12, textAlign: 'left' }}>
-                      Selected room only fits {selectedRoom.totalMembers || 1} guests.
-                      <div style={{ marginTop: 8 }}>
-                        Try these rooms instead:
-                        <ul style={{ marginTop: 8, paddingLeft: 18 }}>
-                          {recommendedRooms.length > 0 ? (
-                            recommendedRooms.map((room) => (
-                              <li key={room._id}>{room.title} - {formatRoomPrice(room)} - up to {room.totalMembers || 1} guests</li>
-                            ))
-                          ) : (
-                            <li>No room fits this guest count right now.</li>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="form-group">
-                    <label>Full Name</label>
-                    <input
-                      className={formErrors.fullName ? 'input-error' : ''}
-                      type="text"
-                      placeholder="e.g. John Doe"
-                      value={fullName}
-                      onChange={(e) => {
-                        setFullName(e.target.value)
-                        setFormErrors(prev => ({...prev, fullName: ''}))
-                      }}
-                    />
-                    {formErrors.fullName && <span className="error-text">{formErrors.fullName}</span>}
-                  </div>
-
-                  <div className="form-group">
-                    <label>Email Address</label>
-                    <input
-                      className={formErrors.email ? 'input-error' : ''}
-                      type="email"
-                      placeholder="e.g. john@example.com"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value)
-                        setFormErrors(prev => ({...prev, email: ''}))
-                      }}
-                    />
-                    {formErrors.email && <span className="error-text">{formErrors.email}</span>}
-                  </div>
-
-                  <div className="form-group">
+                <h2>🏨 Browse & Book Rooms</h2>
+                
+                {/* Horizontal Date & Guest Filters */}
+                <div className="booking-filters-bar">
+                  <div className="filter-item">
                     <label>Check-in Date</label>
                     <input 
-                      className={formErrors.checkIn ? 'input-error' : ''}
                       type="date" 
-                      min={new Date().toISOString().split('T')[0]} 
+                      min={getTodayStr()} 
                       value={checkIn} 
-                      onChange={(e) => {
-                        setCheckIn(e.target.value)
-                        setFormErrors(prev => ({...prev, checkIn: ''}))
-                      }} 
+                      onChange={(e) => setCheckIn(e.target.value)} 
                     />
-                    {formErrors.checkIn && <span className="error-text">{formErrors.checkIn}</span>}
                   </div>
-
-                  <div className="form-group">
-                    <label>Phone Number</label>
-                    <input
-                      className={formErrors.phone ? 'input-error' : ''}
-                      type="tel"
-                      placeholder="e.g. +977-9800000000"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value)
-                        setFormErrors(prev => ({...prev, phone: ''}))
-                      }}
-                    />
-                    {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
-                  </div>
-
-                  <div className="form-group">
+                  <div className="filter-item">
                     <label>Check-out Date</label>
                     <input 
-                      className={formErrors.checkOut ? 'input-error' : ''}
                       type="date" 
-                      min={checkIn || new Date().toISOString().split('T')[0]} 
+                      min={checkIn || getTodayStr()} 
                       value={checkOut} 
-                      onChange={(e) => {
-                        setCheckOut(e.target.value)
-                        setFormErrors(prev => ({...prev, checkOut: ''}))
-                      }} 
+                      onChange={(e) => setCheckOut(e.target.value)} 
                     />
-                    {formErrors.checkOut && <span className="error-text">{formErrors.checkOut}</span>}
                   </div>
+                  <div className="filter-item">
+                    <label>Guests</label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      value={memberCount} 
+                      onChange={(e) => setMemberCount(Number(e.target.value))} 
+                    />
+                  </div>
+                </div>
 
-                  {selectedRoom && checkIn && checkOut && (
-                    (() => {
-                      const cIn = new Date(checkIn);
-                      const cOut = new Date(checkOut);
-                      if (cOut > cIn) {
-                        const days = Math.ceil(Math.abs(cOut - cIn) / (1000 * 60 * 60 * 24)) || 1;
-                        const totalPrice = (selectedRoom.price || selectedRoom.roomPrice || 0) * days;
-                        return (
-                          <div className="price-estimate-box">
-                            ⏳ Stay Duration: <strong>{days} {days === 1 ? 'Night' : 'Nights'}</strong><br/>
-                            💵 Total Price: <strong>Rs. {totalPrice.toLocaleString()}</strong>
+                {/* Rooms Grid */}
+                <div className="rooms-booking-grid">
+                  {rooms.map((room) => {
+                    const isAvailable = checkRoomAvailability(room._id);
+                    const roomCover = room.images && room.images.length > 0 ? room.images[0] : null;
+                    
+                    return (
+                      <div className="room-booking-card" key={room._id}>
+                        <div className="room-booking-img-wrapper">
+                          {roomCover ? (
+                            <img src={roomCover} alt={room.title} className="room-booking-img" />
+                          ) : (
+                            <div className="room-booking-img-placeholder">
+                              <span>🏨 {room.title}</span>
+                            </div>
+                          )}
+                          <span className={`room-availability-badge ${isAvailable ? 'available' : 'booked'}`}>
+                            {isAvailable ? 'Available' : 'Not Available'}
+                          </span>
+                        </div>
+                        
+                        <div className="room-booking-details-box">
+                          <div className="room-booking-header-row">
+                            <h3 className="room-booking-title">{room.title}</h3>
+                            <span className="room-booking-price-tag">Rs. {Number(room.price).toLocaleString()} <small>/ night</small></span>
                           </div>
-                        );
-                      }
-                      return null;
-                    })()
-                  )}
+                          
+                          <p className="room-booking-desc">{room.description || 'Enjoy premium stay options, comfort, and state-of-the-art facilities.'}</p>
+                          
+                          <div className="room-booking-specs">
+                            <span>👥 Max Guests: {room.totalMembers || 2}</span>
+                            <span>🔑 Floor: 1</span>
+                          </div>
+                          
+                          {isAvailable ? (
+                            <button 
+                              type="button" 
+                              className="btn-book-room-action"
+                              onClick={() => {
+                                setSelectedRoomId(room._id);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              Book Room
+                            </button>
+                          ) : (
+                            <div className="room-unavailable-msg">Room is not available</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
 
-                  <div className="form-group full-width">
-                    <button className="btn gold" type="submit" style={{ marginTop: '10px' }}>Complete Reservation</button>
+                {/* Booking Modal */}
+                {isModalOpen && selectedRoom && (
+                  <div className="booking-modal-overlay">
+                    <div className="booking-modal-content">
+                      <div className="booking-modal-header">
+                        <h3>Book {selectedRoom.title}</h3>
+                        <button type="button" className="close-modal-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
+                      </div>
+                      
+                      <form className="booking-modal-form" onSubmit={handleRoomBooking}>
+                        <div className="modal-summary-box">
+                          <p><strong>Price per night:</strong> Rs. {Number(selectedRoom.price).toLocaleString()}</p>
+                          <p><strong>Selected Dates:</strong> {checkIn} to {checkOut}</p>
+                          
+                          {(() => {
+                            const cIn = new Date(checkIn);
+                            const cOut = new Date(checkOut);
+                            if (cOut > cIn) {
+                              const days = Math.ceil(Math.abs(cOut - cIn) / (1000 * 60 * 60 * 24)) || 1;
+                              const totalPrice = (selectedRoom.price || 0) * days;
+                              return (
+                                <p className="modal-total-estimate">
+                                  Stay Duration: <strong>{days} {days === 1 ? 'Night' : 'Nights'}</strong><br/>
+                                  Total Price: <strong>Rs. {totalPrice.toLocaleString()}</strong>
+                                </p>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+
+                        <div className="form-group">
+                          <label>Full Name</label>
+                          <input
+                            className={formErrors.fullName ? 'input-error' : ''}
+                            type="text"
+                            placeholder="e.g. John Doe"
+                            value={fullName}
+                            onChange={(e) => {
+                              setFullName(e.target.value);
+                              setFormErrors(prev => ({...prev, fullName: ''}));
+                            }}
+                            required
+                          />
+                          {formErrors.fullName && <span className="error-text">{formErrors.fullName}</span>}
+                        </div>
+
+                        <div className="form-group">
+                          <label>Email Address</label>
+                          <input
+                            className={formErrors.email ? 'input-error' : ''}
+                            type="email"
+                            placeholder="e.g. john@example.com"
+                            value={email}
+                            onChange={(e) => {
+                              setEmail(e.target.value);
+                              setFormErrors(prev => ({...prev, email: ''}));
+                            }}
+                            required
+                          />
+                          {formErrors.email && <span className="error-text">{formErrors.email}</span>}
+                        </div>
+
+                        <div className="form-group">
+                          <label>Phone Number</label>
+                          <input
+                            className={formErrors.phone ? 'input-error' : ''}
+                            type="tel"
+                            placeholder="e.g. +977-9800000000"
+                            value={phone}
+                            onChange={(e) => {
+                              setPhone(e.target.value);
+                              setFormErrors(prev => ({...prev, phone: ''}));
+                            }}
+                            required
+                          />
+                          {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
+                        </div>
+
+                        <div className="form-group">
+                          <label>Number of Guests</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max={selectedRoom.totalMembers || 10}
+                            value={memberCount}
+                            onChange={(e) => setMemberCount(Number(e.target.value))}
+                          />
+                        </div>
+
+                        <div className="modal-actions">
+                          <button className="btn cancel-btn" type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                          <button className="btn gold confirm-btn" type="submit" disabled={submitting}>
+                            {submitting ? 'Booking...' : 'Confirm Reservation'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
                   </div>
-                </form>
+                )}
               </section>
             )}
 

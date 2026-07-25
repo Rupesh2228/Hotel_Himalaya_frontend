@@ -20,7 +20,8 @@ const initialRoomForm = {
   title: '',
   description: '',
   price: '',
-  totalMembers: '2'
+  totalMembers: '2',
+  images: ''
 };
 
 const initialGalleryForm = {
@@ -722,7 +723,8 @@ const AdminDashboard = () => {
         title: roomForm.title.trim(),
         description: roomForm.description,
         price: Number(roomForm.price || 0),
-        totalMembers: Number(roomForm.totalMembers || 1)
+        totalMembers: Number(roomForm.totalMembers || 1),
+        images: roomForm.images
       };
 
       const response = await fetch(apiPath(editingRoomId ? `/api/admin/rooms/${editingRoomId}` : '/api/admin/rooms'), {
@@ -1681,6 +1683,10 @@ const AdminDashboard = () => {
                     <label>Total members</label>
                     <input type="number" min="1" value={roomForm.totalMembers} onChange={(e) => setRoomForm({ ...roomForm, totalMembers: e.target.value })} />
                   </div>
+                  <div className="form-group">
+                    <label>Room Image</label>
+                    <DragAndDropUploader value={roomForm.images} onChange={(url) => setRoomForm({ ...roomForm, images: url })} />
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>Description</label>
@@ -1694,16 +1700,23 @@ const AdminDashboard = () => {
             </div>
             <div className="table-wrapper">
               <table>
-                <thead><tr><th>Room</th><th>Price</th><th>Members</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Image</th><th>Room</th><th>Price</th><th>Members</th><th>Actions</th></tr></thead>
                 <tbody>
                   {roomList.map((room) => (
                     <tr key={room._id}>
+                      <td>
+                        {room.images && room.images.length > 0 ? (
+                          <img src={room.images[0]} alt={room.title} style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                        ) : (
+                          <span style={{ fontSize: '12px', color: '#888' }}>No Image</span>
+                        )}
+                      </td>
                       <td>{room.title}</td>
                       <td>Rs. {room.price}</td>
                       <td>{room.totalMembers || 1}</td>
                       <td>
                         <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2' }); }}><FaEdit /> Edit</button>
+                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || '') }); }}><FaEdit /> Edit</button>
                           <button type="button" className="btn-danger" onClick={() => handleDeleteRoom(room._id)}><FaTrash /> Delete</button>
                         </div>
                       </td>
