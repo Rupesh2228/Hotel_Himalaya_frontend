@@ -1586,7 +1586,7 @@ const AdminDashboard = () => {
                     <textarea value={pastEventForm.description} onChange={(e) => setPastEventForm({ ...pastEventForm, description: e.target.value })} required rows="3" placeholder="Briefly describe the completed event..." />
                   </div>
                   <div className="form-group full-width form-actions">
-                    <button type="submit" className="btn-info"><FaPlus /> Add Completed Event</button>
+                    <button type="submit" className="btn-info btn-icon"><FaPlus /> Add Completed Event</button>
                   </div>
                 </form>
               </div>
@@ -1629,7 +1629,7 @@ const AdminDashboard = () => {
                       <label>Category Name</label>
                       <input type="text" placeholder="e.g. Interior" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
                     </div>
-                    <button type="submit" className="btn-success" style={{ height: 'fit-content', alignSelf: 'flex-end' }}><FaPlus /> Add Category</button>
+                    <button type="submit" className="btn-success btn-icon" style={{ height: 'fit-content', alignSelf: 'flex-end' }}><FaPlus /> Add Category</button>
                   </form>
                   <h4>Existing Categories</h4>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
@@ -1662,7 +1662,7 @@ const AdminDashboard = () => {
                         ))}
                       </select>
                     </div>
-                    <button type="submit" className="btn-info" style={{ gridColumn: '1 / -1' }}><FaDownload /> Upload Image</button>
+                    <button type="submit" className="btn-info btn-icon" style={{ gridColumn: '1 / -1' }}><FaDownload /> Upload Image</button>
                   </form>
                 </div>
               </div>
@@ -1716,7 +1716,7 @@ const AdminDashboard = () => {
                   <textarea value={roomForm.description} onChange={(e) => setRoomForm({ ...roomForm, description: e.target.value })} />
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn-success">{editingRoomId ? (<><FaEdit /> Update room</>) : (<><FaPlus /> Add room</>)}</button>
+                  <button type="submit" className="btn-success btn-icon">{editingRoomId ? (<><FaEdit /> Update room</>) : (<><FaPlus /> Add room</>)}</button>
                   {editingRoomId ? <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(''); setRoomForm(initialRoomForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -1778,7 +1778,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button type="submit" className="btn-success">{editingAttractionId ? (<><FaEdit /> Update attraction</>) : (<><FaPlus /> Add attraction</>)}</button>
+                  <button type="submit" className="btn-success btn-icon">{editingAttractionId ? (<><FaEdit /> Update attraction</>) : (<><FaPlus /> Add attraction</>)}</button>
                   {editingAttractionId ? <button type="button" className="btn-secondary" onClick={() => { setEditingAttractionId(''); setAttractionForm(initialAttractionForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -1854,7 +1854,7 @@ const AdminDashboard = () => {
                   <DragAndDropUploader value={eventForm.imageUrl} onChange={(url) => setEventForm({ ...eventForm, imageUrl: url })} />
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn-warning">{editingEventId ? (<><FaEdit /> Update event</>) : (<><FaCalendarAlt /> Create event</>)}</button>
+                  <button type="submit" className="btn-warning btn-icon">{editingEventId ? (<><FaEdit /> Update event</>) : (<><FaCalendarAlt /> Create event</>)}</button>
                   {editingEventId ? <button type="button" className="btn-secondary" onClick={() => { setEditingEventId(''); setEventForm(initialEventForm); }}>Cancel</button> : null}
                 </div>
               </form>
@@ -2192,7 +2192,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button type="submit" className="btn-success">{editingTourId ? (<><FaEdit /> Update tour</>) : (<><FaPlus /> Add tour</>)}</button>
+                  <button type="submit" className="btn-success btn-icon">{editingTourId ? (<><FaEdit /> Update tour</>) : (<><FaPlus /> Add tour</>)}</button>
                   {editingTourId ? <button type="button" className="btn-secondary" onClick={() => { setEditingTourId(''); setTourForm(initialTourForm); }}>Cancel</button> : null}
                 </div>
               </form>
