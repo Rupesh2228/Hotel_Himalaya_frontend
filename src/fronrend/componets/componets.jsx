@@ -111,7 +111,7 @@ const Components = () => {
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >
                   <UserRound className="nav-link-icon" aria-hidden="true" />
-                  <span>Dashboard</span>
+                  <span>Booking Room</span>
                 </NavLink>
               </li>
             )}
