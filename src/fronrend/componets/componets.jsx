@@ -12,6 +12,7 @@ import {
   Sparkles,
   UserRound,
   X,
+  Bell,
 } from 'lucide-react'
 import logo from '../../img/logo.png'
 import './componets.css'
@@ -93,16 +94,29 @@ const Components = () => {
             ))}
 
             {user?.role === 'admin' ? (
-              <li>
-                <NavLink
-                  to="/hh-cp-9f3m2q"
-                  onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                >
-                  <LockKeyhole className="nav-link-icon" aria-hidden="true" />
-                  <span>Admin Panel</span>
-                </NavLink>
-              </li>
+              <>
+                <li>
+                  <NavLink
+                    to="/hh-cp-9f3m2q"
+                    onClick={closeMenu}
+                    className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
+                  >
+                    <LockKeyhole className="nav-link-icon" aria-hidden="true" />
+                    <span>Admin</span>
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/hh-cp-9f3m2q/notifications"
+                    onClick={closeMenu}
+                    className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
+                  >
+                    <Bell className="nav-link-icon" aria-hidden="true" />
+                    <span>Notifications</span>
+                  </NavLink>
+                </li>
+              </>
             ) : (
               <li>
                 <NavLink
