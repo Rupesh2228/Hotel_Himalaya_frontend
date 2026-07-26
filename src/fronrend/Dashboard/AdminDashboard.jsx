@@ -25,6 +25,23 @@ const normalizeTourBookingModule = (booking) => {
 const API_BASE_URL = getApiUrl();
 const apiPath = (path) => `${API_BASE_URL}${path}`;
 
+// Helper to defensively coerce values to arrays and log unexpected shapes.
+const ensureArray = (value, label = 'value') => {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === 'object') {
+    // Common wrapper keys used by APIs
+    if (Array.isArray(value.data)) return value.data;
+    if (Array.isArray(value.results)) return value.results;
+    if (Array.isArray(value.items)) return value.items;
+    if (Array.isArray(value.list)) return value.list;
+    if (Array.isArray(value.reviews)) return value.reviews;
+    if (Array.isArray(value.bookings)) return value.bookings;
+  }
+  // Warn once — developer can inspect network response shape
+  console.warn(`[AdminDashboard] expected ${label} to be an array but got:`, value);
+  return [];
+};
+
 const initialRoomForm = {
   title: '',
   description: '',
@@ -387,7 +404,7 @@ const AdminDashboard = () => {
 
 
   const persistTourBookings = (bookings) => {
-    const normalized = bookings.map(normalizeTourBookingModule);
+    const normalized = ensureArray(bookings, 'bookings').map(normalizeTourBookingModule);
     const payload = JSON.stringify(normalized);
     TOUR_BOOKING_STORAGE_KEYS.forEach((storageKey) => {
       localStorage.setItem(storageKey, payload);
@@ -560,23 +577,19 @@ const AdminDashboard = () => {
         const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
         const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
-        setRoomBookings(bookingsData || []);
-        setUsers(Array.isArray(usersData) ? usersData : []);
-        setRoomList(Array.isArray(roomsData) ? roomsData : []);
-        setGalleryImages(Array.isArray(galleryData) ? galleryData : []);
-        setGalleryCategories(galleryCatsData || []);
-        setAttractions(Array.isArray(attractionsData) ? attractionsData : []);
-        setEvents(eventsData || []);
-        setEventBookings(eventBookingsData || []);
-        setMessages(messagesData || []);
+        // Normalize and defensively set list states using ensureArray to avoid runtime .map errors
+        setRoomBookings(ensureArray(bookingsData, 'bookingsData'));
+        setUsers(ensureArray(usersData, 'usersData'));
+        setRoomList(ensureArray(roomsData, 'roomsData'));
+        setGalleryImages(ensureArray(galleryData, 'galleryData'));
+        setGalleryCategories(ensureArray(galleryCatsData, 'galleryCatsData'));
+        setAttractions(ensureArray(attractionsData, 'attractionsData'));
+        setEvents(ensureArray(eventsData, 'eventsData'));
+        setEventBookings(ensureArray(eventBookingsData, 'eventBookingsData'));
+        setMessages(ensureArray(messagesData, 'messagesData'));
         // Ensure reviews is always an array (API may return object or wrapper)
-        const reviewsArray = Array.isArray(reviewsData)
-          ? reviewsData
-          : (reviewsData && Array.isArray(reviewsData.reviews)
-            ? reviewsData.reviews
-            : (reviewsData && Array.isArray(reviewsData.data) ? reviewsData.data : []));
-        setReviews(reviewsArray);
-        setPastEvents(pastEventsData || []);
+        setReviews(ensureArray(reviewsData, 'reviewsData'));
+        setPastEvents(ensureArray(pastEventsData, 'pastEventsData'));
       } catch (error) {
         console.error(error);
         setEventBookingsError('Could not load admin dashboard data right now.');
@@ -628,7 +641,7 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
-        setNotifications((current) => current.map((notification) => (
+        setNotifications((current) => ensureArray(current, 'notifications').map((notification) => (
           notification._id === notificationId ? { ...notification, read: true } : notification
         )));
       }
@@ -647,7 +660,8 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
-        setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
+        setNotifications((current) => ensureArray(current, 'notifications').map((notification) => ({ ...notification, read: true })));
+
       }
     } catch (error) {
       console.error('Could not mark all notifications as read:', error);
@@ -774,10 +788,10 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error(data.error || 'Unable to save room.');
 
       if (editingRoomId) {
-        setRoomList((current) => current.map((room) => (room._id === editingRoomId ? data : room)));
+        setRoomList((current) => ensureArray(current, 'roomList').map((room) => (room._id === editingRoomId ? data : room)));
         setAdminMessage('Room updated.');
       } else {
-        setRoomList((current) => [data, ...current]);
+        setRoomList((current) => [data, ...ensureArray(current, 'roomList')]);
         setAdminMessage('Room added.');
       }
       setRoomForm(initialRoomForm);
@@ -845,7 +859,7 @@ const AdminDashboard = () => {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to verify booking.');
-      setRoomBookings((current) => current.map((item) => (item._id === booking._id ? data : item)));
+      setRoomBookings((current) => ensureArray(current, 'roomBookings').map((item) => (item._id === booking._id ? data : item)));
       setAdminMessage('Room booking verified.');
     } catch (error) {
       setAdminError(error.message || 'Unable to verify booking.');
@@ -940,7 +954,7 @@ const AdminDashboard = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to add past event.');
-      setPastEvents((current) => [data, ...current]);
+      setPastEvents((current) => [data, ...ensureArray(current, 'pastEvents')]);
       setPastEventForm(initialPastEventForm);
       setAdminMessage('Completed event added.');
     } catch (error) {
@@ -992,7 +1006,7 @@ const AdminDashboard = () => {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to add gallery image.');
-      setGalleryImages((current) => [data, ...current]);
+      setGalleryImages((current) => [data, ...ensureArray(current, 'galleryImages')]);
       setGalleryForm(initialGalleryForm);
       setAdminMessage('Gallery image added.');
     } catch (error) {
@@ -1039,7 +1053,7 @@ const AdminDashboard = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to add category.');
-      setGalleryCategories((prev) => [data, ...prev]);
+      setGalleryCategories((prev) => [data, ...ensureArray(prev, 'galleryCategories')]);
       setCategoryName('');
       setAdminMessage('Category added successfully.');
     } catch (error) {
@@ -1088,8 +1102,8 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error(data.error || 'Unable to save attraction.');
 
       const nextAttractions = editingAttractionId
-        ? attractions.map((item) => (item._id === editingAttractionId ? data : item))
-        : [data, ...attractions];
+              ? ensureArray(attractions, 'attractions').map((item) => (item._id === editingAttractionId ? data : item))
+              : [data, ...ensureArray(attractions, 'attractions')];
 
       setAttractions(nextAttractions);
       broadcastAttractionChange(nextAttractions, editingAttractionId ? 'updated' : 'created');
@@ -1153,10 +1167,10 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error(data.error || 'Unable to save event.');
 
       if (editingEventId) {
-        setEvents((current) => current.map((item) => (item._id === editingEventId ? data : item)));
+        setEvents((current) => ensureArray(current, 'events').map((item) => (item._id === editingEventId ? data : item)));
         setAdminMessage('Event updated.');
       } else {
-        setEvents((current) => [data, ...current]);
+        setEvents((current) => [data, ...ensureArray(current, 'events')]);
         setAdminMessage('Event added.');
       }
       setEventForm(initialEventForm);
@@ -1291,8 +1305,8 @@ const AdminDashboard = () => {
 
       setTourList((currentTours) => {
         const nextTours = editingTourId
-          ? currentTours.map((tour) => (tour._id === editingTourId ? savedTour : tour))
-          : [savedTour, ...currentTours];
+                ? ensureArray(currentTours, 'tourList').map((tour) => (tour._id === editingTourId ? savedTour : tour))
+                : [savedTour, ...ensureArray(currentTours, 'tourList')];
         saveStoredTours(nextTours);
         return nextTours;
       });
@@ -1352,7 +1366,7 @@ const AdminDashboard = () => {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to update user role.');
 
-      setUsers((current) => current.map((item) => (item._id === targetUser._id ? data.user : item)));
+      setUsers((current) => ensureArray(current, 'users').map((item) => (item._id === targetUser._id ? data.user : item)));
       if (targetUser._id === (user?.id || user?._id)) {
         await refreshUser();
       }
@@ -1405,7 +1419,7 @@ const AdminDashboard = () => {
                       <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
-                      {pendingAdmins.map((u) => {
+                      {ensureArray(pendingAdmins, 'pendingAdmins').map((u) => {
                         const isUpdating = updatingRoleUserId === u._id;
                         const providerLabel = u.provider || 'local';
                         return (
@@ -1454,7 +1468,7 @@ const AdminDashboard = () => {
                   <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => {
+                  {ensureArray(users, 'users').map((u) => {
                     const isUpdating = updatingRoleUserId === u._id;
                     const providerLabel = u.provider || 'local';
                     return (
@@ -1510,7 +1524,7 @@ const AdminDashboard = () => {
                     <tr><th>From</th><th>Email</th><th>Phone</th><th>Message</th><th>Date</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
-                    {messages.map((m) => (
+                    {ensureArray(messages, 'messages').map((m) => (
                       <tr key={m._id || m.id}>
                         <td>{m.name}</td>
                         <td>{m.email}</td>
@@ -1549,7 +1563,7 @@ const AdminDashboard = () => {
                     <tr><th>Author</th><th>Rating</th><th>Review</th><th>Date</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
-                    {reviews.map((review) => (
+                    {ensureArray(reviews, 'reviews').map((review) => (
                       <tr key={review._id || review.id}>
                         <td>{review.author || review.name || 'Guest'}</td>
                         <td>{review.rating || 0}/5</td>
@@ -1605,7 +1619,7 @@ const AdminDashboard = () => {
               <div className="card">
                 <h3>Completed Events List</h3>
                 <div className="gallery-grid">
-                  {pastEvents.map((ev) => (
+                  {ensureArray(pastEvents, 'pastEvents').map((ev) => (
                     <div className="gallery-item" key={ev._id}>
                       {ev.imageUrl && <img src={ev.imageUrl} alt={ev.title} />}
                       <div className="gallery-item-actions">
@@ -1644,7 +1658,7 @@ const AdminDashboard = () => {
                   </form>
                   <h4>Existing Categories</h4>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {galleryCategories.map(cat => (
+                    {ensureArray(galleryCategories, 'galleryCategories').map(cat => (
                       <li key={cat._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #ddd' }}>
                         <span>{cat.name}</span>
                         <button type="button" className="btn-danger" style={{ padding: '5px 10px' }} onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
@@ -1668,7 +1682,7 @@ const AdminDashboard = () => {
                       <label>Category</label>
                       <select value={galleryForm.category} onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}>
                         <option value="">No Category</option>
-                        {galleryCategories.map(c => (
+                        {ensureArray(galleryCategories, 'galleryCategories').map(c => (
                           <option key={c._id} value={c._id}>{c.name}</option>
                         ))}
                       </select>
@@ -1680,7 +1694,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="gallery-grid" style={{ marginTop: '40px' }}>
-              {galleryImages.map((image) => (
+              {ensureArray(galleryImages, 'galleryImages').map((image) => (
                 <div className="gallery-item" key={image._id}>
                   {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
                   <div className="gallery-item-actions">
@@ -1736,7 +1750,7 @@ const AdminDashboard = () => {
               <table>
                 <thead><tr><th>Image</th><th>Room</th><th>Price</th><th>Members</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {roomList.map((room) => (
+                  {ensureArray(roomList, 'roomList').map((room) => (
                     <tr key={room._id}>
                       <td>
                         {room.images && room.images.length > 0 ? (
@@ -1798,7 +1812,7 @@ const AdminDashboard = () => {
               <table>
                 <thead><tr><th>Attraction</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {attractions.map((attraction) => (
+                  {ensureArray(attractions, 'attractions').map((attraction) => (
                     <tr key={attraction._id}>
                       <td>{attraction.title}</td>
                       <td>
@@ -1874,7 +1888,7 @@ const AdminDashboard = () => {
               <table>
                 <thead><tr><th>Event</th><th>Seats</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {events.map((event) => (
+                  {ensureArray(events, 'events').map((event) => (
                     <tr key={event._id}>
                       <td>{event.title}</td>
                       <td>{event.availableSeats || 0}/{event.totalSeats || 0}</td>
@@ -1907,7 +1921,7 @@ const AdminDashboard = () => {
                   <div className="eb-status-pill completed">Completed: {eventBookingStatusCounts.completed}</div>
                 </div>
                 <div className="eb-grid">
-                  {eventBookings.map((booking) => (
+                  {ensureArray(eventBookings, 'eventBookings').map((booking) => (
                     <div className="eb-card" key={booking._id}>
                       <div className="eb-card-accent" />
                       <div className="eb-card-body">
