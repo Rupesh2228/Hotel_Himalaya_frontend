@@ -1,0 +1,143 @@
+/* Skeleton Loading Animation Styles */
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: #f0f0f0;
+  }
+  50% {
+    background-color: #e0e0e0;
+  }
+  100% {
+    background-color: #f0f0f0;
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1.5s linear infinite;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s linear infinite;
+  border-radius: 4px;
+  height: 20px;
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text--short {
+  width: 70%;
+  margin-bottom: 0;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+}
+
+/* Table Skeleton */
+.skeleton-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skeleton-table thead tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.skeleton-table th,
+.skeleton-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.skeleton-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Grid Skeleton */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.skeleton-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.skeleton-card .skeleton {
+  margin-bottom: 12px;
+}
+
+.skeleton-card .skeleton-image {
+  margin-bottom: 12px;
+}
+
+/* List Skeleton */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.skeleton-list-content {
+  flex: 1;
+  width: 100%;
+}
+
+.skeleton-list-content .skeleton {
+  margin-bottom: 8px;
+}
+
+.skeleton-list-content .skeleton:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .skeleton-card {
+    border-radius: 4px;
+  }
+
+  .skeleton-image {
+    height: 150px;
+  }
+}
+
+/* Pulsing effect alternative */
+.skeleton.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
