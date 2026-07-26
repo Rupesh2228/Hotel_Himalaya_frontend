@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
+import { Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -2448,7 +2449,7 @@ const AdminDashboard = () => {
                 aria-label="Show notifications"
                 onClick={() => setShowNotifications((visible) => !visible)}
               >
-                <FaBell />
+                <Bell size="1.25em" strokeWidth={2.5} />
                 {unreadNotificationCount > 0 && (
                   <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>
                 )}

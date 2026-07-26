@@ -86,6 +86,7 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                   end={to === '/'}
+
                 >
                   <Icon className="nav-link-icon" aria-hidden="true" />
                   <span>{label}</span>
@@ -106,16 +107,8 @@ const Components = () => {
                   </NavLink>
                 </li>
 
-                <li>
-                  <NavLink
-                    to="/hh-cp-9f3m2q/notifications"
-                    onClick={closeMenu}
-                    className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                  >
-                    <Bell className="nav-link-icon" aria-hidden="true" />
-                    <span>Notifications</span>
-                  </NavLink>
-                </li>
+             
+               
               </>
             ) : (
               <li>
