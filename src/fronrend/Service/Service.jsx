@@ -43,7 +43,9 @@ const ReviewsList = () => {
         const response = await fetch(API_URL);
         if (response.ok) {
           const data = await response.json();
-          setReviews(data.filter((review) => !isLegacyGoogleReview(review)));
+          // Ensure we always work with an array — some API responses may return an object
+          const reviewsArray = Array.isArray(data) ? data : (data && Array.isArray(data.reviews) ? data.reviews : []);
+          setReviews(reviewsArray.filter((review) => !isLegacyGoogleReview(review)));
         }
       } catch (error) {
         console.error('Error fetching reviews:', error);
@@ -232,7 +234,7 @@ const ReviewsList = () => {
         </div>
       ) : (
         <div className="reviews-grid">
-          {reviews.map((r) => {
+          {(Array.isArray(reviews) ? reviews : []).map((r) => {
             const isLoved = (r.lovedBy || []).includes(user?.email || deviceId);
             const loveCount = (r.lovedBy || []).length || 0;
 
