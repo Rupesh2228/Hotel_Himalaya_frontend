@@ -117,7 +117,9 @@ const UserDashboard = () => {
       const response = await fetch(BOOKINGS_API_URL)
       if (response.ok) {
         const data = await response.json()
-        setAllBookings(data)
+        // Support both array responses and { data: [...] } shape
+        const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+        setAllBookings(bookingsArray)
       }
     } catch (error) {
       console.error('Error fetching all bookings:', error)
@@ -135,15 +137,18 @@ const UserDashboard = () => {
 
         if (roomsResponse.ok) {
           const data = await roomsResponse.json()
-          setRooms(data)
-          if (data.length > 0) {
-            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || data[0]._id)
+          // Rooms endpoint may return { data: [...], pagination } — accept either
+          const roomsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+          setRooms(roomsArray)
+          if (roomsArray.length > 0) {
+            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id)
           }
         }
 
         if (bookingsResponse.ok) {
           const data = await bookingsResponse.json()
-          setAllBookings(data)
+          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+          setAllBookings(bookingsArray)
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -181,8 +186,9 @@ const UserDashboard = () => {
         const response = await fetch(`${BOOKINGS_API_URL}?bookedBy=${encodeURIComponent(bookingOwnerId)}`)
         if (response.ok) {
           const data = await response.json()
-          setBookings(data)
-          localStorage.setItem(bookingsCacheKey, JSON.stringify(data))
+          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+          setBookings(bookingsArray)
+          localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
         }
       } catch (error) {
         console.error('Error fetching bookings:', error)
