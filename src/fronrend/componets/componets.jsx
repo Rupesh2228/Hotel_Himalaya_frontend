@@ -52,6 +52,13 @@ const Components = () => {
             </NavLink>
           </h1>
 
+          {user?.role === 'admin' && (
+            <NavLink to="/hh-cp-9f3m2q/notifications" className="alerts-btn" onClick={closeMenu} aria-label="All alerts (0 unread)">
+              <Bell className="alerts-icon" aria-hidden="true" />
+              <span className="alerts-text">All alerts (<span className="alerts-count">0</span> unread)</span>
+            </NavLink>
+          )}
+
           <button
             type="button"
             className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
