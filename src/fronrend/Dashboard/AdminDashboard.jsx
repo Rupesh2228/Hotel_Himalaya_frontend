@@ -569,7 +569,13 @@ const AdminDashboard = () => {
         setEvents(eventsData || []);
         setEventBookings(eventBookingsData || []);
         setMessages(messagesData || []);
-        setReviews(reviewsData || []);
+        // Ensure reviews is always an array (API may return object or wrapper)
+        const reviewsArray = Array.isArray(reviewsData)
+          ? reviewsData
+          : (reviewsData && Array.isArray(reviewsData.reviews)
+            ? reviewsData.reviews
+            : (reviewsData && Array.isArray(reviewsData.data) ? reviewsData.data : []));
+        setReviews(reviewsArray);
         setPastEvents(pastEventsData || []);
       } catch (error) {
         console.error(error);
