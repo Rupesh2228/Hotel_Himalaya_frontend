@@ -545,11 +545,15 @@ const AdminDashboard = () => {
         ]);
 
         const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
-        const usersData = usersRes.ok ? await usersRes.json() : [];
-        const roomsData = roomsRes.ok ? await roomsRes.json() : [];
-        const galleryData = galleryRes.ok ? await galleryRes.json() : [];
+        const usersRes_json = usersRes.ok ? await usersRes.json() : {};
+        const usersData = usersRes_json.data || usersRes_json || [];
+        const roomsRes_json = roomsRes.ok ? await roomsRes.json() : {};
+        const roomsData = roomsRes_json.data || roomsRes_json || [];
+        const galleryRes_json = galleryRes.ok ? await galleryRes.json() : {};
+        const galleryData = galleryRes_json.data || galleryRes_json || [];
         const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
-        const attractionsData = attractionsRes.ok ? await attractionsRes.json() : [];
+        const attractionsRes_json = attractionsRes.ok ? await attractionsRes.json() : {};
+        const attractionsData = attractionsRes_json.data || attractionsRes_json || [];
         const eventsData = eventsRes.ok ? await eventsRes.json() : [];
         const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
         const messagesData = messagesRes.ok ? await messagesRes.json() : [];
@@ -557,11 +561,11 @@ const AdminDashboard = () => {
         const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
         setRoomBookings(bookingsData || []);
-        setUsers(usersData || []);
-        setRoomList(roomsData || []);
-        setGalleryImages(galleryData || []);
+        setUsers(Array.isArray(usersData) ? usersData : []);
+        setRoomList(Array.isArray(roomsData) ? roomsData : []);
+        setGalleryImages(Array.isArray(galleryData) ? galleryData : []);
         setGalleryCategories(galleryCatsData || []);
-        setAttractions(attractionsData || []);
+        setAttractions(Array.isArray(attractionsData) ? attractionsData : []);
         setEvents(eventsData || []);
         setEventBookings(eventBookingsData || []);
         setMessages(messagesData || []);
