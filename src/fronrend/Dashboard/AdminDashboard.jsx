@@ -614,7 +614,10 @@ const AdminDashboard = () => {
       const response = await fetch(apiPath('/api/notifications'), {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.ok) setNotifications(await response.json());
+      if (response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setNotifications(ensureArray(data, 'notifications'));
+      }
     } catch (error) {
       console.error('Could not load admin notifications:', error);
     }

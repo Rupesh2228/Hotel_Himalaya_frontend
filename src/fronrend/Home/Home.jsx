@@ -19,7 +19,8 @@ const Home = () => {
         const res = await fetch(`${API_URL}/api/attractions`)
         if (res.ok) {
           const data = await res.json()
-          setAttractions(data)
+          const attractionsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+          setAttractions(attractionsArray)
         }
       } catch (err) {
         console.error('Failed to fetch attractions:', err)

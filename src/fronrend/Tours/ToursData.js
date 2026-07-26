@@ -458,7 +458,9 @@ export const getStoredTours = async () => {
     const response = await fetch(`${API_URL}/api/tours`);
     if (!response.ok) throw new Error('Failed to fetch tours');
     const parsedTours = await response.json();
-    const normalizedTours = Array.isArray(parsedTours) ? parsedTours.map(normalizeTour) : DEFAULT_TOURS.map(normalizeTour);
+    // Accept either an array or a wrapper { data: [...] }
+    const toursList = Array.isArray(parsedTours) ? parsedTours : (parsedTours && Array.isArray(parsedTours.data) ? parsedTours.data : null);
+    const normalizedTours = Array.isArray(toursList) ? toursList.map(normalizeTour) : DEFAULT_TOURS.map(normalizeTour);
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(normalizedTours));
     return normalizedTours;
   } catch (e) {
