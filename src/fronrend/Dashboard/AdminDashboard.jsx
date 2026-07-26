@@ -1694,9 +1694,12 @@ const AdminDashboard = () => {
             </div>
 
             <div className="gallery-grid" style={{ marginTop: '40px' }}>
-              {ensureArray(galleryImages, 'galleryImages').map((image) => (
+              {ensureArray(galleryImages, 'galleryImages').map((image) => {
+                const candidate = image?.url || image?.imageUrl || image?.path || image?.src || image?.file;
+                const imgSrc = candidate ? (String(candidate).startsWith('http') ? candidate : `${API_BASE_URL}${candidate}`) : '';
+                return (
                 <div className="gallery-item" key={image._id}>
-                  {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
+                  {imgSrc ? <img src={imgSrc} alt={image.title || 'Gallery item'} /> : null}
                   <div className="gallery-item-actions">
                     <span style={{color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px', borderRadius: '5px'}}>{image.category?.name || 'Uncategorized'}</span>
                     <button type="button" className="btn-danger" onClick={() => handleDeleteGalleryImage(image._id)}>
@@ -1704,6 +1707,8 @@ const AdminDashboard = () => {
                     </button>
                   </div>
                 </div>
+                )
+              })}
               ))}
             </div>
           </div>
