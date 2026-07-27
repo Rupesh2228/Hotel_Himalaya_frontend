@@ -400,6 +400,7 @@ const AdminDashboard = () => {
   const [tourForm, setTourForm] = useState(initialTourForm);
   const [editingTourId, setEditingTourId] = useState('');
 
+  const authIdentity = user?.email || user?._id || user?.id || user?.role || 'guest';
   const TOUR_BOOKING_STORAGE_KEYS = ['himalaya_tour_bookings', 'hotel_tour_bookings', 'tour_bookings'];
 
 
@@ -534,77 +535,89 @@ const AdminDashboard = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoadingAdminData(false);
-        setLoadingEventBookings(false);
-        setAdminError('Sign in as an admin to see live management data.');
-        return;
-      }
+  const fetchAdminData = useCallback(async (signal) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoadingAdminData(false);
+      setLoadingEventBookings(false);
+      setLoadingMessages(false);
+      setLoadingReviews(false);
+      setAdminError('Sign in as an admin to see live management data.');
+      return;
+    }
 
-      const authHeaders = { Authorization: `Bearer ${token}` };
+    const authHeaders = { Authorization: `Bearer ${token}` };
 
-      try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
-          fetch(apiPath('/api/bookings')),
-          fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
-          fetch(apiPath('/api/rooms')),
-          fetch(apiPath('/api/gallery')),
-          fetch(apiPath('/api/gallery/categories')),
-          fetch(apiPath('/api/attractions')),
-          fetch(apiPath('/api/events')),
-          fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
-          fetch(apiPath('/api/messages'), { headers: authHeaders }),
-          fetch(apiPath('/api/reviews')),
-          fetch(apiPath('/api/past-events'))
-        ]);
+    try {
+      const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
+        fetch(apiPath('/api/bookings'), { signal }),
+        fetch(apiPath('/api/admin/users'), { headers: authHeaders, signal }),
+        fetch(apiPath('/api/rooms'), { signal }),
+        fetch(apiPath('/api/gallery'), { signal }),
+        fetch(apiPath('/api/gallery/categories'), { signal }),
+        fetch(apiPath('/api/attractions'), { signal }),
+        fetch(apiPath('/api/events'), { signal }),
+        fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders, signal }),
+        fetch(apiPath('/api/messages'), { headers: authHeaders, signal }),
+        fetch(apiPath('/api/reviews'), { signal }),
+        fetch(apiPath('/api/past-events'), { signal })
+      ]);
 
-        const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
-        const usersRes_json = usersRes.ok ? await usersRes.json() : {};
-        const usersData = usersRes_json.data || usersRes_json || [];
-        const roomsRes_json = roomsRes.ok ? await roomsRes.json() : {};
-        const roomsData = roomsRes_json.data || roomsRes_json || [];
-        const galleryRes_json = galleryRes.ok ? await galleryRes.json() : {};
-        const galleryData = galleryRes_json.data || galleryRes_json || [];
-        const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
-        const attractionsRes_json = attractionsRes.ok ? await attractionsRes.json() : {};
-        const attractionsData = attractionsRes_json.data || attractionsRes_json || [];
-        const eventsData = eventsRes.ok ? await eventsRes.json() : [];
-        const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
-        const messagesData = messagesRes.ok ? await messagesRes.json() : [];
-        const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
-        const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
+      const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
+      const usersRes_json = usersRes.ok ? await usersRes.json() : {};
+      const usersData = usersRes_json.data || usersRes_json || [];
+      const roomsRes_json = roomsRes.ok ? await roomsRes.json() : {};
+      const roomsData = roomsRes_json.data || roomsRes_json || [];
+      const galleryRes_json = galleryRes.ok ? await galleryRes.json() : {};
+      const galleryData = galleryRes_json.data || galleryRes_json || [];
+      const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
+      const attractionsRes_json = attractionsRes.ok ? await attractionsRes.json() : {};
+      const attractionsData = attractionsRes_json.data || attractionsRes_json || [];
+      const eventsData = eventsRes.ok ? await eventsRes.json() : [];
+      const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
+      const messagesData = messagesRes.ok ? await messagesRes.json() : [];
+      const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
+      const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
-        // Normalize and defensively set list states using ensureArray to avoid runtime .map errors
-        setRoomBookings(ensureArray(bookingsData, 'bookingsData'));
-        setUsers(ensureArray(usersData, 'usersData'));
-        setRoomList(ensureArray(roomsData, 'roomsData'));
-        setGalleryImages(ensureArray(galleryData, 'galleryData'));
-        setGalleryCategories(ensureArray(galleryCatsData, 'galleryCatsData'));
-        setAttractions(ensureArray(attractionsData, 'attractionsData'));
-        setEvents(ensureArray(eventsData, 'eventsData'));
-        setEventBookings(ensureArray(eventBookingsData, 'eventBookingsData'));
-        setMessages(ensureArray(messagesData, 'messagesData'));
-        // Ensure reviews is always an array (API may return object or wrapper)
-        setReviews(ensureArray(reviewsData, 'reviewsData'));
-        setPastEvents(ensureArray(pastEventsData, 'pastEventsData'));
-      } catch (error) {
-        console.error(error);
-        setEventBookingsError('Could not load admin dashboard data right now.');
-        setMessagesError('Could not load messages right now.');
-        setReviewsError('Could not load reviews right now.');
-      } finally {
+      if (signal?.aborted) return;
+
+      // Normalize and defensively set list states using ensureArray to avoid runtime .map errors
+      setRoomBookings(ensureArray(bookingsData, 'bookingsData'));
+      setUsers(ensureArray(usersData, 'usersData'));
+      setRoomList(ensureArray(roomsData, 'roomsData'));
+      setGalleryImages(ensureArray(galleryData, 'galleryData'));
+      setGalleryCategories(ensureArray(galleryCatsData, 'galleryCatsData'));
+      setAttractions(ensureArray(attractionsData, 'attractionsData'));
+      setEvents(ensureArray(eventsData, 'eventsData'));
+      setEventBookings(ensureArray(eventBookingsData, 'eventBookingsData'));
+      setMessages(ensureArray(messagesData, 'messagesData'));
+      // Ensure reviews is always an array (API may return object or wrapper)
+      setReviews(ensureArray(reviewsData, 'reviewsData'));
+      setPastEvents(ensureArray(pastEventsData, 'pastEventsData'));
+    } catch (error) {
+      if (signal?.aborted) return;
+      console.error(error);
+      setEventBookingsError('Could not load admin dashboard data right now.');
+      setMessagesError('Could not load messages right now.');
+      setReviewsError('Could not load reviews right now.');
+    } finally {
+      if (!signal?.aborted) {
         setLoadingAdminData(false);
         setLoadingEventBookings(false);
         setLoadingMessages(false);
         setLoadingReviews(false);
       }
-    };
-
-    fetchAdminData();
+    }
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchAdminData(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [fetchAdminData, authIdentity]);
 
   const loadNotifications = useCallback(async () => {
     const token = localStorage.getItem('token');
@@ -621,7 +634,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Could not load admin notifications:', error);
     }
-  }, []);
+  }, [authIdentity]);
 
   useEffect(() => {
     loadNotifications();
