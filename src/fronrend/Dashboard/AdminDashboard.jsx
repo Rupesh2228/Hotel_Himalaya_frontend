@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaBed, FaBell, FaBellSlash, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -13,7 +13,7 @@ import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
 
 
 const normalizeTourBookingModule = (booking) => {
@@ -659,14 +659,15 @@ const AdminDashboard = () => {
       }
       const token = localStorage.getItem('token');
       const keyResponse = await fetch(apiPath('/api/notifications/push/public-key'), {
-        headers: getAuthHeaders()` },
+        headers: getAuthHeaders(),
       });
       if (!keyResponse.ok) {
         // Server does not expose a VAPID public key — gracefully fall back.
         try {
-          await navigator.serviceWorker.register('/sw.js');
+          const registration = await navigator.serviceWorker.register('/sw.js');
           setPushEnabled(true);
           setAdminMessage('Push is not configured on the server. Registered service worker for local notifications.');
+          registration.showNotification('Alerts Enabled', { body: 'You will now receive notifications on this device.' });
         } catch {
           setAdminError('Push notifications are not configured on the server and service worker registration failed.');
         }
@@ -681,12 +682,13 @@ const AdminDashboard = () => {
       });
       const response = await fetch(apiPath('/api/notifications/push/subscribe'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }` },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(subscription),
       });
       if (!response.ok) throw new Error('Could not save this device for notifications.');
       setPushEnabled(true);
       setAdminMessage('Device notifications are enabled.');
+      registration.showNotification('Alerts Enabled', { body: 'You will now receive push notifications on this device.' });
     } catch (error) {
       setAdminError(error.message || 'Could not enable device notifications.');
     }
@@ -2422,10 +2424,11 @@ const AdminDashboard = () => {
           <div className="topbar-right">
             <button
               type="button"
-              className="btn-back-to-site"
+              className={`btn-push-alerts ${pushEnabled ? 'enabled' : 'disabled'}`}
               onClick={pushEnabled ? disableDeviceNotifications : enableDeviceNotifications}
+              title={pushEnabled ? 'Disable device alerts' : 'Enable device alerts'}
             >
-              {pushEnabled ? 'Disable device alerts' : 'Enable device alerts'}
+              {pushEnabled ? <><FaBell className="btn-icon" /> Alerts Enabled</> : <><FaBellSlash className="btn-icon" /> Enable Alerts</>}
             </button>
             <div className="notification-menu">
               <button

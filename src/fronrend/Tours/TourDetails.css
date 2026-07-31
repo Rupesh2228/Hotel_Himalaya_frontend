@@ -311,10 +311,14 @@
 
 .star_active {
   color: #fbbf24;
+  fill: #fbbf24;
+  font-size: 1.1rem;
 }
 
 .star_inactive {
   color: #cbd5e1;
+  fill: #cbd5e1;
+  font-size: 1.1rem;
 }
 
 .reviews_count {
@@ -2157,9 +2161,15 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #475569;
-  font-size: 0.75rem;
+  color: #0f172a;
+  font-size: 1rem;
   transition: all 0.15s ease;
+}
+
+.bk_counter button svg {
+  fill: currentColor;
+  width: 14px;
+  height: 14px;
 }
 
 .bk_counter button:hover {

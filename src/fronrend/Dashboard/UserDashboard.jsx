@@ -227,7 +227,8 @@ const UserDashboard = () => {
             localStorage.setItem('himalaya_tour_bookings', JSON.stringify(normalizedBookings));
           }
           const userEmail = user?.email || '';
-          const filtered = normalizedBookings.filter(b => b.bookedBy === userEmail || b.email === userEmail);
+          const currentDeviceId = getDeviceId();
+          const filtered = normalizedBookings.filter(b => b.bookedBy === userEmail || b.email === userEmail || b.deviceId === currentDeviceId || (b.bookedBy && b.bookedBy === currentDeviceId));
           setTourBookings(filtered);
         }
       } catch (error) {
@@ -293,8 +294,8 @@ const UserDashboard = () => {
 
     if (memberCount > Number(selectedRoom.totalMembers || 0)) {
       const message = recommendedRooms.length > 0
-        ? `Selected room allows only ${selectedRoom.totalMembers || 1} members. Recommended rooms:\n${recommendedRooms.map((room) => `- ${room.title} (up to ${room.totalMembers || 1} members)`).join('\n')}`
-        : `Selected room allows only ${selectedRoom.totalMembers || 1} members and no other rooms fit this group.`
+        ? `It max is ${selectedRoom.totalMembers || 1} for this room, or you can book other rooms like this:\n${recommendedRooms.map((room) => `- ${room.title} (up to ${room.totalMembers || 1} members)`).join('\n')}`
+        : `It max is ${selectedRoom.totalMembers || 1} for this room, and no other rooms fit this group.`;
       alert(message)
       return
     }

@@ -143,6 +143,7 @@ const handleBookNowSubmit = (e) => {
     paymentMethod,
     status: 'Pending',
     bookedBy: email,
+    deviceId: localStorage.getItem('hotel_device_id'),
     createdAt: new Date().toISOString()
   };
 
