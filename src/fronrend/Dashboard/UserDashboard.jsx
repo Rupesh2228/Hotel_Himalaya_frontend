@@ -111,8 +111,8 @@ const UserDashboard = () => {
   const [tourBookings, setTourBookings] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState({})
-  const selectedRoom = rooms.find((room) => room._id === selectedRoomId)
-  const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
+  const selectedRoom = Array.isArray(rooms) ? rooms.find((room) => room._id === selectedRoomId) : undefined
+  const recommendedRooms = Array.isArray(rooms) ? rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount) : []
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
 
   const fetchAllBookings = async () => {
@@ -138,9 +138,10 @@ const UserDashboard = () => {
 
         if (roomsResponse.ok) {
           const data = await roomsResponse.json()
-          setRooms(data)
-          if (data.length > 0) {
-            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || data[0]._id)
+          const roomsArray = Array.isArray(data) ? data : (data.data || [])
+          setRooms(roomsArray)
+          if (roomsArray.length > 0) {
+            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id)
           }
         }
 
@@ -163,7 +164,7 @@ const UserDashboard = () => {
     if (!targetCheckIn || !targetCheckOut || targetCheckOut <= targetCheckIn) return true;
 
     // Filter bookings for this room that are verified or status !== 'Cancelled'
-    const conflicts = allBookings.filter(b => {
+    const conflicts = (Array.isArray(allBookings) ? allBookings : []).filter(b => {
       if (b.roomId !== roomId) return false;
       if (b.status === 'Cancelled') return false;
       
@@ -305,7 +306,7 @@ const UserDashboard = () => {
 
     setFormErrors({})
 
-    const existingBookings = bookings
+    const existingBookings = Array.isArray(bookings) ? bookings : []
     const conflictingBooking = existingBookings.find((booking) =>
       isBookingConflict(booking, checkIn, checkOut, selectedRoom._id)
     )
