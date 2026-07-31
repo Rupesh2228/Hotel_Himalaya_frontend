@@ -558,17 +558,17 @@ const AdminDashboard = () => {
         const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
         const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
-        setRoomBookings(bookingsData.data || bookingsData || []);
-        setUsers(usersData || []);
-        setRoomList(roomsData || []);
-        setGalleryImages(galleryData || []);
-        setGalleryCategories(galleryCatsData || []);
-        setAttractions(attractionsData || []);
-        setEvents(eventsData || []);
-        setEventBookings(eventBookingsData || []);
-        setMessages(messagesData || []);
-        setReviews(reviewsData || []);
-        setPastEvents(pastEventsData || []);
+        setRoomBookings(Array.isArray(bookingsData.data) ? bookingsData.data : (Array.isArray(bookingsData) ? bookingsData : []));
+        setUsers(Array.isArray(usersData) ? usersData : (Array.isArray(usersData?.data) ? usersData.data : []));
+        setRoomList(Array.isArray(roomsData) ? roomsData : (Array.isArray(roomsData?.data) ? roomsData.data : []));
+        setGalleryImages(Array.isArray(galleryData) ? galleryData : (Array.isArray(galleryData?.data) ? galleryData.data : []));
+        setGalleryCategories(Array.isArray(galleryCatsData) ? galleryCatsData : (Array.isArray(galleryCatsData?.data) ? galleryCatsData.data : []));
+        setAttractions(Array.isArray(attractionsData) ? attractionsData : (Array.isArray(attractionsData?.data) ? attractionsData.data : []));
+        setEvents(Array.isArray(eventsData) ? eventsData : (Array.isArray(eventsData?.data) ? eventsData.data : []));
+        setEventBookings(Array.isArray(eventBookingsData) ? eventBookingsData : (Array.isArray(eventBookingsData?.data) ? eventBookingsData.data : []));
+        setMessages(Array.isArray(messagesData) ? messagesData : (Array.isArray(messagesData?.data) ? messagesData.data : []));
+        setReviews(Array.isArray(reviewsData) ? reviewsData : (Array.isArray(reviewsData?.data) ? reviewsData.data : []));
+        setPastEvents(Array.isArray(pastEventsData) ? pastEventsData : (Array.isArray(pastEventsData?.data) ? pastEventsData.data : []));
       } catch (error) {
         console.error(error);
         setEventBookingsError('Could not load admin dashboard data right now.');
