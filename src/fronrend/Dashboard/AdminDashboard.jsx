@@ -1799,7 +1799,7 @@ const AdminDashboard = () => {
                             try {
                               const resp = await fetch(apiPath(`/api/admin/rooms/${room._id}`), {
                                 method: 'PUT',
-                                headers: { 'Content-Type': 'application/json', Authorization: `****** },
+                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                                 body: JSON.stringify({ isAvailable: e.target.checked })
                               });
                               const updated = await resp.json().catch(() => ({}));
