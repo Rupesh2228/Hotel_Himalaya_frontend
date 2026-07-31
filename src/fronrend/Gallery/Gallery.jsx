@@ -27,11 +27,11 @@ const Gallery = () => {
         const imagesData = imagesRes.ok ? await imagesRes.json() : [];
         const catsData = catsRes.ok ? await catsRes.json() : [];
 
-        if (Array.isArray(imagesData) && imagesData.length) {
-          setGalleryImages(imagesData);
-        } else {
-          setGalleryImages([]);
-        }
+        // Backend returns { data: [], pagination: {} } — unwrap the data array
+        const imagesArray = Array.isArray(imagesData)
+          ? imagesData
+          : (Array.isArray(imagesData?.data) ? imagesData.data : []);
+        setGalleryImages(imagesArray);
         
         if (Array.isArray(catsData)) {
           setCategories(catsData);
