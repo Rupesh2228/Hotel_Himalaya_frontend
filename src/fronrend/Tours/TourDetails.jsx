@@ -20,6 +20,7 @@ import './TourDetails.css'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import * as isoCountries from 'i18n-iso-countries'
 import enLocale from 'i18n-iso-countries/langs/en.json'
+import { getApiUrl } from '../../config/api'
 
 isoCountries.registerLocale(enLocale)
 
