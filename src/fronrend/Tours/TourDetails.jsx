@@ -88,7 +88,7 @@ const TourDetails = () => {
 
 // Duplicate handleBookNowSubmit removed
 
-const handleBookNowSubmit = (e) => {
+const handleBookNowSubmit = async (e) => {
   e.preventDefault();
 
   const minTravelDate = getMinTravelDate();
@@ -147,7 +147,42 @@ const handleBookNowSubmit = (e) => {
     createdAt: new Date().toISOString()
   };
 
-  // Persist to local storage so the admin dashboard can load it reliably.
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    
+    const response = await fetch(`${getApiUrl()}/api/tours/book`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        tourId: tour._id,
+        travelDate: selectedDate,
+        guests: totalPeople,
+        adults: numAdults,
+        children: numChildren,
+        bookedByName: fullName,
+        bookedByEmail: email,
+        bookedByPhone: phoneNumber,
+        tourCoverImage: tour.coverImage,
+        country: country,
+        address: address,
+        paymentMethod: paymentMethod,
+        deviceId: localStorage.getItem('hotel_device_id')
+      })
+    });
+    
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to book tour');
+    }
+  } catch (error) {
+    console.error('Failed to book tour via API:', error);
+    alert(error.message || 'Error occurred while booking tour');
+    return;
+  }
+
+  // Persist to local storage for backward compatibility
   try {
     const storageKeys = ['himalaya_tour_bookings', 'hotel_tour_bookings', 'tour_bookings'];
     storageKeys.forEach((storageKey) => {

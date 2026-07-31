@@ -107,7 +107,8 @@ const Events = () => {
           ticketsCount: Number(bookingForm.ticketsCount),
           bookedByName: bookingForm.name,
           bookedByEmail: bookingForm.email,
-          bookedByPhone: bookingForm.phone
+          bookedByPhone: bookingForm.phone,
+          deviceId: localStorage.getItem('hotel_device_id')
         })
       });
 

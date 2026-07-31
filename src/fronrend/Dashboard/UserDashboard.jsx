@@ -199,7 +199,8 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchEventBookings = async () => {
       const storedToken = token || localStorage.getItem('token');
-      if (!storedToken && !user?.email) return;
+      const currentDeviceId = getDeviceId();
+      if (!storedToken && !user?.email && !currentDeviceId) return;
       try {
         // Try authenticated endpoint first
         if (storedToken) {
@@ -212,13 +213,15 @@ const UserDashboard = () => {
             return;
           }
         }
-        // Fallback: fetch by email
-        if (user?.email) {
-          const response = await fetch(`${getApiUrl()}/api/events/my-bookings-by-email?email=${encodeURIComponent(user.email)}`);
-          if (response.ok) {
-            const data = await response.json();
-            setEventBookings(data);
-          }
+        // Fallback: fetch by email or deviceId
+        const params = new URLSearchParams();
+        if (user?.email) params.append('email', user.email);
+        if (currentDeviceId) params.append('deviceId', currentDeviceId);
+        
+        const response = await fetch(`${getApiUrl()}/api/events/my-bookings-by-email?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setEventBookings(data);
         }
       } catch (error) {
         console.error('Error fetching event bookings:', error);
@@ -228,26 +231,36 @@ const UserDashboard = () => {
   }, [token, user]);
 
   useEffect(() => {
-    const fetchTourBookings = () => {
+    const fetchTourBookings = async () => {
+      const storedToken = token || localStorage.getItem('token');
+      const currentDeviceId = getDeviceId();
       try {
-        const stored = localStorage.getItem('himalaya_tour_bookings');
-        if (stored) {
-          const allBookings = JSON.parse(stored);
-          const normalizedBookings = allBookings.map(normalizeTourBooking);
-          if (JSON.stringify(allBookings) !== JSON.stringify(normalizedBookings)) {
-            localStorage.setItem('himalaya_tour_bookings', JSON.stringify(normalizedBookings));
+        if (storedToken) {
+          const response = await fetch(`${getApiUrl()}/api/tours/my-bookings`, {
+            headers: { 'Authorization': `Bearer ${storedToken}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setTourBookings(data.map(normalizeTourBooking));
+            return;
           }
-          const userEmail = user?.email || '';
-          const currentDeviceId = getDeviceId();
-          const filtered = normalizedBookings.filter(b => b.bookedBy === userEmail || b.email === userEmail || b.deviceId === currentDeviceId || (b.bookedBy && b.bookedBy === currentDeviceId));
-          setTourBookings(filtered);
+        }
+        
+        const params = new URLSearchParams();
+        if (user?.email) params.append('email', user.email);
+        if (currentDeviceId) params.append('deviceId', currentDeviceId);
+        
+        const response = await fetch(`${getApiUrl()}/api/tours/my-bookings-guest?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setTourBookings(data.map(normalizeTourBooking));
         }
       } catch (error) {
         console.error('Error loading tour bookings:', error);
       }
     };
     fetchTourBookings();
-  }, [user]);
+  }, [token, user]);
 
 
 
