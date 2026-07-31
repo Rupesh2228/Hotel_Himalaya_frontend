@@ -5,9 +5,6 @@ import Components from '../componets/componets'
 import './UserDashboard.css'
 import { getApiUrl } from '../../config/api'
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
-
-
 const ROOMS_API_URL = `${getApiUrl()}/api/rooms`
 const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
 const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
@@ -111,8 +108,8 @@ const UserDashboard = () => {
   const [tourBookings, setTourBookings] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState({})
-  const selectedRoom = Array.isArray(rooms) ? rooms.find((room) => room._id === selectedRoomId) : undefined
-  const recommendedRooms = Array.isArray(rooms) ? rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount) : []
+  const selectedRoom = rooms.find((room) => room._id === selectedRoomId)
+  const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
 
   const fetchAllBookings = async () => {
@@ -120,7 +117,9 @@ const UserDashboard = () => {
       const response = await fetch(BOOKINGS_API_URL)
       if (response.ok) {
         const data = await response.json()
-        setAllBookings(data.data || data)
+        // Support both array responses and { data: [...] } shape
+        const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+        setAllBookings(bookingsArray)
       }
     } catch (error) {
       console.error('Error fetching all bookings:', error)
@@ -138,7 +137,8 @@ const UserDashboard = () => {
 
         if (roomsResponse.ok) {
           const data = await roomsResponse.json()
-          const roomsArray = Array.isArray(data) ? data : (data.data || [])
+          // Rooms endpoint may return { data: [...], pagination } — accept either
+          const roomsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
           setRooms(roomsArray)
           if (roomsArray.length > 0) {
             setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id)
@@ -147,7 +147,8 @@ const UserDashboard = () => {
 
         if (bookingsResponse.ok) {
           const data = await bookingsResponse.json()
-          setAllBookings(data.data || data)
+          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+          setAllBookings(bookingsArray)
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -164,7 +165,7 @@ const UserDashboard = () => {
     if (!targetCheckIn || !targetCheckOut || targetCheckOut <= targetCheckIn) return true;
 
     // Filter bookings for this room that are verified or status !== 'Cancelled'
-    const conflicts = (Array.isArray(allBookings) ? allBookings : []).filter(b => {
+    const conflicts = allBookings.filter(b => {
       if (b.roomId !== roomId) return false;
       if (b.status === 'Cancelled') return false;
       
@@ -185,7 +186,7 @@ const UserDashboard = () => {
         const response = await fetch(`${BOOKINGS_API_URL}?bookedBy=${encodeURIComponent(bookingOwnerId)}`)
         if (response.ok) {
           const data = await response.json()
-          const bookingsArray = data.data || data
+          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
           setBookings(bookingsArray)
           localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
         }
@@ -200,26 +201,13 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchEventBookings = async () => {
       const storedToken = token || localStorage.getItem('token');
-      const currentDeviceId = getDeviceId();
-      if (!storedToken && !user?.email && !currentDeviceId) return;
+      if (!storedToken) return;
       try {
-        // Try authenticated endpoint first
-        if (storedToken) {
-          const response = await fetch(EVENT_BOOKINGS_API_URL, {
-            headers: { 'Authorization': `Bearer ${storedToken}` }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setEventBookings(data);
-            return;
+        const response = await fetch(EVENT_BOOKINGS_API_URL, {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
           }
-        }
-        // Fallback: fetch by email or deviceId
-        const params = new URLSearchParams();
-        if (user?.email) params.append('email', user.email);
-        if (currentDeviceId) params.append('deviceId', currentDeviceId);
-        
-        const response = await fetch(`${getApiUrl()}/api/events/my-bookings-by-email?${params.toString()}`);
+        });
         if (response.ok) {
           const data = await response.json();
           setEventBookings(data);
@@ -229,39 +217,28 @@ const UserDashboard = () => {
       }
     };
     fetchEventBookings();
-  }, [token, user]);
+  }, [token]);
 
   useEffect(() => {
-    const fetchTourBookings = async () => {
-      const storedToken = token || localStorage.getItem('token');
-      const currentDeviceId = getDeviceId();
+    const fetchTourBookings = () => {
       try {
-        if (storedToken) {
-          const response = await fetch(`${getApiUrl()}/api/tours/my-bookings`, {
-            headers: { 'Authorization': `Bearer ${storedToken}` }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setTourBookings(data.map(normalizeTourBooking));
-            return;
+        const stored = localStorage.getItem('himalaya_tour_bookings');
+        if (stored) {
+          const allBookings = JSON.parse(stored);
+          const normalizedBookings = allBookings.map(normalizeTourBooking);
+          if (JSON.stringify(allBookings) !== JSON.stringify(normalizedBookings)) {
+            localStorage.setItem('himalaya_tour_bookings', JSON.stringify(normalizedBookings));
           }
-        }
-        
-        const params = new URLSearchParams();
-        if (user?.email) params.append('email', user.email);
-        if (currentDeviceId) params.append('deviceId', currentDeviceId);
-        
-        const response = await fetch(`${getApiUrl()}/api/tours/my-bookings-guest?${params.toString()}`);
-        if (response.ok) {
-          const data = await response.json();
-          setTourBookings(data.map(normalizeTourBooking));
+          const userEmail = user?.email || '';
+          const filtered = normalizedBookings.filter(b => b.bookedBy === userEmail || b.email === userEmail);
+          setTourBookings(filtered);
         }
       } catch (error) {
         console.error('Error loading tour bookings:', error);
       }
     };
     fetchTourBookings();
-  }, [token, user]);
+  }, [user]);
 
 
 
@@ -306,7 +283,7 @@ const UserDashboard = () => {
 
     setFormErrors({})
 
-    const existingBookings = Array.isArray(bookings) ? bookings : []
+    const existingBookings = bookings
     const conflictingBooking = existingBookings.find((booking) =>
       isBookingConflict(booking, checkIn, checkOut, selectedRoom._id)
     )
@@ -319,8 +296,8 @@ const UserDashboard = () => {
 
     if (memberCount > Number(selectedRoom.totalMembers || 0)) {
       const message = recommendedRooms.length > 0
-        ? `It max is ${selectedRoom.totalMembers || 1} for this room, or you can book other rooms like this:\n${recommendedRooms.map((room) => `- ${room.title} (up to ${room.totalMembers || 1} members)`).join('\n')}`
-        : `It max is ${selectedRoom.totalMembers || 1} for this room, and no other rooms fit this group.`;
+        ? `Selected room allows only ${selectedRoom.totalMembers || 1} members. Recommended rooms:\n${recommendedRooms.map((room) => `- ${room.title} (up to ${room.totalMembers || 1} members)`).join('\n')}`
+        : `Selected room allows only ${selectedRoom.totalMembers || 1} members and no other rooms fit this group.`
       alert(message)
       return
     }
@@ -563,7 +540,6 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.fullName ? 'input-error' : ''}
                             type="text"
-                            placeholder="e.g. John Doe"
                             value={fullName}
                             onChange={(e) => {
                               setFullName(e.target.value);
@@ -579,7 +555,7 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.email ? 'input-error' : ''}
                             type="email"
-                            placeholder="e.g. john@example.com"
+                            placeholder="e.g. user@example.com"
                             value={email}
                             onChange={(e) => {
                               setEmail(e.target.value);
@@ -595,7 +571,6 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.phone ? 'input-error' : ''}
                             type="tel"
-                            placeholder="e.g. +977-9800000000"
                             value={phone}
                             onChange={(e) => {
                               setPhone(e.target.value);
@@ -778,4 +753,3 @@ const UserDashboard = () => {
 }
 
 export default UserDashboard
-
