@@ -5,7 +5,7 @@ import Components from '../componets/componets'
 import './UserDashboard.css'
 import { getApiUrl } from '../../config/api'
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
 
 
 const ROOMS_API_URL = `${getApiUrl()}/api/rooms`
@@ -199,23 +199,33 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchEventBookings = async () => {
       const storedToken = token || localStorage.getItem('token');
-      if (!storedToken) return;
+      if (!storedToken && !user?.email) return;
       try {
-        const response = await fetch(EVENT_BOOKINGS_API_URL, {
-          headers: {
-            'Authorization': `Bearer ${storedToken}`
+        // Try authenticated endpoint first
+        if (storedToken) {
+          const response = await fetch(EVENT_BOOKINGS_API_URL, {
+            headers: { 'Authorization': `Bearer ${storedToken}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setEventBookings(data);
+            return;
           }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setEventBookings(data);
+        }
+        // Fallback: fetch by email
+        if (user?.email) {
+          const response = await fetch(`${getApiUrl()}/api/events/my-bookings-by-email?email=${encodeURIComponent(user.email)}`);
+          if (response.ok) {
+            const data = await response.json();
+            setEventBookings(data);
+          }
         }
       } catch (error) {
         console.error('Error fetching event bookings:', error);
       }
     };
     fetchEventBookings();
-  }, [token]);
+  }, [token, user]);
 
   useEffect(() => {
     const fetchTourBookings = () => {
