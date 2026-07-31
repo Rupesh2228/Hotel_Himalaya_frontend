@@ -558,7 +558,7 @@ const AdminDashboard = () => {
         const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
         const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
-        setRoomBookings(bookingsData || []);
+        setRoomBookings(bookingsData.data || bookingsData || []);
         setUsers(usersData || []);
         setRoomList(roomsData || []);
         setGalleryImages(galleryData || []);

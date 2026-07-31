@@ -120,7 +120,7 @@ const UserDashboard = () => {
       const response = await fetch(BOOKINGS_API_URL)
       if (response.ok) {
         const data = await response.json()
-        setAllBookings(data)
+        setAllBookings(data.data || data)
       }
     } catch (error) {
       console.error('Error fetching all bookings:', error)
@@ -146,7 +146,7 @@ const UserDashboard = () => {
 
         if (bookingsResponse.ok) {
           const data = await bookingsResponse.json()
-          setAllBookings(data)
+          setAllBookings(data.data || data)
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -184,8 +184,9 @@ const UserDashboard = () => {
         const response = await fetch(`${BOOKINGS_API_URL}?bookedBy=${encodeURIComponent(bookingOwnerId)}`)
         if (response.ok) {
           const data = await response.json()
-          setBookings(data)
-          localStorage.setItem(bookingsCacheKey, JSON.stringify(data))
+          const bookingsArray = data.data || data
+          setBookings(bookingsArray)
+          localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
         }
       } catch (error) {
         console.error('Error fetching bookings:', error)
