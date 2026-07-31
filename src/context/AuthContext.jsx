@@ -2,7 +2,7 @@
 import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { getApiUrl } from "../config/api";
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
 
 
 const AuthContext = createContext();
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         await fetch(`${apiUrl()}/api/auth/logout`, {
           method: "POST",
-          headers: getAuthHeaders()` },
+          headers: getAuthHeaders()
         });
       }
     } catch {
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     if (!token) return null;
     try {
       const res = await fetch(`${apiUrl()}/api/auth/me`, {
-        headers: getAuthHeaders()` },
+        headers: getAuthHeaders()
       });
       if (res.ok) {
         const data = await res.json();

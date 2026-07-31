@@ -529,7 +529,7 @@ const AdminDashboard = () => {
         return;
       }
 
-      const authHeaders = getAuthHeaders();` };
+      const authHeaders = getAuthHeaders();
 
       try {
         const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
@@ -591,7 +591,7 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(apiPath('/api/notifications'), {
-        headers: getAuthHeaders()` },
+        headers: getAuthHeaders()
       });
       if (response.ok) setNotifications(await response.json());
     } catch (error) {
@@ -617,7 +617,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/notifications/${notificationId}/read`), {
         method: 'POST',
-        headers: getAuthHeaders()` },
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         setNotifications((current) => current.map((notification) => (
@@ -636,7 +636,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath('/api/notifications/read-all'), {
         method: 'POST',
-        headers: getAuthHeaders()` },
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
@@ -702,7 +702,7 @@ const AdminDashboard = () => {
       if (subscription) {
         await fetch(apiPath('/api/notifications/push/subscribe'), {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }` },
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
         await subscription.unsubscribe();
@@ -757,8 +757,8 @@ const AdminDashboard = () => {
 
       const response = await fetch(apiPath(editingRoomId ? `/api/admin/rooms/${editingRoomId}` : '/api/admin/rooms'), {
         method: editingRoomId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify(payload)
       });
 
@@ -787,7 +787,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/rooms/${roomId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -808,7 +808,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/bookings/${bookingId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -829,8 +829,8 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/bookings/${booking._id}/verify`), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify({ verificationCode: booking.verificationCode, verifiedBy: user?.name || 'admin' })
       });
       const data = await response.json().catch(() => ({}));
@@ -850,7 +850,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/events/admin/bookings/${bookingId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -878,7 +878,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/messages/${messageId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -900,7 +900,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/reviews/${reviewId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -922,8 +922,8 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const response = await fetch(apiPath('/api/past-events'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify(pastEventForm)
       });
       const data = await response.json();
@@ -944,7 +944,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const response = await fetch(apiPath(`/api/past-events/${eventId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json();
@@ -972,8 +972,8 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath('/api/admin/gallery'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify(galleryForm)
       });
       const data = await response.json().catch(() => ({}));
@@ -995,8 +995,7 @@ const AdminDashboard = () => {
       setAdminMessage('');
       const response = await fetch(apiPath(`/api/admin/gallery/${imageId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()`
-        }
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Unable to delete image.');
       setGalleryImages((current) => current.filter((image) => image._id !== imageId));
@@ -1016,8 +1015,8 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath('/api/admin/gallery-categories'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify({ name: categoryName })
       });
       const data = await response.json();
@@ -1037,7 +1036,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/gallery-categories/${id}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Unable to delete category.');
       setGalleryCategories((prev) => prev.filter((c) => c._id !== id));
@@ -1061,8 +1060,8 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(editingAttractionId ? `/api/admin/attractions/${editingAttractionId}` : '/api/admin/attractions'), {
         method: editingAttractionId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify(attractionForm)
       });
       const data = await response.json().catch(() => ({}));
@@ -1090,7 +1089,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/attractions/${attractionId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -1119,8 +1118,8 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(editingEventId ? `/api/events/${editingEventId}` : '/api/events'), {
         method: editingEventId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify({
           ...eventForm,
           price: Number(eventForm.price || 0),
@@ -1153,7 +1152,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/events/${eventId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -1321,8 +1320,8 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/users/${targetUser._id}/role`), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
-        },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+
         body: JSON.stringify({ role: nextRole })
       });
 
@@ -1350,7 +1349,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/users/${userId}`), {
         method: 'DELETE',
-        headers: getAuthHeaders()` }
+        headers: getAuthHeaders()
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));

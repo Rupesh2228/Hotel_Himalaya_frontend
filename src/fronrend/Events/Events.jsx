@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 import './Events.css';
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
 
 
 const API_URL = getApiUrl();
