@@ -434,9 +434,6 @@ const UserDashboard = () => {
                               <span>🏨 {room.title}</span>
                             </div>
                           )}
-                          <span className={`room-availability-badge ${isAvailable ? 'available' : 'booked'}`}>
-                            {isAvailable ? 'Available' : 'Not Available'}
-                          </span>
                         </div>
                         
                         <div className="room-booking-details-box">
@@ -540,7 +537,7 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.fullName ? 'input-error' : ''}
                             type="text"
-                            placeholder="e.g. John Doe"
+                            
                             value={fullName}
                             onChange={(e) => {
                               setFullName(e.target.value);
@@ -556,7 +553,7 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.email ? 'input-error' : ''}
                             type="email"
-                            placeholder="e.g. john@example.com"
+                            placeholder="e.g. user@example.com"
                             value={email}
                             onChange={(e) => {
                               setEmail(e.target.value);

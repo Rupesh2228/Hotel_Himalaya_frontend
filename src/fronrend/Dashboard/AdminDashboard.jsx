@@ -47,7 +47,8 @@ const initialRoomForm = {
   description: '',
   price: '',
   totalMembers: '2',
-  images: ''
+  images: '',
+  isAvailable: true,
 };
 
 const initialGalleryForm = {
@@ -788,8 +789,9 @@ const AdminDashboard = () => {
         description: roomForm.description,
         price: Number(roomForm.price || 0),
         totalMembers: Number(roomForm.totalMembers || 1),
-        images: roomForm.images
-      };
+          images: roomForm.images,
+          isAvailable: !!roomForm.isAvailable,
+        };
 
       const response = await fetch(apiPath(editingRoomId ? `/api/admin/rooms/${editingRoomId}` : '/api/admin/rooms'), {
         method: editingRoomId ? 'PUT' : 'POST',
@@ -1756,6 +1758,10 @@ const AdminDashboard = () => {
                     <label>Room Image</label>
                     <DragAndDropUploader value={roomForm.images} onChange={(url) => setRoomForm({ ...roomForm, images: url })} />
                   </div>
+                  <div className="form-group" style={{ alignItems: 'center', flexDirection: 'row', gap: '8px' }}>
+                    <input type="checkbox" id="room-available" checked={!!roomForm.isAvailable} onChange={(e) => setRoomForm({ ...roomForm, isAvailable: e.target.checked })} />
+                    <label htmlFor="room-available" style={{ margin: 0, textTransform: 'none' }}>Available</label>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>Description</label>
@@ -1769,7 +1775,7 @@ const AdminDashboard = () => {
             </div>
             <div className="table-wrapper">
               <table>
-                <thead><tr><th>Image</th><th>Room</th><th>Price</th><th>Members</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Image</th><th>Room</th><th>Price</th><th>Members</th><th>Available</th><th>Actions</th></tr></thead>
                 <tbody>
                   {ensureArray(roomList, 'roomList').map((room) => (
                     <tr key={room._id}>
@@ -1784,8 +1790,31 @@ const AdminDashboard = () => {
                       <td>Rs. {room.price}</td>
                       <td>{room.totalMembers || 1}</td>
                       <td>
+                        <input
+                          type="checkbox"
+                          checked={room.isAvailable !== false}
+                          onChange={async (e) => {
+                            const token = localStorage.getItem('token');
+                            if (!token) { setAdminError('Please sign in as an admin first.'); return; }
+                            try {
+                              const resp = await fetch(apiPath(`/api/admin/rooms/${room._id}`), {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json', Authorization: `****** },
+                                body: JSON.stringify({ isAvailable: e.target.checked })
+                              });
+                              const updated = await resp.json().catch(() => ({}));
+                              if (!resp.ok) throw new Error(updated.error || 'Failed to update availability');
+                              setRoomList((current) => ensureArray(current, 'roomList').map((r) => (r._id === room._id ? updated : r)));
+                              setAdminMessage('Room availability updated.');
+                            } catch (err) {
+                              setAdminError(err.message || 'Failed to update availability');
+                            }
+                          }}
+                        />
+                      </td>
+                      <td>
                         <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || '') }); }}><FaEdit /> Edit</button>
+                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || ''), isAvailable: room.isAvailable !== false }); }}><FaEdit /> Edit</button>
                           <button type="button" className="btn-danger" onClick={() => handleDeleteRoom(room._id)}><FaTrash /> Delete</button>
                         </div>
                       </td>
