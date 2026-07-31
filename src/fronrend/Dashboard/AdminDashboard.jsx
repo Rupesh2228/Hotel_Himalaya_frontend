@@ -593,7 +593,10 @@ const AdminDashboard = () => {
       const response = await fetch(apiPath('/api/notifications'), {
         headers: getAuthHeaders()
       });
-      if (response.ok) setNotifications(await response.json());
+
+      if (response.ok) {
+        setNotifications(await response.json());
+      }
     } catch (error) {
       console.error('Could not load admin notifications:', error);
     }
@@ -601,6 +604,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadNotifications();
+
     const timer = window.setInterval(loadNotifications, 30000);
     window.addEventListener('focus', loadNotifications);
 
