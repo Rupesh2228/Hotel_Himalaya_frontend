@@ -2,6 +2,9 @@
 import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { getApiUrl } from "../config/api";
 
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+
+
 const AuthContext = createContext();
 
 const apiUrl = () => getApiUrl();
@@ -30,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         await fetch(`${apiUrl()}/api/auth/logout`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: getAuthHeaders()` },
         });
       }
     } catch {
@@ -47,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     if (!token) return null;
     try {
       const res = await fetch(`${apiUrl()}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders()` },
       });
       if (res.ok) {
         const data = await res.json();
@@ -227,3 +230,4 @@ export const useAuth = () => {
   if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
+

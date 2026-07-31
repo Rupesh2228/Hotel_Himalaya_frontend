@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { FaBed, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
-import { Bell } from 'lucide-react';
+import { FaBed, FaBell, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
@@ -14,6 +13,9 @@ import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
 
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+
+
 const normalizeTourBookingModule = (booking) => {
   const bookingId = booking?._id || booking?.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   if (bookingId.startsWith('tb_')) {
@@ -25,30 +27,12 @@ const normalizeTourBookingModule = (booking) => {
 const API_BASE_URL = getApiUrl();
 const apiPath = (path) => `${API_BASE_URL}${path}`;
 
-// Helper to defensively coerce values to arrays and log unexpected shapes.
-const ensureArray = (value, label = 'value') => {
-  if (Array.isArray(value)) return value;
-  if (value && typeof value === 'object') {
-    // Common wrapper keys used by APIs
-    if (Array.isArray(value.data)) return value.data;
-    if (Array.isArray(value.results)) return value.results;
-    if (Array.isArray(value.items)) return value.items;
-    if (Array.isArray(value.list)) return value.list;
-    if (Array.isArray(value.reviews)) return value.reviews;
-    if (Array.isArray(value.bookings)) return value.bookings;
-  }
-  // Warn once — developer can inspect network response shape
-  console.warn(`[AdminDashboard] expected ${label} to be an array but got:`, value);
-  return [];
-};
-
 const initialRoomForm = {
   title: '',
   description: '',
   price: '',
   totalMembers: '2',
-  images: '',
-  isAvailable: true,
+  images: ''
 };
 
 const initialGalleryForm = {
@@ -401,12 +385,11 @@ const AdminDashboard = () => {
   const [tourForm, setTourForm] = useState(initialTourForm);
   const [editingTourId, setEditingTourId] = useState('');
 
-  const authIdentity = user?.email || user?._id || user?.id || user?.role || 'guest';
   const TOUR_BOOKING_STORAGE_KEYS = ['himalaya_tour_bookings', 'hotel_tour_bookings', 'tour_bookings'];
 
 
   const persistTourBookings = (bookings) => {
-    const normalized = ensureArray(bookings, 'bookings').map(normalizeTourBookingModule);
+    const normalized = bookings.map(normalizeTourBookingModule);
     const payload = JSON.stringify(normalized);
     TOUR_BOOKING_STORAGE_KEYS.forEach((storageKey) => {
       localStorage.setItem(storageKey, payload);
@@ -536,89 +519,71 @@ const AdminDashboard = () => {
     };
   }, []);
 
-  const fetchAdminData = useCallback(async (signal) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoadingAdminData(false);
-      setLoadingEventBookings(false);
-      setLoadingMessages(false);
-      setLoadingReviews(false);
-      setAdminError('Sign in as an admin to see live management data.');
-      return;
-    }
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoadingAdminData(false);
+        setLoadingEventBookings(false);
+        setAdminError('Sign in as an admin to see live management data.');
+        return;
+      }
 
-    const authHeaders = { Authorization: `Bearer ${token}` };
+      const authHeaders = getAuthHeaders();` };
 
-    try {
-      const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
-        fetch(apiPath('/api/bookings'), { signal }),
-        fetch(apiPath('/api/admin/users'), { headers: authHeaders, signal }),
-        fetch(apiPath('/api/rooms'), { signal }),
-        fetch(apiPath('/api/gallery'), { signal }),
-        fetch(apiPath('/api/gallery/categories'), { signal }),
-        fetch(apiPath('/api/attractions'), { signal }),
-        fetch(apiPath('/api/events'), { signal }),
-        fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders, signal }),
-        fetch(apiPath('/api/messages'), { headers: authHeaders, signal }),
-        fetch(apiPath('/api/reviews'), { signal }),
-        fetch(apiPath('/api/past-events'), { signal })
-      ]);
+      try {
+        const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
+          fetch(apiPath('/api/bookings'), { headers: getAuthHeaders() }),
+          fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
+          fetch(apiPath('/api/rooms')),
+          fetch(apiPath('/api/gallery')),
+          fetch(apiPath('/api/gallery/categories')),
+          fetch(apiPath('/api/attractions')),
+          fetch(apiPath('/api/events')),
+          fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
+          fetch(apiPath('/api/messages'), { headers: authHeaders }),
+          fetch(apiPath('/api/reviews')),
+          fetch(apiPath('/api/past-events'))
+        ]);
 
-      const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
-      const usersRes_json = usersRes.ok ? await usersRes.json() : {};
-      const usersData = usersRes_json.data || usersRes_json || [];
-      const roomsRes_json = roomsRes.ok ? await roomsRes.json() : {};
-      const roomsData = roomsRes_json.data || roomsRes_json || [];
-      const galleryRes_json = galleryRes.ok ? await galleryRes.json() : {};
-      const galleryData = galleryRes_json.data || galleryRes_json || [];
-      const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
-      const attractionsRes_json = attractionsRes.ok ? await attractionsRes.json() : {};
-      const attractionsData = attractionsRes_json.data || attractionsRes_json || [];
-      const eventsData = eventsRes.ok ? await eventsRes.json() : [];
-      const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
-      const messagesData = messagesRes.ok ? await messagesRes.json() : [];
-      const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
-      const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
+        const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
+        const usersData = usersRes.ok ? await usersRes.json() : [];
+        const roomsData = roomsRes.ok ? await roomsRes.json() : [];
+        const galleryData = galleryRes.ok ? await galleryRes.json() : [];
+        const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
+        const attractionsData = attractionsRes.ok ? await attractionsRes.json() : [];
+        const eventsData = eventsRes.ok ? await eventsRes.json() : [];
+        const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
+        const messagesData = messagesRes.ok ? await messagesRes.json() : [];
+        const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
+        const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
 
-      if (signal?.aborted) return;
-
-      // Normalize and defensively set list states using ensureArray to avoid runtime .map errors
-      setRoomBookings(ensureArray(bookingsData, 'bookingsData'));
-      setUsers(ensureArray(usersData, 'usersData'));
-      setRoomList(ensureArray(roomsData, 'roomsData'));
-      setGalleryImages(ensureArray(galleryData, 'galleryData'));
-      setGalleryCategories(ensureArray(galleryCatsData, 'galleryCatsData'));
-      setAttractions(ensureArray(attractionsData, 'attractionsData'));
-      setEvents(ensureArray(eventsData, 'eventsData'));
-      setEventBookings(ensureArray(eventBookingsData, 'eventBookingsData'));
-      setMessages(ensureArray(messagesData, 'messagesData'));
-      // Ensure reviews is always an array (API may return object or wrapper)
-      setReviews(ensureArray(reviewsData, 'reviewsData'));
-      setPastEvents(ensureArray(pastEventsData, 'pastEventsData'));
-    } catch (error) {
-      if (signal?.aborted) return;
-      console.error(error);
-      setEventBookingsError('Could not load admin dashboard data right now.');
-      setMessagesError('Could not load messages right now.');
-      setReviewsError('Could not load reviews right now.');
-    } finally {
-      if (!signal?.aborted) {
+        setRoomBookings(bookingsData || []);
+        setUsers(usersData || []);
+        setRoomList(roomsData || []);
+        setGalleryImages(galleryData || []);
+        setGalleryCategories(galleryCatsData || []);
+        setAttractions(attractionsData || []);
+        setEvents(eventsData || []);
+        setEventBookings(eventBookingsData || []);
+        setMessages(messagesData || []);
+        setReviews(reviewsData || []);
+        setPastEvents(pastEventsData || []);
+      } catch (error) {
+        console.error(error);
+        setEventBookingsError('Could not load admin dashboard data right now.');
+        setMessagesError('Could not load messages right now.');
+        setReviewsError('Could not load reviews right now.');
+      } finally {
         setLoadingAdminData(false);
         setLoadingEventBookings(false);
         setLoadingMessages(false);
         setLoadingReviews(false);
       }
-    }
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchAdminData(controller.signal);
-
-    return () => {
-      controller.abort();
     };
-  }, [fetchAdminData, authIdentity]);
+
+    fetchAdminData();
+  }, []);
 
   const loadNotifications = useCallback(async () => {
     const token = localStorage.getItem('token');
@@ -626,16 +591,13 @@ const AdminDashboard = () => {
 
     try {
       const response = await fetch(apiPath('/api/notifications'), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders()` },
       });
-      if (response.ok) {
-        const data = await response.json().catch(() => ({}));
-        setNotifications(ensureArray(data, 'notifications'));
-      }
+      if (response.ok) setNotifications(await response.json());
     } catch (error) {
       console.error('Could not load admin notifications:', error);
     }
-  }, [authIdentity]);
+  }, []);
 
   useEffect(() => {
     loadNotifications();
@@ -655,10 +617,10 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/notifications/${notificationId}/read`), {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders()` },
       });
       if (response.ok) {
-        setNotifications((current) => ensureArray(current, 'notifications').map((notification) => (
+        setNotifications((current) => current.map((notification) => (
           notification._id === notificationId ? { ...notification, read: true } : notification
         )));
       }
@@ -674,11 +636,10 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath('/api/notifications/read-all'), {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders()` },
       });
       if (response.ok) {
-        setNotifications((current) => ensureArray(current, 'notifications').map((notification) => ({ ...notification, read: true })));
-
+        setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
       }
     } catch (error) {
       console.error('Could not mark all notifications as read:', error);
@@ -698,7 +659,7 @@ const AdminDashboard = () => {
       }
       const token = localStorage.getItem('token');
       const keyResponse = await fetch(apiPath('/api/notifications/push/public-key'), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders()` },
       });
       if (!keyResponse.ok) {
         // Server does not expose a VAPID public key — gracefully fall back.
@@ -720,7 +681,7 @@ const AdminDashboard = () => {
       });
       const response = await fetch(apiPath('/api/notifications/push/subscribe'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }` },
         body: JSON.stringify(subscription),
       });
       if (!response.ok) throw new Error('Could not save this device for notifications.');
@@ -739,7 +700,7 @@ const AdminDashboard = () => {
       if (subscription) {
         await fetch(apiPath('/api/notifications/push/subscribe'), {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }` },
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
         await subscription.unsubscribe();
@@ -789,15 +750,12 @@ const AdminDashboard = () => {
         description: roomForm.description,
         price: Number(roomForm.price || 0),
         totalMembers: Number(roomForm.totalMembers || 1),
-          images: roomForm.images,
-          isAvailable: !!roomForm.isAvailable,
-        };
+        images: roomForm.images
+      };
 
       const response = await fetch(apiPath(editingRoomId ? `/api/admin/rooms/${editingRoomId}` : '/api/admin/rooms'), {
         method: editingRoomId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify(payload)
       });
@@ -806,10 +764,10 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error(data.error || 'Unable to save room.');
 
       if (editingRoomId) {
-        setRoomList((current) => ensureArray(current, 'roomList').map((room) => (room._id === editingRoomId ? data : room)));
+        setRoomList((current) => current.map((room) => (room._id === editingRoomId ? data : room)));
         setAdminMessage('Room updated.');
       } else {
-        setRoomList((current) => [data, ...ensureArray(current, 'roomList')]);
+        setRoomList((current) => [data, ...current]);
         setAdminMessage('Room added.');
       }
       setRoomForm(initialRoomForm);
@@ -827,7 +785,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/rooms/${roomId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -848,7 +806,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/bookings/${bookingId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -869,15 +827,13 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/bookings/${booking._id}/verify`), {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify({ verificationCode: booking.verificationCode, verifiedBy: user?.name || 'admin' })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to verify booking.');
-      setRoomBookings((current) => ensureArray(current, 'roomBookings').map((item) => (item._id === booking._id ? data : item)));
+      setRoomBookings((current) => current.map((item) => (item._id === booking._id ? data : item)));
       setAdminMessage('Room booking verified.');
     } catch (error) {
       setAdminError(error.message || 'Unable to verify booking.');
@@ -892,7 +848,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/events/admin/bookings/${bookingId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -920,7 +876,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/messages/${messageId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -942,7 +898,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/reviews/${reviewId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -964,15 +920,13 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const response = await fetch(apiPath('/api/past-events'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify(pastEventForm)
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to add past event.');
-      setPastEvents((current) => [data, ...ensureArray(current, 'pastEvents')]);
+      setPastEvents((current) => [data, ...current]);
       setPastEventForm(initialPastEventForm);
       setAdminMessage('Completed event added.');
     } catch (error) {
@@ -988,7 +942,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       const response = await fetch(apiPath(`/api/past-events/${eventId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json();
@@ -1016,15 +970,13 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath('/api/admin/gallery'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify(galleryForm)
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to add gallery image.');
-      setGalleryImages((current) => [data, ...ensureArray(current, 'galleryImages')]);
+      setGalleryImages((current) => [data, ...current]);
       setGalleryForm(initialGalleryForm);
       setAdminMessage('Gallery image added.');
     } catch (error) {
@@ -1041,8 +993,7 @@ const AdminDashboard = () => {
       setAdminMessage('');
       const response = await fetch(apiPath(`/api/admin/gallery/${imageId}`), {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
+        headers: getAuthHeaders()`
         }
       });
       if (!response.ok) throw new Error('Unable to delete image.');
@@ -1063,15 +1014,13 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath('/api/admin/gallery-categories'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify({ name: categoryName })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to add category.');
-      setGalleryCategories((prev) => [data, ...ensureArray(prev, 'galleryCategories')]);
+      setGalleryCategories((prev) => [data, ...prev]);
       setCategoryName('');
       setAdminMessage('Category added successfully.');
     } catch (error) {
@@ -1086,7 +1035,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/gallery-categories/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) throw new Error('Unable to delete category.');
       setGalleryCategories((prev) => prev.filter((c) => c._id !== id));
@@ -1110,9 +1059,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(editingAttractionId ? `/api/admin/attractions/${editingAttractionId}` : '/api/admin/attractions'), {
         method: editingAttractionId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify(attractionForm)
       });
@@ -1120,8 +1067,8 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error(data.error || 'Unable to save attraction.');
 
       const nextAttractions = editingAttractionId
-              ? ensureArray(attractions, 'attractions').map((item) => (item._id === editingAttractionId ? data : item))
-              : [data, ...ensureArray(attractions, 'attractions')];
+        ? attractions.map((item) => (item._id === editingAttractionId ? data : item))
+        : [data, ...attractions];
 
       setAttractions(nextAttractions);
       broadcastAttractionChange(nextAttractions, editingAttractionId ? 'updated' : 'created');
@@ -1141,7 +1088,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/attractions/${attractionId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -1170,9 +1117,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(editingEventId ? `/api/events/${editingEventId}` : '/api/events'), {
         method: editingEventId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify({
           ...eventForm,
@@ -1185,10 +1130,10 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error(data.error || 'Unable to save event.');
 
       if (editingEventId) {
-        setEvents((current) => ensureArray(current, 'events').map((item) => (item._id === editingEventId ? data : item)));
+        setEvents((current) => current.map((item) => (item._id === editingEventId ? data : item)));
         setAdminMessage('Event updated.');
       } else {
-        setEvents((current) => [data, ...ensureArray(current, 'events')]);
+        setEvents((current) => [data, ...current]);
         setAdminMessage('Event added.');
       }
       setEventForm(initialEventForm);
@@ -1206,7 +1151,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/events/${eventId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -1323,8 +1268,8 @@ const AdminDashboard = () => {
 
       setTourList((currentTours) => {
         const nextTours = editingTourId
-                ? ensureArray(currentTours, 'tourList').map((tour) => (tour._id === editingTourId ? savedTour : tour))
-                : [savedTour, ...ensureArray(currentTours, 'tourList')];
+          ? currentTours.map((tour) => (tour._id === editingTourId ? savedTour : tour))
+          : [savedTour, ...currentTours];
         saveStoredTours(nextTours);
         return nextTours;
       });
@@ -1374,9 +1319,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/users/${targetUser._id}/role`), {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }`
         },
         body: JSON.stringify({ role: nextRole })
       });
@@ -1384,7 +1327,7 @@ const AdminDashboard = () => {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to update user role.');
 
-      setUsers((current) => ensureArray(current, 'users').map((item) => (item._id === targetUser._id ? data.user : item)));
+      setUsers((current) => current.map((item) => (item._id === targetUser._id ? data.user : item)));
       if (targetUser._id === (user?.id || user?._id)) {
         await refreshUser();
       }
@@ -1405,7 +1348,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(apiPath(`/api/admin/users/${userId}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()` }
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -1437,7 +1380,7 @@ const AdminDashboard = () => {
                       <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
-                      {ensureArray(pendingAdmins, 'pendingAdmins').map((u) => {
+                      {pendingAdmins.map((u) => {
                         const isUpdating = updatingRoleUserId === u._id;
                         const providerLabel = u.provider || 'local';
                         return (
@@ -1486,7 +1429,7 @@ const AdminDashboard = () => {
                   <tr><th>Name</th><th>Email</th><th>Provider</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  {ensureArray(users, 'users').map((u) => {
+                  {users.map((u) => {
                     const isUpdating = updatingRoleUserId === u._id;
                     const providerLabel = u.provider || 'local';
                     return (
@@ -1542,7 +1485,7 @@ const AdminDashboard = () => {
                     <tr><th>From</th><th>Email</th><th>Phone</th><th>Message</th><th>Date</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
-                    {ensureArray(messages, 'messages').map((m) => (
+                    {messages.map((m) => (
                       <tr key={m._id || m.id}>
                         <td>{m.name}</td>
                         <td>{m.email}</td>
@@ -1581,7 +1524,7 @@ const AdminDashboard = () => {
                     <tr><th>Author</th><th>Rating</th><th>Review</th><th>Date</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
-                    {ensureArray(reviews, 'reviews').map((review) => (
+                    {reviews.map((review) => (
                       <tr key={review._id || review.id}>
                         <td>{review.author || review.name || 'Guest'}</td>
                         <td>{review.rating || 0}/5</td>
@@ -1637,7 +1580,7 @@ const AdminDashboard = () => {
               <div className="card">
                 <h3>Completed Events List</h3>
                 <div className="gallery-grid">
-                  {ensureArray(pastEvents, 'pastEvents').map((ev) => (
+                  {pastEvents.map((ev) => (
                     <div className="gallery-item" key={ev._id}>
                       {ev.imageUrl && <img src={ev.imageUrl} alt={ev.title} />}
                       <div className="gallery-item-actions">
@@ -1676,7 +1619,7 @@ const AdminDashboard = () => {
                   </form>
                   <h4>Existing Categories</h4>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {ensureArray(galleryCategories, 'galleryCategories').map(cat => (
+                    {galleryCategories.map(cat => (
                       <li key={cat._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #ddd' }}>
                         <span>{cat.name}</span>
                         <button type="button" className="btn-danger" style={{ padding: '5px 10px' }} onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
@@ -1700,7 +1643,7 @@ const AdminDashboard = () => {
                       <label>Category</label>
                       <select value={galleryForm.category} onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}>
                         <option value="">No Category</option>
-                        {ensureArray(galleryCategories, 'galleryCategories').map(c => (
+                        {galleryCategories.map(c => (
                           <option key={c._id} value={c._id}>{c.name}</option>
                         ))}
                       </select>
@@ -1712,12 +1655,9 @@ const AdminDashboard = () => {
             </div>
 
             <div className="gallery-grid" style={{ marginTop: '40px' }}>
-              {ensureArray(galleryImages, 'galleryImages').map((image) => {
-                const candidate = image?.url || image?.imageUrl || image?.path || image?.src || image?.file;
-                const imgSrc = candidate ? (String(candidate).startsWith('http') ? candidate : `${API_BASE_URL}${candidate}`) : '';
-                return (
+              {galleryImages.map((image) => (
                 <div className="gallery-item" key={image._id}>
-                  {imgSrc ? <img src={imgSrc} alt={image.title || 'Gallery item'} /> : null}
+                  {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
                   <div className="gallery-item-actions">
                     <span style={{color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px', borderRadius: '5px'}}>{image.category?.name || 'Uncategorized'}</span>
                     <button type="button" className="btn-danger" onClick={() => handleDeleteGalleryImage(image._id)}>
@@ -1725,9 +1665,7 @@ const AdminDashboard = () => {
                     </button>
                   </div>
                 </div>
-                )
-              })}
-              
+              ))}
             </div>
           </div>
         );
@@ -1758,10 +1696,6 @@ const AdminDashboard = () => {
                     <label>Room Image</label>
                     <DragAndDropUploader value={roomForm.images} onChange={(url) => setRoomForm({ ...roomForm, images: url })} />
                   </div>
-                  <div className="form-group" style={{ alignItems: 'center', flexDirection: 'row', gap: '8px' }}>
-                    <input type="checkbox" id="room-available" checked={!!roomForm.isAvailable} onChange={(e) => setRoomForm({ ...roomForm, isAvailable: e.target.checked })} />
-                    <label htmlFor="room-available" style={{ margin: 0, textTransform: 'none' }}>Available</label>
-                  </div>
                 </div>
                 <div className="form-group">
                   <label>Description</label>
@@ -1775,9 +1709,9 @@ const AdminDashboard = () => {
             </div>
             <div className="table-wrapper">
               <table>
-                <thead><tr><th>Image</th><th>Room</th><th>Price</th><th>Members</th><th>Available</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Image</th><th>Room</th><th>Price</th><th>Members</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {ensureArray(roomList, 'roomList').map((room) => (
+                  {roomList.map((room) => (
                     <tr key={room._id}>
                       <td>
                         {room.images && room.images.length > 0 ? (
@@ -1790,31 +1724,8 @@ const AdminDashboard = () => {
                       <td>Rs. {room.price}</td>
                       <td>{room.totalMembers || 1}</td>
                       <td>
-                        <input
-                          type="checkbox"
-                          checked={room.isAvailable !== false}
-                          onChange={async (e) => {
-                            const token = localStorage.getItem('token');
-                            if (!token) { setAdminError('Please sign in as an admin first.'); return; }
-                            try {
-                              const resp = await fetch(apiPath(`/api/admin/rooms/${room._id}`), {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                                body: JSON.stringify({ isAvailable: e.target.checked })
-                              });
-                              const updated = await resp.json().catch(() => ({}));
-                              if (!resp.ok) throw new Error(updated.error || 'Failed to update availability');
-                              setRoomList((current) => ensureArray(current, 'roomList').map((r) => (r._id === room._id ? updated : r)));
-                              setAdminMessage('Room availability updated.');
-                            } catch (err) {
-                              setAdminError(err.message || 'Failed to update availability');
-                            }
-                          }}
-                        />
-                      </td>
-                      <td>
                         <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || ''), isAvailable: room.isAvailable !== false }); }}><FaEdit /> Edit</button>
+                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || '') }); }}><FaEdit /> Edit</button>
                           <button type="button" className="btn-danger" onClick={() => handleDeleteRoom(room._id)}><FaTrash /> Delete</button>
                         </div>
                       </td>
@@ -1862,7 +1773,7 @@ const AdminDashboard = () => {
               <table>
                 <thead><tr><th>Attraction</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {ensureArray(attractions, 'attractions').map((attraction) => (
+                  {attractions.map((attraction) => (
                     <tr key={attraction._id}>
                       <td>{attraction.title}</td>
                       <td>
@@ -1938,7 +1849,7 @@ const AdminDashboard = () => {
               <table>
                 <thead><tr><th>Event</th><th>Seats</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {ensureArray(events, 'events').map((event) => (
+                  {events.map((event) => (
                     <tr key={event._id}>
                       <td>{event.title}</td>
                       <td>{event.availableSeats || 0}/{event.totalSeats || 0}</td>
@@ -1971,7 +1882,7 @@ const AdminDashboard = () => {
                   <div className="eb-status-pill completed">Completed: {eventBookingStatusCounts.completed}</div>
                 </div>
                 <div className="eb-grid">
-                  {ensureArray(eventBookings, 'eventBookings').map((booking) => (
+                  {eventBookings.map((booking) => (
                     <div className="eb-card" key={booking._id}>
                       <div className="eb-card-accent" />
                       <div className="eb-card-body">
@@ -2523,7 +2434,7 @@ const AdminDashboard = () => {
                 aria-label="Show notifications"
                 onClick={() => setShowNotifications((visible) => !visible)}
               >
-                <Bell size="1.25em" strokeWidth={2.5} />
+                <FaBell />
                 {unreadNotificationCount > 0 && (
                   <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>
                 )}
@@ -2596,4 +2507,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
 

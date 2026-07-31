@@ -24,16 +24,14 @@ const Gallery = () => {
           fetch(`${API_URL}/api/gallery/categories`)
         ]);
         
-        const imagesJson = imagesRes.ok ? await imagesRes.json() : null;
+        const imagesData = imagesRes.ok ? await imagesRes.json() : [];
         const catsData = catsRes.ok ? await catsRes.json() : [];
 
-        // Backend returns { data: [...], pagination: {...} }.
-        // Support both an array response and the { data } object for compatibility.
-        const imagesArray = Array.isArray(imagesJson)
-          ? imagesJson
-          : (imagesJson && Array.isArray(imagesJson.data) ? imagesJson.data : []);
-
-        setGalleryImages(imagesArray);
+        if (Array.isArray(imagesData) && imagesData.length) {
+          setGalleryImages(imagesData);
+        } else {
+          setGalleryImages([]);
+        }
         
         if (Array.isArray(catsData)) {
           setCategories(catsData);

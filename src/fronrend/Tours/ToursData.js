@@ -3,6 +3,9 @@
 
 import { getApiUrl } from '../../config/api';
 
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+
+
 const API_URL = getApiUrl();
 const TOUR_STORAGE_KEY = 'himalaya_tours_db';
 const TOUR_CHANGE_EVENT = 'himalaya_tours_changed';
@@ -458,9 +461,7 @@ export const getStoredTours = async () => {
     const response = await fetch(`${API_URL}/api/tours`);
     if (!response.ok) throw new Error('Failed to fetch tours');
     const parsedTours = await response.json();
-    // Accept either an array or a wrapper { data: [...] }
-    const toursList = Array.isArray(parsedTours) ? parsedTours : (parsedTours && Array.isArray(parsedTours.data) ? parsedTours.data : null);
-    const normalizedTours = Array.isArray(toursList) ? toursList.map(normalizeTour) : DEFAULT_TOURS.map(normalizeTour);
+    const normalizedTours = Array.isArray(parsedTours) ? parsedTours.map(normalizeTour) : DEFAULT_TOURS.map(normalizeTour);
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(normalizedTours));
     return normalizedTours;
   } catch (e) {
@@ -597,3 +598,4 @@ export const getVisibleTours = (tours) => {
   if (!Array.isArray(tours)) return [];
   return tours.filter(isTourVisible);
 };
+

@@ -12,7 +12,6 @@ import {
   Sparkles,
   UserRound,
   X,
-  Bell,
 } from 'lucide-react'
 import logo from '../../img/logo.png'
 import './componets.css'
@@ -86,7 +85,6 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                   end={to === '/'}
-
                 >
                   <Icon className="nav-link-icon" aria-hidden="true" />
                   <span>{label}</span>
@@ -95,21 +93,16 @@ const Components = () => {
             ))}
 
             {user?.role === 'admin' ? (
-              <>
-                <li>
-                  <NavLink
-                    to="/hh-cp-9f3m2q"
-                    onClick={closeMenu}
-                    className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                  >
-                    <LockKeyhole className="nav-link-icon" aria-hidden="true" />
-                    <span>Admin</span>
-                  </NavLink>
-                </li>
-
-             
-               
-              </>
+              <li>
+                <NavLink
+                  to="/hh-cp-9f3m2q"
+                  onClick={closeMenu}
+                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
+                >
+                  <LockKeyhole className="nav-link-icon" aria-hidden="true" />
+                  <span>Admin Panel</span>
+                </NavLink>
+              </li>
             ) : (
               <li>
                 <NavLink
@@ -118,7 +111,7 @@ const Components = () => {
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >
                   <UserRound className="nav-link-icon" aria-hidden="true" />
-                  <span>Booking Room</span>
+                  <span>Dashboard</span>
                 </NavLink>
               </li>
             )}

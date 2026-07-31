@@ -5,6 +5,9 @@ import Components from '../componets/componets'
 import './UserDashboard.css'
 import { getApiUrl } from '../../config/api'
 
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+
+
 const ROOMS_API_URL = `${getApiUrl()}/api/rooms`
 const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
 const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
@@ -117,9 +120,7 @@ const UserDashboard = () => {
       const response = await fetch(BOOKINGS_API_URL)
       if (response.ok) {
         const data = await response.json()
-        // Support both array responses and { data: [...] } shape
-        const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-        setAllBookings(bookingsArray)
+        setAllBookings(data)
       }
     } catch (error) {
       console.error('Error fetching all bookings:', error)
@@ -137,18 +138,15 @@ const UserDashboard = () => {
 
         if (roomsResponse.ok) {
           const data = await roomsResponse.json()
-          // Rooms endpoint may return { data: [...], pagination } — accept either
-          const roomsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-          setRooms(roomsArray)
-          if (roomsArray.length > 0) {
-            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id)
+          setRooms(data)
+          if (data.length > 0) {
+            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || data[0]._id)
           }
         }
 
         if (bookingsResponse.ok) {
           const data = await bookingsResponse.json()
-          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-          setAllBookings(bookingsArray)
+          setAllBookings(data)
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -186,9 +184,8 @@ const UserDashboard = () => {
         const response = await fetch(`${BOOKINGS_API_URL}?bookedBy=${encodeURIComponent(bookingOwnerId)}`)
         if (response.ok) {
           const data = await response.json()
-          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-          setBookings(bookingsArray)
-          localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
+          setBookings(data)
+          localStorage.setItem(bookingsCacheKey, JSON.stringify(data))
         }
       } catch (error) {
         console.error('Error fetching bookings:', error)
@@ -434,6 +431,9 @@ const UserDashboard = () => {
                               <span>🏨 {room.title}</span>
                             </div>
                           )}
+                          <span className={`room-availability-badge ${isAvailable ? 'available' : 'booked'}`}>
+                            {isAvailable ? 'Available' : 'Not Available'}
+                          </span>
                         </div>
                         
                         <div className="room-booking-details-box">
@@ -537,7 +537,7 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.fullName ? 'input-error' : ''}
                             type="text"
-                            
+                            placeholder="e.g. John Doe"
                             value={fullName}
                             onChange={(e) => {
                               setFullName(e.target.value);
@@ -553,7 +553,7 @@ const UserDashboard = () => {
                           <input
                             className={formErrors.email ? 'input-error' : ''}
                             type="email"
-                            placeholder="e.g. user@example.com"
+                            placeholder="e.g. john@example.com"
                             value={email}
                             onChange={(e) => {
                               setEmail(e.target.value);
@@ -752,3 +752,4 @@ const UserDashboard = () => {
 }
 
 export default UserDashboard
+

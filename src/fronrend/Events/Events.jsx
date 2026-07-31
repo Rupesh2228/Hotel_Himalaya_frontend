@@ -5,6 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 import './Events.css';
 
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: Bearer  } : {}; };
+
+
 const API_URL = getApiUrl();
 
 const Events = () => {
@@ -47,15 +50,13 @@ const Events = () => {
       const res = await fetch(`${API_URL}/api/events`);
       if (!res.ok) throw new Error('Failed to fetch events');
       const data = await res.json();
-      const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-      setEvents(eventsArray);
+      setEvents(data);
 
       // Fetch past events
       const pastRes = await fetch(`${API_URL}/api/past-events`);
       if (pastRes.ok) {
         const pastData = await pastRes.json();
-        const pastArray = Array.isArray(pastData) ? pastData : (pastData && Array.isArray(pastData.data) ? pastData.data : []);
-        setPastEvents(pastArray);
+        setPastEvents(pastData);
       }
     } catch (err) {
       console.error(err);
@@ -356,3 +357,4 @@ const Events = () => {
 };
 
 export default Events;
+
