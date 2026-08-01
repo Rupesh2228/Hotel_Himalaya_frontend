@@ -122,12 +122,16 @@ const UserDashboard = () => {
       try {
         const response = await fetch(EVENT_BOOKINGS_API_URL, {
           headers: {
-            'Authorization': `Bearer ${storedToken}`
-          }
+            'Authorization': `Bearer ${storedToken}`,
+            'Cache-Control': 'no-cache'
+          },
+          cache: 'no-store'
         });
         if (response.ok) {
           const data = await response.json();
-          setEventBookings(data);
+          // Safely set eventBookings in case API returns nested data array
+          const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+          setEventBookings(eventsArray);
         }
       } catch (error) {
         console.error('Error fetching event bookings:', error);
@@ -137,25 +141,28 @@ const UserDashboard = () => {
   }, [token]);
 
   useEffect(() => {
-    const fetchTourBookings = () => {
+    const fetchTourBookings = async () => {
+      const storedToken = token || localStorage.getItem('token');
+      if (!storedToken) return;
       try {
-        const stored = localStorage.getItem('himalaya_tour_bookings');
-        if (stored) {
-          const allBookings = JSON.parse(stored);
-          const normalizedBookings = allBookings.map(normalizeTourBooking);
-          if (JSON.stringify(allBookings) !== JSON.stringify(normalizedBookings)) {
-            localStorage.setItem('himalaya_tour_bookings', JSON.stringify(normalizedBookings));
-          }
-          const userEmail = user?.email || '';
-          const filtered = normalizedBookings.filter(b => b.bookedBy === userEmail || b.email === userEmail);
-          setTourBookings(filtered);
+        const response = await fetch(`${getApiUrl()}/api/tours/my-bookings`, {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`,
+            'Cache-Control': 'no-cache'
+          },
+          cache: 'no-store'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+          setTourBookings(toursArray);
         }
       } catch (error) {
-        console.error('Error loading tour bookings:', error);
+        console.error('Error fetching tour bookings:', error);
       }
     };
     fetchTourBookings();
-  }, [user]);
+  }, [token]);
 
 
 
