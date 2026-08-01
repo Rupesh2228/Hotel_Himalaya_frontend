@@ -12,7 +12,7 @@ const BlogManager = () => {
   const [formData, setFormData] = useState({
     title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
     fullDescription: '', seoTitle: '', metaDescription: '',
-    keywords: '', canonical: '', schema: ''
+    keywords: '', canonical: '', schema: '', status: 'Published'
   });
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const BlogManager = () => {
       });
       
       if (res.ok) {
-        setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' });
+        setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '', status: 'Published' });
         setEditingId(null);
         fetchBlogs();
       } else {
@@ -127,6 +127,13 @@ const BlogManager = () => {
               <input required className="mgr-input" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} />
             </div>
             <div className="mgr-form-group">
+              <label className="mgr-label">Status</label>
+              <select className="mgr-input" value={formData.status || 'Published'} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                <option value="Published">Published</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </div>
+            <div className="mgr-form-group">
               <label className="mgr-label">Featured Image URL</label>
               <input required className="mgr-input" value={formData.featuredImage} onChange={e => setFormData({ ...formData, featuredImage: e.target.value })} />
             </div>
@@ -173,9 +180,9 @@ const BlogManager = () => {
           
           <div className="mgr-actions">
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' }); }} className="mgr-btn mgr-btn-secondary">Cancel</button>
+              <button type="button" onClick={() => { setEditingId(null); setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '', status: 'Published' }); }} className="mgr-btn mgr-btn-secondary">Cancel</button>
             )}
-            <button type="submit" className="mgr-btn mgr-btn-primary">{editingId ? 'Update Blog' : 'Save Blog'}</button>
+            <button type="submit" className="mgr-btn mgr-btn--save">{editingId ? 'Update Blog' : 'Save Blog'}</button>
           </div>
         </form>
       </div>
@@ -194,8 +201,8 @@ const BlogManager = () => {
               <tr key={blog._id} className="hover:bg-gray-50">
                 <td className="py-2 px-4 border-b">{blog.title}</td>
                 <td className="py-2 px-4 border-b text-right space-x-2">
-                  <button onClick={() => handleEdit(blog)} className="text-blue-600 hover:underline">Edit</button>
-                  <button onClick={() => handleDelete(blog._id)} className="text-red-600 hover:underline">Delete</button>
+                  <button onClick={() => handleEdit(blog)} className="mgr-action-btn mgr-action-btn--edit">Edit</button>
+                  <button onClick={() => handleDelete(blog._id)} className="mgr-action-btn mgr-action-btn--delete">Delete</button>
                 </td>
               </tr>
             ))}

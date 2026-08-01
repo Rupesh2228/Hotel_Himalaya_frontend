@@ -12,7 +12,7 @@ const AttractionManager = () => {
   const [formData, setFormData] = useState({
     title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
     fullDescription: '', seoTitle: '', metaDescription: '',
-    keywords: '', canonical: '', schema: ''
+    keywords: '', canonical: '', schema: '', status: 'Published'
   });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
@@ -46,8 +46,7 @@ const AttractionManager = () => {
   const resetForm = () => {
     setFormData({
       title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
-      fullDescription: '', seoTitle: '', metaDescription: '',
-      keywords: '', canonical: '', schema: ''
+      fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '', status: 'Published'
     });
     setEditingId(null);
   };
@@ -176,6 +175,14 @@ const AttractionManager = () => {
             <div className="mgr-form-group">
               <label className="mgr-label">Slug</label>
               <input required className="mgr-input" placeholder="auto-generated" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} />
+            </div>
+            
+            <div className="mgr-form-group">
+              <label className="mgr-label">Status</label>
+              <select className="mgr-input" value={formData.status || 'Published'} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                <option value="Published">Published</option>
+                <option value="Draft">Draft</option>
+              </select>
             </div>
 
             {/* Featured Image */}
