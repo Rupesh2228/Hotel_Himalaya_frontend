@@ -52,22 +52,32 @@ const SEO = ({ page, customSEO }) => {
   }, [page, customSEO]);
 
   const pageKey = page?.trim();
-  if (!seoData) {
-    if (!pageKey) return null;
-    return (
-      <Helmet>
-        <title>{`Hotel Himalaya${pageKey === 'Home' ? '' : ` | ${pageKey}`}`}</title>
-      </Helmet>
-    );
-  }
+  const pageTitle = pageKey ? `Hotel Himalaya${pageKey === 'Home' ? '' : ` | ${pageKey}`}` : 'Hotel Himalaya';
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const metaTitle = seoData?.title || pageTitle;
+  const metaDescription = seoData?.metaDescription || '';
+  const metaKeywords = seoData?.keywords || '';
+  const canonicalUrl = seoData?.canonical || pageUrl;
+  const ogType = seoData?.ogType || 'website';
+  const robotsContent = seoData?.robots || 'index, follow';
+
+  if (!seoData && !pageKey) return null;
 
   return (
     <Helmet>
-      {seoData.title && <title>{seoData.title}</title>}
-      {seoData.metaDescription && <meta name="description" content={seoData.metaDescription} />}
-      {seoData.keywords && <meta name="keywords" content={seoData.keywords} />}
-      {seoData.canonical && <link rel="canonical" href={seoData.canonical} />}
-      {seoData.schema && (
+      <title>{metaTitle}</title>
+      {metaDescription && <meta name="description" content={metaDescription} />}
+      {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+      <meta name="robots" content={robotsContent} />
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      <meta property="og:title" content={metaTitle} />
+      {metaDescription && <meta property="og:description" content={metaDescription} />}
+      <meta property="og:type" content={ogType} />
+      {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={metaTitle} />
+      {metaDescription && <meta name="twitter:description" content={metaDescription} />}
+      {seoData?.schema && (
         <script type="application/ld+json">
           {seoData.schema}
         </script>

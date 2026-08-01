@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { FaBed, FaLeaf, FaWifi, FaBell, FaFire, FaBuilding, FaHeart, FaRegHeart, FaStar, FaUser } from "react-icons/fa";
 import "./Service.css";
 import Components from "../componets/componets";
+import SEO from '../componets/SEO';
 import background from "../../img/background.jpg";
 import LastComponent from '../componets/LastComponents';
 import { useAuth } from '../../context/AuthContext';
@@ -290,6 +291,7 @@ const Service = () => {
   return (
     <>
       <Components />
+      <SEO page="Rooms" />
 
       {/* Header Section */}
       <section className="service-hero">
