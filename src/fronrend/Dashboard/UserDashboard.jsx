@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FaTicketAlt, FaHistory, FaCalendarPlus, FaSuitcase } from 'react-icons/fa'
+import { FaTicketAlt, FaHistory, FaSuitcase } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import Components from '../componets/componets'
 import './UserDashboard.css'
@@ -81,7 +81,7 @@ const UserDashboard = () => {
     return d.toISOString().split('T')[0]
   }
 
-  const [activeTab, setActiveTab] = useState('book-room')
+  const [activeTab, setActiveTab] = useState('my-bookings')
   const [rooms, setRooms] = useState([])
   const [allBookings, setAllBookings] = useState([])
   const [selectedRoomId, setSelectedRoomId] = useState('')
@@ -392,7 +392,6 @@ const UserDashboard = () => {
           <aside className="user-dashboard-tabs">
             {/* Tab buttons */}
             {[
-              { id: 'book-room', label: 'Book a Room', icon: <FaCalendarPlus /> },
               { id: 'my-bookings', label: 'Room Bookings', icon: <FaHistory /> },
               { id: 'event-bookings', label: 'Event Tickets', icon: <FaTicketAlt /> },
               { id: 'tour-bookings', label: 'Tour Bookings', icon: <FaSuitcase /> },
@@ -412,200 +411,6 @@ const UserDashboard = () => {
 
           {/* Tab Content */}
           <main className="user-dashboard-content">
-            {activeTab === 'book-room' && (
-              <section className="tab-pane">
-                <h2>🏨 Browse & Book Rooms</h2>
-                
-
-
-                {/* Rooms Grid */}
-                <div className="rooms-booking-grid">
-                  {rooms.map((room) => {
-                    const roomId = room._id || room.id;
-                    const isAvailable = checkRoomAvailability(roomId);
-                    const roomCover = room.images && room.images.length > 0 ? room.images[0] : null;
-                    
-                    return (
-                      <div className="room-booking-card" key={roomId}>
-                        <div className="room-booking-img-wrapper">
-                          {roomCover ? (
-                            <img src={roomCover} alt={room.title} className="room-booking-img" />
-                          ) : (
-                            <div className="room-booking-img-placeholder">
-                              <span>🏨 {room.title}</span>
-                            </div>
-                          )}
-                          <span className={`room-availability-badge ${isAvailable ? 'available' : 'booked'}`}>
-                            {isAvailable ? 'Available' : 'Not Available'}
-                          </span>
-                        </div>
-                        
-                        <div className="room-booking-details-box">
-                          <div className="room-booking-header-row">
-                            <h3 className="room-booking-title">{room.title}</h3>
-                            <span className="room-booking-price-tag">Rs. {Number(room.price).toLocaleString()} <small>/ night</small></span>
-                          </div>
-                          
-                          <p className="room-booking-desc">{room.description || 'Enjoy premium stay options, comfort, and state-of-the-art facilities.'}</p>
-                          
-                          <div className="room-booking-specs">
-                            <span>👥 Max Guests: {room.totalMembers || 2}</span>
-                            <span>🔑 Floor: 1</span>
-                          </div>
-                          
-                          {isAvailable ? (
-                            <button 
-                              type="button" 
-                              className="btn-book-room-action"
-                              onClick={() => {
-                                setSelectedRoomId(roomId);
-                                setIsModalOpen(true);
-                              }}
-                            >
-                              Book Room
-                            </button>
-                          ) : (
-                            <div className="room-unavailable-msg">Room is not available</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Booking Modal */}
-                {isModalOpen && selectedRoom && (
-                  <div className="booking-modal-overlay">
-                    <div className="booking-modal-content">
-                      <div className="booking-modal-header">
-                        <h3>Book {selectedRoom.title}</h3>
-                        <button type="button" className="close-modal-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
-                      </div>
-                      
-                      <form className="booking-modal-form" onSubmit={handleRoomBooking}>
-                        <div className="modal-summary-box">
-                          <p><strong>Price per night:</strong> Rs. {Number(selectedRoom.price).toLocaleString()}</p>
-                          <p><strong>Selected Dates:</strong> {checkIn} to {checkOut}</p>
-                          
-                          {(() => {
-                            const cIn = new Date(checkIn);
-                            const cOut = new Date(checkOut);
-                            if (cOut > cIn) {
-                              const days = Math.ceil(Math.abs(cOut - cIn) / (1000 * 60 * 60 * 24)) || 1;
-                              const totalPrice = (selectedRoom.price || 0) * days;
-                              return (
-                                <p className="modal-total-estimate">
-                                  Stay Duration: <strong>{days} {days === 1 ? 'Night' : 'Nights'}</strong><br/>
-                                  Total Price: <strong>Rs. {totalPrice.toLocaleString()}</strong>
-                                </p>
-                              );
-                            }
-                            return null;
-                          })()}
-                        </div>
-
-                        <div className="form-group">
-                          <label>Check-in Date</label>
-                          <input
-                            className={formErrors.checkIn ? 'input-error' : ''}
-                            type="date"
-                            min={getTodayStr()}
-                            value={checkIn}
-                            onChange={(e) => {
-                              setCheckIn(e.target.value);
-                              setFormErrors(prev => ({...prev, checkIn: ''}));
-                            }}
-                            required
-                          />
-                          {formErrors.checkIn && <span className="error-text">{formErrors.checkIn}</span>}
-                        </div>
-
-                        <div className="form-group">
-                          <label>Check-out Date</label>
-                          <input
-                            className={formErrors.checkOut ? 'input-error' : ''}
-                            type="date"
-                            min={checkIn || getTodayStr()}
-                            value={checkOut}
-                            onChange={(e) => {
-                              setCheckOut(e.target.value);
-                              setFormErrors(prev => ({...prev, checkOut: ''}));
-                            }}
-                            required
-                          />
-                          {formErrors.checkOut && <span className="error-text">{formErrors.checkOut}</span>}
-                        </div>
-
-                        <div className="form-group">
-                          <label>Full Name</label>
-                          <input
-                            className={formErrors.fullName ? 'input-error' : ''}
-                            type="text"
-                            value={fullName}
-                            onChange={(e) => {
-                              setFullName(e.target.value);
-                              setFormErrors(prev => ({...prev, fullName: ''}));
-                            }}
-                            required
-                          />
-                          {formErrors.fullName && <span className="error-text">{formErrors.fullName}</span>}
-                        </div>
-
-                        <div className="form-group">
-                          <label>Email Address</label>
-                          <input
-                            className={formErrors.email ? 'input-error' : ''}
-                            type="email"
-                            placeholder="e.g. user@example.com"
-                            value={email}
-                            onChange={(e) => {
-                              setEmail(e.target.value);
-                              setFormErrors(prev => ({...prev, email: ''}));
-                            }}
-                            required
-                          />
-                          {formErrors.email && <span className="error-text">{formErrors.email}</span>}
-                        </div>
-
-                        <div className="form-group">
-                          <label>Phone Number</label>
-                          <input
-                            className={formErrors.phone ? 'input-error' : ''}
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => {
-                              setPhone(e.target.value);
-                              setFormErrors(prev => ({...prev, phone: ''}));
-                            }}
-                            required
-                          />
-                          {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
-                        </div>
-
-                        <div className="form-group">
-                          <label>Number of Guests</label>
-                          <input
-                            type="number"
-                            min="1"
-                            max={selectedRoom.totalMembers || 10}
-                            value={memberCount}
-                            onChange={(e) => setMemberCount(Number(e.target.value))}
-                          />
-                        </div>
-
-                        <div className="modal-actions">
-                          <button className="btn cancel-btn" type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                          <button className="btn gold confirm-btn" type="submit" disabled={submitting}>
-                            {submitting ? 'Booking...' : 'Confirm Reservation'}
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
-
             {activeTab === 'my-bookings' && (
               <section className="tab-pane">
                 <h2> Booked Rooms History</h2>

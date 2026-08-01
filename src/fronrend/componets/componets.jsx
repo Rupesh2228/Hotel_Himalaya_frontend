@@ -20,7 +20,8 @@ const Components = () => {
     { to: '/events', label: 'Events',  },
     { to: '/blogs', label: 'Blogs',  },
     { to: '/contact', label: 'Contact', },
-    
+    { to: '/book-now', label: 'Book Now',  },
+
   ]
 
   return (
@@ -65,7 +66,7 @@ const Components = () => {
             </button>          </div>
 
           <ul>
-            {navLinks.map(({ to, label, icon }) => (
+            {navLinks.map(({ to, label }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -73,11 +74,20 @@ const Components = () => {
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                   end={to === '/'}
                 >
-                  <span className="nav-link-emoji" aria-hidden="true">{icon}</span>
                   <span>{label}</span>
                 </NavLink>
               </li>
             ))}
+
+            <li className="book-now-item">
+              <NavLink
+                to="/rooms#rooms"
+                onClick={closeMenu}
+                className="menu__link book-now-btn"
+              >
+                Book Now
+              </NavLink>
+            </li>
 
             {user?.role === 'admin' ? (
               <li>

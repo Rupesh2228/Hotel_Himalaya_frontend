@@ -172,6 +172,9 @@ header nav.nav ul {
   font-weight: 700;
   text-transform: none;
 }
+li.book-now-item {
+  margin-left: auto;
+}
 .book-now-btn:hover,
 .book-now-btn.active {
   background: #154a35;

@@ -120,6 +120,155 @@ body {
   font-weight: 300;
 }
 
+.rooms-section {
+  padding: 100px 5%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(247,243,238,0.95) 100%);
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.room-card {
+  background: #ffffff;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
+  transition: var(--transition-bounce);
+  display: flex;
+  flex-direction: column;
+}
+
+.room-card:hover {
+  transform: translateY(-10px);
+}
+
+.room-image-wrapper {
+  position: relative;
+}
+
+.room-image {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.room-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: #0f5132;
+  color: #ffffff;
+  font-size: 0.85rem;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.room-card-body {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.room-card-body h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.room-subtitle {
+  font-size: 0.98rem;
+  color: #777;
+  margin: 0;
+}
+
+.room-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.room-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(15, 81, 50, 0.08);
+  color: #0f5132;
+  font-weight: 600;
+}
+
+.room-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.room-price {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.room-price span {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.room-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.room-details-btn,
+.room-book-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.room-details-btn {
+  background: #ffffff;
+  color: #0f5132;
+  border-color: rgba(15, 81, 50, 0.12);
+  cursor: pointer;
+}
+
+.room-details-btn:hover {
+  background: #f7f7f7;
+}
+
+.room-book-btn {
+  background: #0f5132;
+  color: #ffffff;
+}
+
+.room-book-btn:hover {
+  background: #154a35;
+}
+
 /* Services Grid Section */
 .services-section {
   padding: 100px 5%;
