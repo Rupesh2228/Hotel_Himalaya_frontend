@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
-import './BlogDetail.css';
+import "./BlogDetail.css"; // Add CSS if needed
 
 const BlogDetail = () => {
   const { slug } = useParams();
