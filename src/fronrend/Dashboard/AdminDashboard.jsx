@@ -2241,9 +2241,15 @@ const AdminDashboard = () => {
                               className="btn-sm btn-red"
                               onClick={() => handleRejectTourBooking(b._id)}
                             >
-                              <FaTimes /> Delete
+                              <FaTimes /> Reject
                             </button>
                           )}
+                          <button
+                            className="btn-sm btn-danger"
+                            onClick={() => handleDeleteTourBooking(b._id)}
+                          >
+                            <FaTrash /> Remove
+                          </button>
                         </td>
                       </tr>
                     ))}
