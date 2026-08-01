@@ -6,11 +6,8 @@ export const DEFAULT_LIVE_BACKEND_URL =
 export const getApiBaseUrl = () => {
   // When running locally, always use Vite's proxy (relative URL = "")
   // regardless of any VITE_API_URL setting, to avoid CORS issues.
-  if (typeof window !== "undefined") {
-    const hostname = window.location.hostname;
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return ""; // Vite proxy handles /api/* → http://localhost:3000
-    }
+  if (import.meta.env.DEV) {
+    return ""; // Vite proxy handles /api/* → http://localhost:3000
   }
 
   // In production builds, use the configured API URL or fall back to the

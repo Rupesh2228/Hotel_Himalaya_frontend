@@ -14,7 +14,7 @@ const VIEWS = {
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, login, signup, verifyOTP, resendOTP, forgotPassword, extractError, googleLogin } = useAuth()
+  const { user, login, signup, verifyOTP, resendOTP, forgotPassword, extractError, googleLogin, logout } = useAuth()
 
   const [view, setView] = useState(VIEWS.LOGIN)
   const [loading, setLoading] = useState(false)
@@ -42,13 +42,16 @@ export default function Login() {
   // Forgot password
   const [forgotEmail, setForgotEmail] = useState('')
 
+  const isAdminPage = location.pathname.includes('hh-secure-portal')
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
+      if (isAdminPage && user.role === 'pending_admin') return // wait on login page
       const from = location.state?.from || (user.role === 'admin' ? '/hh-cp-9f3m2q' : '/dashboard')
       navigate(from, { replace: true })
     }
-  }, [user, navigate, location.state])
+  }, [user, navigate, location.state, isAdminPage])
 
   // OTP resend cooldown timer
   useEffect(() => {
@@ -147,8 +150,6 @@ export default function Login() {
     }
   }
 
-  const isAdminPage = location.pathname.includes('hh-secure-portal')
-
   useEffect(() => {
     if (view === VIEWS.LOGIN && isAdminPage) {
       let interval;
@@ -162,8 +163,10 @@ export default function Login() {
               setLoading(true)
               try {
                 const result = await googleLogin(response.credential, true)
-                const dest = result?.role === 'admin' ? '/hh-cp-9f3m2q' : '/dashboard'
-                navigate(location.state?.from || dest, { replace: true })
+                if (result?.role !== 'pending_admin') {
+                  const dest = result?.role === 'admin' ? '/hh-cp-9f3m2q' : '/dashboard'
+                  navigate(location.state?.from || dest, { replace: true })
+                }
               } catch (err) {
                 setError(extractError(err))
               } finally {
@@ -190,6 +193,19 @@ export default function Login() {
 
   const renderLogin = () => {
     if (isAdminPage) {
+      if (user && user.role === 'pending_admin') {
+        return (
+          <div className="auth-form" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 0' }}>
+            <p style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#b91c1c', lineHeight: '1.5', fontWeight: 'bold' }}>
+              Your admin access is pending approval by a main admin. Please wait.
+            </p>
+            <button type="button" className="auth-submit-btn" onClick={() => logout()}>
+              Sign Out
+            </button>
+          </div>
+        )
+      }
+
       return (
         <div className="auth-form" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 0' }}>
           <p style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#666', lineHeight: '1.5' }}>
