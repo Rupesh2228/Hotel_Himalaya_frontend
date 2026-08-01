@@ -289,7 +289,7 @@
 .seo-input {
   height: 46px;
   border-radius: 12px;
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid #000000;
   background: #f9fafb;
   padding: 0 16px;
   font-size: 14px;
@@ -315,7 +315,7 @@
 .seo-input-icon-wrap {
   display: flex;
   align-items: center;
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid #000000;
   border-radius: 12px;
   background: #f9fafb;
   overflow: hidden;
@@ -359,7 +359,7 @@
 /* ── Textarea ── */
 .seo-textarea {
   border-radius: 12px;
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid #000000;
   background: #f9fafb;
   padding: 12px 16px;
   font-size: 14px;
