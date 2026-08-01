@@ -677,7 +677,6 @@ const AdminDashboard = () => {
         try {
           const registration = await navigator.serviceWorker.register('/sw.js');
           setPushEnabled(true);
-          setAdminMessage('Push is not configured on the server. Registered service worker for local notifications.');
           registration.showNotification('Alerts Enabled', { body: 'You will now receive notifications on this device.' });
         } catch {
           setAdminError('Push notifications are not configured on the server and service worker registration failed.');
