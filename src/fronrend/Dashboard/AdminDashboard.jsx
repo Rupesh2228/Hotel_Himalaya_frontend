@@ -1615,12 +1615,13 @@ const AdminDashboard = () => {
               <h2>Gallery Management</h2>
               <p>Add and remove images from the main hotel gallery.</p>
             </div>
-            
+
             <div className="gallery-admin-container">
-              <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: '300px' }}>
+              <div className="gallery-panel-grid">
+                {/* Categories Panel */}
+                <div className="gallery-panel-card">
                   <h3><FaPlus /> Add Gallery Category</h3>
-                  <form onSubmit={handleCategorySubmit} className="form-grid" style={{ marginBottom: '20px' }}>
+                  <form onSubmit={handleCategorySubmit} className="form-grid" style={{ marginBottom: '20px', position: 'relative', zIndex: 1 }}>
                     <div className="form-group">
                       <label>Category Name</label>
                       <input type="text" placeholder="e.g. Interior" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
@@ -1628,17 +1629,18 @@ const AdminDashboard = () => {
                     <button type="submit" className="btn-success btn-icon" style={{ height: 'fit-content', alignSelf: 'flex-end' }}><FaPlus /> Add Category</button>
                   </form>
                   <h4>Existing Categories</h4>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                  <ul className="gallery-category-list">
                     {galleryCategories.map(cat => (
-                      <li key={cat._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #ddd' }}>
+                      <li key={cat._id} className="gallery-category-item">
                         <span>{cat.name}</span>
-                        <button type="button" className="btn-danger" style={{ padding: '5px 10px' }} onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
+                        <button type="button" className="btn-danger btn-sm" onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
                       </li>
                     ))}
                   </ul>
                 </div>
-                
-                <div style={{ flex: 1, minWidth: '300px' }}>
+
+                {/* Upload Panel */}
+                <div className="gallery-panel-card">
                   <h3><FaPlus /> Add Gallery Image</h3>
                   <form onSubmit={handleGallerySubmit} className="form-grid">
                     <div className="form-group" style={{ gridColumn: '1 / -1' }}>
@@ -1664,12 +1666,17 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="gallery-grid" style={{ marginTop: '40px' }}>
+            {/* Gallery Grid */}
+            <div className="gallery-grid-header">
+              <h3 className="gallery-grid-title">All Images</h3>
+              <span className="gallery-count-badge">{galleryImages.length} images</span>
+            </div>
+            <div className="gallery-grid">
               {galleryImages.map((image) => (
                 <div className="gallery-item" key={image._id}>
                   {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
                   <div className="gallery-item-actions">
-                    <span style={{color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px', borderRadius: '5px'}}>{image.category?.name || 'Uncategorized'}</span>
+                    <span className="gallery-item-cat-label">{image.category?.name || 'Uncategorized'}</span>
                     <button type="button" className="btn-danger" onClick={() => handleDeleteGalleryImage(image._id)}>
                       <FaTrash /> Remove
                     </button>
