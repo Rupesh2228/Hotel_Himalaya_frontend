@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { getApiUrl } from '../../config/api';
 
 const SEO = ({ page, customSEO }) => {
   const [seoData, setSeoData] = useState(null);
 
   useEffect(() => {
-    // If it's a dynamic page (like blog detail), we use customSEO passed via props
-    if (customSEO) {
-      setSeoData(customSEO);
-      return;
-    }
+    const loadSeo = async () => {
+      if (customSEO) {
+        setSeoData(customSEO);
+        return;
+      }
 
-    // Otherwise, fetch from global SEO API based on page name
-    if (page) {
-      const fetchSEO = async () => {
+      if (page) {
         try {
-          // You should configure your API base URL correctly
-          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+          const apiUrl = getApiUrl();
           const response = await fetch(`${apiUrl}/api/seo/${page}`);
           if (response.ok) {
             const data = await response.json();
@@ -25,11 +23,12 @@ const SEO = ({ page, customSEO }) => {
             }
           }
         } catch (error) {
-          console.error("Failed to fetch SEO data:", error);
+          console.error('Failed to fetch SEO data:', error);
         }
-      };
-      fetchSEO();
-    }
+      }
+    };
+
+    loadSeo();
   }, [page, customSEO]);
 
   if (!seoData) return null;
