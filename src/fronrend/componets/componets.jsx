@@ -12,13 +12,15 @@ const Components = () => {
   const closeMenu = () => setIsMenuOpen(false)
 
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/rooms', label: 'Rooms' },
-    { to: '/amenities', label: 'Amenities' },
-    { to: '/about', label: 'About Us' },
-    { to: '/gallery', label: 'Gallery' },
-    { to: '/blogs', label: 'Blog' },
-    { to: '/contact', label: 'Contact' },
+    { to: '/', label: 'Home'},
+    { to: '/about', label: 'About Us', },
+    { to: '/services', label: 'Services',  },
+    { to: '/tours', label: 'Tours',  },
+    { to: '/gallery', label: 'Gallery',  },
+    { to: '/events', label: 'Events',  },
+    { to: '/blogs', label: 'Blogs',  },
+    { to: '/contact', label: 'Contact', },
+    
   ]
 
   return (
@@ -60,11 +62,10 @@ const Components = () => {
             </div>
             <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
               <span aria-hidden="true">×</span>
-            </button>
-           </div>
+            </button>          </div>
 
           <ul>
-            {navLinks.map(({ to, label }) => (
+            {navLinks.map(({ to, label, icon }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -72,20 +73,11 @@ const Components = () => {
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                   end={to === '/'}
                 >
+                  <span className="nav-link-emoji" aria-hidden="true">{icon}</span>
                   <span>{label}</span>
                 </NavLink>
               </li>
             ))}
-
-            <li>
-              <NavLink
-                to="/contact"
-                onClick={closeMenu}
-                className="menu__link book-now-btn"
-              >
-                Book Now
-              </NavLink>
-            </li>
 
             {user?.role === 'admin' ? (
               <li>
