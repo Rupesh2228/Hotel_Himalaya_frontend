@@ -4,8 +4,8 @@
   background: #f3f3f3;
 }
 
-.blog-hero img {
-  min-height: 100%;
+.blog-card-image {
+  min-height: 18rem;
 }
 
 .blog-pagination .page-button {

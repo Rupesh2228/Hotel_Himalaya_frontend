@@ -97,22 +97,13 @@ const Blogs = () => {
 
       <SEO page="Blogs" />
       <div className="container mx-auto px-4 py-8">
-        <div className="blog-hero overflow-hidden rounded-3xl bg-white shadow-xl mb-12">
-          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-center">
-            <div className="p-10 lg:p-14">
-              <span className="inline-block text-sm font-semibold uppercase tracking-[0.3em] text-blue-700 mb-4">Latest News</span>
-              <h1 className="text-5xl font-bold leading-tight text-gray-900 mb-6">Blog Page</h1>
-              <p className="max-w-3xl text-lg leading-8 text-gray-600">
-                Discover fresh stories, travel guides, hotel updates, and inspiring local experiences. Browse our latest posts and stay updated with the newest happenings around Hotel Himalaya.
-              </p>
-            </div>
-            <div className="relative h-80 lg:h-full overflow-hidden">
-              <img
-                src={items[0]?.featuredImage || items[0]?.imageUrl || '/assets/background-B_N8IV_2.jpg'}
-                alt="Blog hero"
-                className="h-full w-full object-cover"
-              />
-            </div>
+        <div className="mb-10 rounded-3xl bg-white px-6 py-8 shadow-xl sm:px-10 sm:py-12">
+          <div className="max-w-3xl">
+            <span className="inline-block text-sm font-semibold uppercase tracking-[0.3em] text-blue-700 mb-4">Latest News</span>
+            <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl mb-4">Blog Page</h1>
+            <p className="text-lg leading-8 text-gray-600">
+              Discover fresh stories, travel guides, hotel updates, and inspiring local experiences. Browse our latest posts and stay updated with the newest happenings around Hotel Himalaya.
+            </p>
           </div>
         </div>
 
@@ -132,51 +123,48 @@ const Blogs = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
           {paginatedItems.map(item => {
             const linkPath = item.itemType === 'blog' ? `/blog/${item.slug}` : `/attractions/${item.slug}`;
             const badgeLabel = item.itemType === 'blog' ? 'Blog' : 'Attraction';
             const publishedAt = item.createdAt ? new Date(item.createdAt).toLocaleString('en-US', {
-              month: 'long',
+              month: 'short',
               day: 'numeric',
-              year: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit'
+              year: 'numeric'
             }) : 'Unknown date';
-            
+
             return (
-              <div key={item._id} className="bg-white overflow-hidden rounded-3xl shadow-xl transition-transform duration-300 hover:-translate-y-1">
-                <div className="relative h-80 overflow-hidden">
-                  <LazyImage
-                    src={item.featuredImage || item.imageUrl}
-                    alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  />
-                  <div className="absolute inset-x-0 top-4 px-4">
-                    <span className="inline-flex rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm">
+              <article key={item._id} className="blog-card rounded-3xl bg-white shadow-xl overflow-hidden transition-transform duration-300 hover:-translate-y-1">
+                <Link to={linkPath} className="block overflow-hidden">
+                  <div className="blog-card-image relative h-72 overflow-hidden">
+                    <LazyImage
+                      src={item.featuredImage || item.imageUrl}
+                      alt={item.title}
+                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm">
                       {badgeLabel}
                     </span>
                   </div>
-                </div>
-                <div className="space-y-4 p-8">
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                </Link>
+                <div className="p-6 sm:p-8">
+                  <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.25em] text-slate-500">
                     <span>By Admin</span>
-                    <span>•</span>
                     <span>{publishedAt}</span>
                   </div>
                   <Link to={linkPath} className="block">
-                    <h2 className="text-3xl font-semibold text-slate-900 transition-colors hover:text-blue-600">
+                    <h2 className="text-2xl font-semibold text-slate-900 hover:text-blue-600 transition-colors mb-3">
                       {item.title}
                     </h2>
                   </Link>
-                  <p className="text-base leading-7 text-slate-600 line-clamp-3">
+                  <p className="text-sm leading-7 text-slate-600 line-clamp-3 mb-6">
                     {item.shortDescription || item.description}
                   </p>
-                  <Link to={linkPath} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800">
-                    Read More <span aria-hidden="true">→</span>
+                  <Link to={linkPath} className="text-sm font-semibold text-blue-600 hover:text-blue-800">
+                    Read More →
                   </Link>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
