@@ -4,49 +4,74 @@ import { Link } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import LazyImage from '../componets/LazyImage';
-import { getApiUrl } from '../../config/api';
+import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
 import './Blogs.css'; // Add CSS if needed
 
 const Blogs = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const apiUrl = getApiUrl();
-        
-        // Fetch both blogs and attractions
-        const [blogsRes, attractionsRes] = await Promise.all([
-          fetch(`${apiUrl}/api/blogs`),
-          fetch(`${apiUrl}/api/attractions`)
-        ]);
-        
-        const blogsData = await blogsRes.json();
-        const attractionsData = await attractionsRes.json();
-        
-        let combined = [];
+      const apiUrl = getApiUrl();
+      const backendUrl = apiUrl || DEFAULT_LIVE_BACKEND_URL;
 
-        if (blogsData.success) {
+      const fetchJson = async (url) => {
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${url}: ${response.status}`);
+        }
+        const text = await response.text();
+        try {
+          return JSON.parse(text);
+        } catch {
+          throw new Error(`Unexpected non-JSON response from ${url}`);
+        }
+      };
+
+      try {
+        let blogsData;
+        let attractionsData;
+
+        try {
+          [blogsData, attractionsData] = await Promise.all([
+            fetchJson(`${backendUrl}/api/blogs`),
+            fetchJson(`${backendUrl}/api/attractions`)
+          ]);
+        } catch (firstError) {
+          if (backendUrl !== DEFAULT_LIVE_BACKEND_URL) {
+            [blogsData, attractionsData] = await Promise.all([
+              fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/blogs`),
+              fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/attractions`)
+            ]);
+          } else {
+            throw firstError;
+          }
+        }
+
+        const combined = [];
+
+        if (blogsData?.success) {
           const publishedBlogs = blogsData.data
             .filter(b => b.status === 'Published')
             .map(b => ({ ...b, itemType: 'blog' }));
-          combined = [...combined, ...publishedBlogs];
+          combined.push(...publishedBlogs);
         }
 
-        if (attractionsData.success) {
+        if (attractionsData?.success) {
           const publishedAttractions = attractionsData.data
             .filter(a => a.status === 'Published')
             .map(a => ({ ...a, itemType: 'attraction' }));
-          combined = [...combined, ...publishedAttractions];
+          combined.push(...publishedAttractions);
         }
-        
-        // Optionally sort by date here if they have a createdAt field
+
         combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
         setItems(combined);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('Error fetching or processing blog data:', err);
+        setError('Unable to load blogs. Please check your backend configuration.');
       } finally {
         setLoading(false);
       }
@@ -64,7 +89,11 @@ const Blogs = () => {
       <SEO page="Blogs" />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Explore Our Blogs & Attractions</h1>
-        
+        {error && (
+          <div className="mb-8 rounded-lg border border-red-200 bg-red-50 p-4 text-center text-red-800">
+            {error}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {items.map(item => {
             const linkPath = item.itemType === 'blog' ? `/blog/${item.slug}` : `/attractions/${item.slug}`;

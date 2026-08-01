@@ -73,6 +73,7 @@ const AttractionManager = () => {
     setSaving(true);
     const payload = {
       ...formData,
+      status: formData.status || 'Published',
       gallery: formData.gallery ? formData.gallery.split(',').map(s => s.trim()) : [],
     };
     try {

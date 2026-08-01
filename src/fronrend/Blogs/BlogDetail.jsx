@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
-import { getApiUrl } from '../../config/api';
-
-const API_URL = getApiUrl();
+import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -15,11 +13,29 @@ const BlogDetail = () => {
 
   useEffect(() => {
     const fetchBlog = async () => {
+      const apiUrl = getApiUrl();
+      const backendUrl = apiUrl || DEFAULT_LIVE_BACKEND_URL;
+
+      const fetchJson = async (url) => {
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${url}: ${response.status}`);
+        }
+        return response.json();
+      };
+
       try {
-        const res = await fetch(`${API_URL}/api/blogs/slug/${slug}`);
-        if (!res.ok) throw new Error('Failed to load blog');
-        const data = await res.json();
-        setBlog(data.data);
+        try {
+          const data = await fetchJson(`${backendUrl}/api/blogs/slug/${slug}`);
+          setBlog(data.data);
+        } catch (firstError) {
+          if (backendUrl !== DEFAULT_LIVE_BACKEND_URL) {
+            const data = await fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/blogs/slug/${slug}`);
+            setBlog(data.data);
+          } else {
+            throw firstError;
+          }
+        }
       } catch (err) {
         console.error(err);
         setError('Unable to load blog details.');

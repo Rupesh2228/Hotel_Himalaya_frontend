@@ -54,6 +54,8 @@ const BlogManager = () => {
     e.preventDefault();
     const payload = {
       ...formData,
+      slug: (formData.slug || '').trim(),
+      status: formData.status || 'Published',
       gallery: formData.gallery ? formData.gallery.split(',').map(s => s.trim()) : [],
     };
     
