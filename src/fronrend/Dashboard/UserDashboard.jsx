@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { FaTicketAlt, FaHistory, FaSuitcase } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import Components from '../componets/componets'
@@ -93,7 +93,7 @@ const UserDashboard = () => {
         const query = bookingQuery ? `?${bookingQuery}` : ''
         const storedToken = token || localStorage.getItem('token');
         const headers = storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {};
-        
+
         const response = await fetch(`${BOOKINGS_API_URL}${query}`, {
           headers: {
             ...headers,
@@ -165,6 +165,50 @@ const UserDashboard = () => {
   }, [token]);
 
 
+
+  // Guest fetchers: when no token present, fetch bookings by email/deviceId using public endpoints
+  useEffect(() => {
+    // Only run for guests (no token)
+    const storedToken = token || localStorage.getItem('token');
+    if (storedToken) return;
+    const fetchGuestEventBookings = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (user?.email) params.set('email', user.email);
+        if (deviceId) params.set('deviceId', deviceId);
+        if (!params.toString()) return;
+        const url = `${getApiUrl()}/api/events/my-bookings-by-email` + `?${params.toString()}`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        const data = await resp.json();
+        const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+        setEventBookings(eventsArray);
+      } catch (err) {
+        console.error('Error fetching guest event bookings:', err);
+      }
+    };
+    fetchGuestEventBookings();
+  }, [user?.email, deviceId, token]);
+
+  useEffect(() => {
+    const storedToken = token || localStorage.getItem('token');
+    if (storedToken) return;
+    const fetchGuestTourBookings = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (user?.email) params.set('email', user.email);
+        if (deviceId) params.set('deviceId', deviceId);
+        if (!params.toString()) return;
+        const url = `${getApiUrl()}/api/tours/my-bookings-guest` + `?${params.toString()}`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        const data = await resp.json();
+        const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+        setTourBookings(toursArray);
+      } catch (err) {
+        console.error('Error fetching guest tour bookings:', err);
+      }
+    };
+    fetchGuestTourBookings();
+  }, [user?.email, deviceId, token]);
 
   return (    <>
       <Components />
@@ -353,3 +397,6 @@ const UserDashboard = () => {
 }
 
 export default UserDashboard
+
+
+
