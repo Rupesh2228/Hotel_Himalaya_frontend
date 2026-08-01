@@ -125,13 +125,10 @@ const AttractionManager = () => {
       <div className="attraction-nav">
         <div className="attraction-nav-left">
           <button type="button" className={`attraction-nav-item ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>All Attractions</button>
-          <button type="button" className={`attraction-nav-item ${activeTab === 'add' ? 'active' : ''}`} onClick={() => { setActiveTab('add'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Add New</button>
           <button type="button" className={`attraction-nav-item ${activeTab === 'published' ? 'active' : ''}`} onClick={() => setActiveTab('published')}>Published</button>
           <button type="button" className={`attraction-nav-item ${activeTab === 'drafts' ? 'active' : ''}`} onClick={() => setActiveTab('drafts')}>Drafts</button>
         </div>
         <div className="attraction-nav-right">
-          <input className="attraction-search" placeholder="Search attractions..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-          <button type="button" className="mgr-btn mgr-btn-primary" onClick={() => { setEditingId(null); setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', status: 'Draft', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' }); setActiveTab('add'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Add Attraction</button>
         </div>
       </div>
 

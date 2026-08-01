@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './AttractionDetail.css'
+import {navbar} from '../componets/componets'
 import Loader from '../componets/Loader'
 import SEO from '../componets/SEO'
-import { subscribeToAttractionChanges } from './attractionEvents'
 import { getApiUrl } from '../../config/api'
 
 const API_URL = getApiUrl()
+
+// Rename imported lowercase "navbar" to a usable React component name
+const Navbar = navbar;
 
 const AttractionDetail = () => {
   const { slug, id } = useParams()
@@ -54,14 +57,17 @@ const AttractionDetail = () => {
 
   if (error || !attraction) {
     return (
-      <div className="attraction_detail_page">
-        <div className="detail_error">
-          <p>{error || 'Attraction not found.'}</p>
-          <button className="detail_back_btn" onClick={() => navigate(-1)}>
-            Go Back
-          </button>
+      <>
+        <Navbar />
+        <div className="attraction_detail_page">
+          <div className="detail_error">
+            <p>{error || 'Attraction not found.'}</p>
+            <button className="detail_back_btn" onClick={() => navigate(-1)}>
+              Go Back
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
@@ -75,6 +81,7 @@ const AttractionDetail = () => {
   }
 
   return (
+
     <div className="attraction_detail_page">
       <SEO customSEO={customSEO} />
       <div className="detail_wrapper">
@@ -106,7 +113,7 @@ const AttractionDetail = () => {
                 ))}
               </div>
             ) : null}
-            <button className="detail_cta_btn" onClick={() => navigate('/attractions')}>
+            <button className="detail_cta_btn" onClick={() => navigate('/')}>
               Back to Attractions
             </button>
           </div>

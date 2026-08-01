@@ -79,13 +79,20 @@ const SEOManager = () => {
 
   const charCount = (str, max) => {
     const len = (str || '').length;
-    // Removing strict limitation color coding for max description
-    const color = '#10b981'; // always green
-    return { len, max, color, pct: len > 0 ? 100 : 0 };
+    // When max is provided, compute percentage relative to max; if not, treat as unlimited and show full progress when any chars exist
+    const color = '#10b981'; // keep green for simplicity
+    let pct = 0;
+    if (typeof max === 'number' && max > 0) {
+      pct = Math.min(100, Math.round((len / max) * 100));
+    } else {
+      pct = len > 0 ? 100 : 0;
+    }
+    return { len, max: typeof max === 'number' ? max : null, color, pct };
   };
 
   const titleStats = charCount(formData.title, 60);
-  const descStats  = charCount(formData.metaDescription, 160);
+  // Meta description is now treated as unlimited (no max passed)
+  const descStats  = charCount(formData.metaDescription);
 
 
   return (
@@ -211,7 +218,7 @@ const SEOManager = () => {
             <div className="seo-label-row">
               <label className="seo-label" htmlFor="seo-desc">📝 Meta Description</label>
               <span className="seo-char-counter" style={{ color: descStats.color }}>
-                {descStats.len}/{descStats.max}
+                {descStats.len}
               </span>
             </div>
             <textarea
