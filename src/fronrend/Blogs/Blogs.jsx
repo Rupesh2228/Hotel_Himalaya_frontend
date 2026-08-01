@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Navbar from '../componets/componets';
 import { Link } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
@@ -55,7 +56,10 @@ const Blogs = () => {
   if (loading) return <Loader fullScreen />;
 
   return (
+   <>
+    <Navbar />
     <div className="blogs-page">
+
       <SEO page="Blogs" />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Explore Our Blogs & Attractions</h1>
@@ -101,6 +105,7 @@ const Blogs = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
