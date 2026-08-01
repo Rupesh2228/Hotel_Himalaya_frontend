@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './AttractionDetail.css'
-import { navbar as Navbar } from '../componets/componets'
+import Navbar from '../componets/componets'
 import Loader from '../componets/Loader'
 import SEO from '../componets/SEO'
 import { getApiUrl } from '../../config/api'
