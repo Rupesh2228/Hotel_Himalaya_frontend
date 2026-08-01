@@ -11,7 +11,7 @@ const BlogManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
-    fullDescription: '', status: 'Draft', seoTitle: '', metaDescription: '',
+    fullDescription: '', seoTitle: '', metaDescription: '',
     keywords: '', canonical: '', schema: ''
   });
 
@@ -63,7 +63,7 @@ const BlogManager = () => {
       });
       
       if (res.ok) {
-        setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', status: 'Draft', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' });
+        setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' });
         setEditingId(null);
         fetchBlogs();
       } else {
@@ -142,13 +142,7 @@ const BlogManager = () => {
               <label className="mgr-label">Full Description (HTML allowed)</label>
               <textarea required className="mgr-textarea" rows="6" value={formData.fullDescription} onChange={e => setFormData({ ...formData, fullDescription: e.target.value })} />
             </div>
-            <div className="mgr-form-group">
-              <label className="mgr-label">Status</label>
-              <select className="mgr-select" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                <option>Draft</option>
-                <option>Published</option>
-              </select>
-            </div>
+
 
             <div className="mgr-section-divider">
               <span className="mgr-section-divider-label">SEO Settings</span>
@@ -179,7 +173,7 @@ const BlogManager = () => {
           
           <div className="mgr-actions">
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', status: 'Draft', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' }); }} className="mgr-btn mgr-btn-secondary">Cancel</button>
+              <button type="button" onClick={() => { setEditingId(null); setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' }); }} className="mgr-btn mgr-btn-secondary">Cancel</button>
             )}
             <button type="submit" className="mgr-btn mgr-btn-primary">{editingId ? 'Update Blog' : 'Save Blog'}</button>
           </div>
@@ -192,7 +186,6 @@ const BlogManager = () => {
           <thead className="bg-gray-100">
             <tr>
               <th className="py-2 px-4 border-b text-left">Title</th>
-              <th className="py-2 px-4 border-b text-left">Status</th>
               <th className="py-2 px-4 border-b text-right">Actions</th>
             </tr>
           </thead>
@@ -200,7 +193,6 @@ const BlogManager = () => {
             {blogs.map(blog => (
               <tr key={blog._id} className="hover:bg-gray-50">
                 <td className="py-2 px-4 border-b">{blog.title}</td>
-                <td className="py-2 px-4 border-b">{blog.status}</td>
                 <td className="py-2 px-4 border-b text-right space-x-2">
                   <button onClick={() => handleEdit(blog)} className="text-blue-600 hover:underline">Edit</button>
                   <button onClick={() => handleDelete(blog._id)} className="text-red-600 hover:underline">Delete</button>

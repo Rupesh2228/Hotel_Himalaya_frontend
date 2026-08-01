@@ -1893,11 +1893,7 @@ const AdminDashboard = () => {
               <div className="empty-state">No event bookings yet. New reservations will appear here with a QR ticket.</div>
             ) : (
               <>
-                <div className="eb-status-summary">
-                  <div className="eb-status-pill upcoming">Upcoming: {eventBookingStatusCounts.upcoming}</div>
-                  <div className="eb-status-pill ongoing">Ongoing: {eventBookingStatusCounts.ongoing}</div>
-                  <div className="eb-status-pill completed">Completed: {eventBookingStatusCounts.completed}</div>
-                </div>
+
                 <div className="eb-grid">
                   {eventBookings.map((booking) => (
                     <div className="eb-card" key={booking._id}>

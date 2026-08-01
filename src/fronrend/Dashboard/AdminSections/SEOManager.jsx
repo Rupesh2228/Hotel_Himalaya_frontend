@@ -22,7 +22,6 @@ const SEOManager = () => {
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
-    setTimeout(() => setToast(null), 3500);
   };
 
   useEffect(() => {
@@ -77,22 +76,7 @@ const SEOManager = () => {
     }
   };
 
-  const charCount = (str, max) => {
-    const len = (str || '').length;
-    // When max is provided, compute percentage relative to max; if not, treat as unlimited and show full progress when any chars exist
-    const color = '#10b981'; // keep green for simplicity
-    let pct = 0;
-    if (typeof max === 'number' && max > 0) {
-      pct = Math.min(100, Math.round((len / max) * 100));
-    } else {
-      pct = len > 0 ? 100 : 0;
-    }
-    return { len, max: typeof max === 'number' ? max : null, color, pct };
-  };
 
-  const titleStats = charCount(formData.title, 60);
-  // Meta description is now treated as unlimited (no max passed)
-  const descStats  = charCount(formData.metaDescription);
 
 
   return (
@@ -100,9 +84,18 @@ const SEOManager = () => {
 
       {/* ── Toast ── */}
       {toast && (
-        <div className={`seo-toast seo-toast-${toast.type}`}>
+        <div className={`seo-toast seo-toast-${toast.type}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span>{toast.type === 'success' ? '✅' : '⚠️'}</span>
-          {toast.msg}
+          <span style={{ flex: 1 }}>{toast.msg}</span>
+          <button
+            onClick={() => setToast(null)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 16, lineHeight: 1, padding: '2px 4px', borderRadius: 6,
+              color: 'inherit', opacity: 0.6, marginLeft: 4
+            }}
+            aria-label="Close"
+          >✕</button>
         </div>
       )}
 
@@ -153,9 +146,6 @@ const SEOManager = () => {
                 <label className="seo-label" htmlFor="seo-title">
                   🏷️ SEO Title <span className="seo-required">*</span>
                 </label>
-                <span className="seo-char-counter" style={{ color: titleStats.color }}>
-                  {titleStats.len}/{titleStats.max}
-                </span>
               </div>
               <input
                 id="seo-title"
@@ -166,13 +156,6 @@ const SEOManager = () => {
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
               />
-              <div className="seo-progress-bar">
-                <div
-                  className="seo-progress-fill"
-                  style={{ width: `${titleStats.pct}%`, background: titleStats.color }}
-                />
-              </div>
-              <p className="seo-hint">Recommended: 50–60 characters for best Google display</p>
             </div>
 
             <div className="seo-field">
@@ -190,7 +173,6 @@ const SEOManager = () => {
                 value={formData.keywords}
                 onChange={e => setFormData({ ...formData, keywords: e.target.value })}
               />
-              <p className="seo-hint">Separate keywords with commas. Aim for 5–10 relevant terms.</p>
             </div>
           </div>
 
@@ -217,9 +199,6 @@ const SEOManager = () => {
           <div className="seo-field">
             <div className="seo-label-row">
               <label className="seo-label" htmlFor="seo-desc">📝 Meta Description</label>
-              <span className="seo-char-counter" style={{ color: descStats.color }}>
-                {descStats.len}
-              </span>
             </div>
             <textarea
               id="seo-desc"
@@ -229,13 +208,6 @@ const SEOManager = () => {
               value={formData.metaDescription}
               onChange={e => setFormData({ ...formData, metaDescription: e.target.value })}
             />
-            <div className="seo-progress-bar">
-              <div
-                className="seo-progress-fill"
-                style={{ width: `${descStats.pct}%`, background: descStats.color }}
-              />
-            </div>
-            <p className="seo-hint">Recommended: 150–160 characters. This appears directly in search engine results.</p>
           </div>
 
           {/* Schema JSON-LD — full width */}
