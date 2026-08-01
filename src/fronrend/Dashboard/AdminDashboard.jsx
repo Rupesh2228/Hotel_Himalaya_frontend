@@ -12,7 +12,6 @@ import {
 import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
-import UserList from './AdminSections/UserList';
 import './AdminSections/Manager.css'; // Importing premium form CSS
 import AttractionManager from './AdminSections/AttractionManager';
 import BlogManager from './AdminSections/BlogManager';
