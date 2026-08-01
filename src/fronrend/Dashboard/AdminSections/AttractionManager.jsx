@@ -16,6 +16,7 @@ const AttractionManager = () => {
   });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchAttractions();
@@ -48,6 +49,16 @@ const AttractionManager = () => {
       fullDescription: '', seoTitle: '', metaDescription: '',
       keywords: '', canonical: '', schema: ''
     });
+    setEditingId(null);
+  };
+
+  const handleEdit = (attraction) => {
+    setEditingId(attraction._id);
+    setFormData({
+      ...attraction,
+      gallery: attraction.gallery ? attraction.gallery.join(', ') : ''
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSave = async (e) => {
@@ -58,8 +69,11 @@ const AttractionManager = () => {
       gallery: formData.gallery ? formData.gallery.split(',').map(s => s.trim()) : [],
     };
     try {
-      const res = await fetch(`${API_URL}/api/attractions`, {
-        method: 'POST',
+      const method = editingId ? 'PUT' : 'POST';
+      const endpoint = editingId ? `${API_URL}/api/attractions/${editingId}` : `${API_URL}/api/attractions`;
+
+      const res = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -67,7 +81,7 @@ const AttractionManager = () => {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        showToast('success', 'Attraction saved successfully!');
+        showToast('success', editingId ? 'Attraction updated successfully!' : 'Attraction saved successfully!');
         resetForm();
         fetchAttractions();
       } else {
@@ -145,8 +159,8 @@ const AttractionManager = () => {
       {/* Form Card */}
       <div className="mgr-form-card">
         <div className="mgr-form-card-header">
-          <h3 className="mgr-form-card-title">✨ Add New Attraction</h3>
-          <span className="mgr-mode-badge mgr-mode-badge--new">New</span>
+          <h3 className="mgr-form-card-title">{editingId ? '✏️ Edit Attraction' : '✨ Add New Attraction'}</h3>
+          <span className={`mgr-mode-badge ${editingId ? 'mgr-mode-badge--edit' : 'mgr-mode-badge--new'}`}>{editingId ? 'Editing' : 'New'}</span>
         </div>
 
         <form onSubmit={handleSave} className="mgr-form">
@@ -227,16 +241,16 @@ const AttractionManager = () => {
               background: '#fff', color: '#6b7280', fontWeight: 700, cursor: 'pointer',
               fontFamily: 'inherit', fontSize: 13.5
             }}>
-              🗑️ Clear
+              {editingId ? '❌ Cancel' : '🗑️ Clear'}
             </button>
             <button type="submit" disabled={saving} style={{
               padding: '11px 28px', borderRadius: 12, border: 'none',
-              background: saving ? '#e5e7eb' : 'linear-gradient(135deg, #d4af37, #b8962e)',
+              background: saving ? '#e5e7eb' : (editingId ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'linear-gradient(135deg, #d4af37, #b8962e)'),
               color: saving ? '#9ca3af' : '#fff', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
-              fontFamily: 'inherit', fontSize: 13.5, boxShadow: saving ? 'none' : '0 5px 18px rgba(212,175,55,0.35)',
+              fontFamily: 'inherit', fontSize: 13.5, boxShadow: saving ? 'none' : (editingId ? '0 5px 18px rgba(37,99,235,0.35)' : '0 5px 18px rgba(212,175,55,0.35)'),
               transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: 8
             }}>
-              {saving ? '⏳ Saving…' : '💾 Save Attraction'}
+              {saving ? '⏳ Saving…' : (editingId ? '💾 Update Attraction' : '💾 Save Attraction')}
             </button>
           </div>
         </form>
@@ -303,6 +317,12 @@ const AttractionManager = () => {
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <div className="mgr-table-actions" style={{ justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => handleEdit(attr)}
+                          className="mgr-action-btn mgr-action-btn--edit"
+                        >
+                          ✏️ Edit
+                        </button>
                         <button
                           onClick={() => handleDelete(attr._id)}
                           className="mgr-action-btn mgr-action-btn--delete"
