@@ -152,15 +152,8 @@ const Blogs = () => {
               >
                 Blog <span className="blogs-tab-count">{blogCount}</span>
               </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeFilter === 'attraction'}
-                className={`blogs-tab ${activeFilter === 'attraction' ? 'active' : ''}`}
-                onClick={() => handleFilterChange('attraction')}
-              >
-                Attraction <span className="blogs-tab-count">{attractionCount}</span>
-              </button>
+              
+      
             </div>
           )}
 

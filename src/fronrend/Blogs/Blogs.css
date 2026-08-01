@@ -7,8 +7,8 @@
 }
 
 .blogs-page {
-  background-color: #000000;
-  color: #ffffff;
+  background-color:#ffffff;
+  color: #000000;
   min-height: 100vh;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -40,7 +40,7 @@
 .blogs-title {
   font-size: 2.75rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #000000;
   margin: 0 0 12px;
   line-height: 1.15;
 }
@@ -48,7 +48,7 @@
 .blogs-subtitle {
   font-size: 1.05rem;
   line-height: 1.7;
-  color: #a3a3a3;
+  color: #120000;
   max-width: 640px;
   margin: 0;
 }
@@ -80,11 +80,11 @@
 }
 
 .blogs-breadcrumb .sep {
-  color: #555;
+  color: #000000;
 }
 
 .blogs-breadcrumb .current {
-  color: #ffffff;
+  color: #000000;
   font-weight: 600;
 }
 
@@ -100,8 +100,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #111111;
-  color: #b3b3b3;
+  background-color: #000000;
+  color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   padding: 8px 16px;
@@ -113,7 +113,7 @@
 }
 
 .blogs-tab:hover {
-  background-color: #1a1a1a;
+  background-color: #000000;
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.25);
 }
@@ -127,7 +127,7 @@
 .blogs-tab-count {
   font-size: 0.75rem;
   font-weight: 700;
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.956);
   padding: 1px 7px;
   border-radius: 999px;
   min-width: 20px;
@@ -135,7 +135,7 @@
 }
 
 .blogs-tab.active .blogs-tab-count {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgb(255, 255, 255);
 }
 
 /* ---------- Error / Empty ---------- */
@@ -151,7 +151,7 @@
 
 .blogs-empty {
   text-align: center;
-  color: #888;
+  color: #130101;
   padding: 40px 0;
 }
 
@@ -234,7 +234,7 @@
 .blog-row-title {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #0c0000;
   margin: 0 0 8px;
   line-height: 1.4;
   display: -webkit-box;
@@ -251,7 +251,7 @@
 .blog-row-excerpt {
   font-size: 0.9rem;
   line-height: 1.6;
-  color: #a3a3a3;
+  color: #000000;
   margin: 0 0 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -283,8 +283,8 @@
 }
 
 .page-button {
-  background-color: #111111;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #000000;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   padding: 8px 16px;
