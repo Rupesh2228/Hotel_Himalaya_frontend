@@ -379,6 +379,7 @@ const AdminDashboard = () => {
   const [galleryForm, setGalleryForm] = useState(initialGalleryForm);
   const [pastEvents, setPastEvents] = useState([]);
   const [pastEventForm, setPastEventForm] = useState(initialPastEventForm);
+  const [editingPastEventId, setEditingPastEventId] = useState('');
   const [attractionForm, setAttractionForm] = useState(initialAttractionForm);
   const [editingAttractionId, setEditingAttractionId] = useState('');
   const [eventForm, setEventForm] = useState(initialEventForm);
@@ -931,20 +932,30 @@ const AdminDashboard = () => {
     setAdminError(''); setAdminMessage('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(apiPath('/api/past-events'), {
-        method: 'POST',
+      const isEditing = Boolean(editingPastEventId);
+      const url = isEditing ? apiPath(`/api/past-events/${editingPastEventId}`) : apiPath('/api/past-events');
+      const method = isEditing ? 'PUT' : 'POST';
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-
         body: JSON.stringify(pastEventForm)
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Unable to add past event.');
-      setPastEvents((current) => [data, ...current]);
+      if (!response.ok) throw new Error(data.error || (isEditing ? 'Unable to update past event.' : 'Unable to add past event.'));
+
+      if (isEditing) {
+        setPastEvents((current) => current.map((ev) => (ev._id === editingPastEventId ? data : ev)));
+        setAdminMessage('Completed event updated.');
+      } else {
+        setPastEvents((current) => [data, ...current]);
+        setAdminMessage('Completed event added.');
+      }
+
       setPastEventForm(initialPastEventForm);
-      setAdminMessage('Completed event added.');
+      setEditingPastEventId('');
     } catch (error) {
       console.error(error);
-      setAdminError(error.message || 'Unable to add past event.');
+      setAdminError(error.message || (editingPastEventId ? 'Unable to update past event.' : 'Unable to add past event.'));
     }
   };
 
@@ -1574,7 +1585,7 @@ const AdminDashboard = () => {
             <div className="admin-grid two-cols">
               <div className="mgr-form-card">
                 <div className="mgr-form-card-header">
-                  <h3 className="mgr-form-card-title"><FaPlus /> Add Completed Event</h3>
+                  <h3 className="mgr-form-card-title">{editingPastEventId ? (<><FaEdit /> Edit Completed Event</>) : (<><FaPlus /> Add Completed Event</>)}</h3>
                 </div>
                 <form onSubmit={handlePastEventSubmit} className="mgr-form">
                   <div className="mgr-form-grid">
@@ -1592,7 +1603,10 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div className="mgr-actions">
-                    <button type="submit" className="mgr-btn mgr-btn-primary"><FaPlus /> Add Completed Event</button>
+                    <button type="submit" className="mgr-btn mgr-btn-primary">{editingPastEventId ? (<><FaEdit /> Save Changes</>) : (<><FaPlus /> Add Completed Event</>)}</button>
+                    {editingPastEventId ? (
+                      <button type="button" className="mgr-btn mgr-btn--delete" onClick={() => { setEditingPastEventId(''); setPastEventForm(initialPastEventForm); }}><FaTimes /> Cancel</button>
+                    ) : null}
                   </div>
                 </form>
               </div>
@@ -1606,9 +1620,14 @@ const AdminDashboard = () => {
                     <div className="gallery-item" key={ev._id}>
                       {ev.imageUrl && <img src={ev.imageUrl} alt={ev.title} />}
                       <div className="gallery-item-actions">
-                        <button type="button" className="btn-danger" onClick={() => handleDeletePastEvent(ev._id)}>
-                          <FaTrash />
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button type="button" className="btn-amber" onClick={() => { setPastEventForm({ imageUrl: ev.imageUrl || '', title: ev.title || '', description: ev.description || '' }); setEditingPastEventId(ev._id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                            <FaEdit />
+                          </button>
+                          <button type="button" className="btn-danger" onClick={() => handleDeletePastEvent(ev._id)}>
+                            <FaTrash />
+                          </button>
+                        </div>
                       </div>
                       <div style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold' }}>{ev.title}</div>
                     </div>

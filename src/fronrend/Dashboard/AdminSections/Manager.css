@@ -258,6 +258,53 @@
   background: #fafafa;
 }
 
+/* ── Attraction Nav (inside attraction places) ── */
+.attraction-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  margin: 18px 0;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+}
+.attraction-nav-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.attraction-nav-item {
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #374151;
+}
+.attraction-nav-item.active {
+  background: linear-gradient(135deg, #fefce8, #fef3c7);
+  color: #92400e;
+  box-shadow: 0 6px 18px rgba(212,175,55,0.08);
+}
+.attraction-nav-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.attraction-search {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 14px;
+}
+@media (max-width: 720px) {
+  .attraction-nav { flex-direction: column; align-items: stretch; }
+  .attraction-nav-right { justify-content: flex-end; }
+}
 /* ── Buttons ── */
 .mgr-btn {
   display: inline-flex;

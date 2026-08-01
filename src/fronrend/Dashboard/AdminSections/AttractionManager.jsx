@@ -9,6 +9,8 @@ const AttractionManager = () => {
   const [attractions, setAttractions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
     fullDescription: '', status: 'Draft', seoTitle: '', metaDescription: '',
@@ -101,6 +103,14 @@ const AttractionManager = () => {
 
   if (loading) return <div>Loading Attractions...</div>;
 
+  const normalizedSearch = String(searchTerm || '').trim().toLowerCase();
+  const filteredAttractions = attractions.filter(a => {
+    if (activeTab === 'published' && a.status !== 'Published') return false;
+    if (activeTab === 'drafts' && a.status !== 'Draft') return false;
+    if (!normalizedSearch) return true;
+    return (a.title || '').toLowerCase().includes(normalizedSearch) || (a.shortDescription || '').toLowerCase().includes(normalizedSearch);
+  });
+
   return (
     <div className="mgr-wrapper">
       <div className="mgr-section-header">
@@ -108,6 +118,20 @@ const AttractionManager = () => {
         <div>
           <h2 className="mgr-header-title">Attractions Management</h2>
           <p className="mgr-header-sub">Manage local attractions and places of interest.</p>
+        </div>
+      </div>
+
+      {/* Navbar inside attraction places */}
+      <div className="attraction-nav">
+        <div className="attraction-nav-left">
+          <button type="button" className={`attraction-nav-item ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>All Attractions</button>
+          <button type="button" className={`attraction-nav-item ${activeTab === 'add' ? 'active' : ''}`} onClick={() => { setActiveTab('add'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Add New</button>
+          <button type="button" className={`attraction-nav-item ${activeTab === 'published' ? 'active' : ''}`} onClick={() => setActiveTab('published')}>Published</button>
+          <button type="button" className={`attraction-nav-item ${activeTab === 'drafts' ? 'active' : ''}`} onClick={() => setActiveTab('drafts')}>Drafts</button>
+        </div>
+        <div className="attraction-nav-right">
+          <input className="attraction-search" placeholder="Search attractions..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <button type="button" className="mgr-btn mgr-btn-primary" onClick={() => { setEditingId(null); setFormData({ title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '', fullDescription: '', status: 'Draft', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '' }); setActiveTab('add'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Add Attraction</button>
         </div>
       </div>
 
@@ -186,7 +210,7 @@ const AttractionManager = () => {
         </form>
       </div>
 
-      <h3 className="text-xl font-bold mb-4">Existing Attractions</h3>
+      <h3 className="text-xl font-bold mb-4">Existing Attractions ({filteredAttractions.length})</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border">
           <thead className="bg-gray-100">
@@ -197,7 +221,7 @@ const AttractionManager = () => {
             </tr>
           </thead>
           <tbody>
-            {attractions.map(attr => (
+            {filteredAttractions.map(attr => (
               <tr key={attr._id} className="hover:bg-gray-50">
                 <td className="py-2 px-4 border-b">{attr.title}</td>
                 <td className="py-2 px-4 border-b">{attr.status}</td>
