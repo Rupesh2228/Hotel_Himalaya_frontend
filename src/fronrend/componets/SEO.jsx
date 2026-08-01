@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
 
 const SEO = ({ page, customSEO }) => {
@@ -64,7 +63,7 @@ const SEO = ({ page, customSEO }) => {
   if (!seoData && !pageKey) return null;
 
   return (
-    <Helmet>
+    <>
       <title>{metaTitle}</title>
       {metaDescription && <meta name="description" content={metaDescription} />}
       {metaKeywords && <meta name="keywords" content={metaKeywords} />}
@@ -78,11 +77,9 @@ const SEO = ({ page, customSEO }) => {
       <meta name="twitter:title" content={metaTitle} />
       {metaDescription && <meta name="twitter:description" content={metaDescription} />}
       {seoData?.schema && (
-        <script type="application/ld+json">
-          {seoData.schema}
-        </script>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: seoData.schema }} />
       )}
-    </Helmet>
+    </>
   );
 };
 
