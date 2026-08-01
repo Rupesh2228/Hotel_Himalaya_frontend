@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
@@ -70,11 +70,26 @@ const BlogDetail = () => {
     schema: blog.schema
   };
 
+  const publishedAt = blog.createdAt ? new Date(blog.createdAt).toLocaleString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  }) : 'Unknown date';
+
   return (
     <div className="attraction_detail_page">
       <SEO customSEO={customSEO} />
       <div className="detail_wrapper">
-    
+        <div className="mb-6 text-sm text-slate-500">
+          <Link to="/" className="text-blue-600 hover:text-blue-800">Home</Link>
+          <span className="px-2">/</span>
+          <Link to="/blogs" className="text-blue-600 hover:text-blue-800">Blogs</Link>
+          <span className="px-2">/</span>
+          <span className="font-semibold text-slate-900">{blog.title}</span>
+        </div>
+
         <div className="detail_hero">
           <div className="detail_image">
             <img src={blog.featuredImage || blog.imageUrl} alt={blog.title} />
@@ -84,7 +99,7 @@ const BlogDetail = () => {
           <div className="detail_content">
             <span className="detail_tag">Blog Post</span>
             <h1 className="detail_title">{blog.title}</h1>
-            <p className="detail_subtitle">{new Date(blog.createdAt).toLocaleDateString()}</p>
+            <p className="detail_subtitle">By Admin • {publishedAt}</p>
             
             <div className="detail_text" dangerouslySetInnerHTML={{ __html: blog.fullDescription || blog.description }} />
             

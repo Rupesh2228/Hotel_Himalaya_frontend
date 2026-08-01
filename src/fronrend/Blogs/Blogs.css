@@ -3,3 +3,17 @@
   min-height: 100vh;
   background: #f3f3f3;
 }
+
+.blog-hero img {
+  min-height: 100%;
+}
+
+.blog-pagination .page-button {
+  min-width: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .blog-hero {
+    border-radius: 2rem;
+  }
+}
