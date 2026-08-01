@@ -3,6 +3,7 @@ import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import Navbar from '../componets/componets';
 import { AttractionCard } from './components';
+import { getApiUrl } from '../../config/api';
 import './Attractions.css';
 
 const Attractions = () => {
@@ -12,7 +13,7 @@ const Attractions = () => {
   useEffect(() => {
     const fetchAttractions = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const apiUrl = getApiUrl();
         const res = await fetch(`${apiUrl}/api/attractions`);
         const data = await res.json();
         if (data.success) {

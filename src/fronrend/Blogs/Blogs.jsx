@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import LazyImage from '../componets/LazyImage';
+import { getApiUrl } from '../../config/api';
 import './Blogs.css'; // Add CSS if needed
 
 const Blogs = () => {
@@ -13,7 +14,7 @@ const Blogs = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const apiUrl = getApiUrl();
         
         // Fetch both blogs and attractions
         const [blogsRes, attractionsRes] = await Promise.all([
