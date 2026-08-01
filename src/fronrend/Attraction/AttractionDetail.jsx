@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './AttractionDetail.css'
-import {navbar} from '../componets/componets'
+import { navbar as Navbar } from '../componets/componets'
 import Loader from '../componets/Loader'
 import SEO from '../componets/SEO'
 import { getApiUrl } from '../../config/api'
 
 const API_URL = getApiUrl()
-
-// Rename imported lowercase "navbar" to a usable React component name
-const Navbar = navbar;
 
 const AttractionDetail = () => {
   const { slug, id } = useParams()
@@ -81,45 +78,47 @@ const AttractionDetail = () => {
   }
 
   return (
-
-    <div className="attraction_detail_page">
-      <SEO customSEO={customSEO} />
-      <div className="detail_wrapper">
-    
-        <div className="detail_hero">
-          <div className="detail_image">
-            <img src={attraction.featuredImage || attraction.imageUrl} alt={attraction.title} />
-            <div className="detail_image_overlay"></div>
-          </div>
-
-          <div className="detail_content">
-            <span className="detail_tag">Nearby Attraction</span>
-            <h1 className="detail_title">{attraction.title}</h1>
-            {attraction.subDescription && <p className="detail_subtitle">{attraction.subDescription}</p>}
-            <div className="detail_meta">
-              {attraction.location && <span>{attraction.location}</span>}
-              {attraction.duration && <span>{attraction.duration}</span>}
-              {attraction.rating && <span>⭐ {attraction.rating}</span>}
+    <>
+      <Navbar />
+      <div className="attraction_detail_page">
+        <SEO customSEO={customSEO} />
+        <div className="detail_wrapper">
+      
+          <div className="detail_hero">
+            <div className="detail_image">
+              <img src={attraction.featuredImage || attraction.imageUrl} alt={attraction.title} />
+              <div className="detail_image_overlay"></div>
             </div>
-            
-            <div className="detail_text" dangerouslySetInnerHTML={{ __html: attraction.fullDescription || attraction.description }} />
-            
-            {(attraction.gallery && attraction.gallery.length > 0) || (attraction.images && attraction.images.length > 0) ? (
-              <div className="detail_gallery">
-                {(attraction.gallery || attraction.images).map((src, index) => (
-                  <div className="detail_thumb" key={index}>
-                    <img src={src} alt={`${attraction.title} ${index + 1}`} />
-                  </div>
-                ))}
+
+            <div className="detail_content">
+              <span className="detail_tag">Nearby Attraction</span>
+              <h1 className="detail_title">{attraction.title}</h1>
+              {attraction.subDescription && <p className="detail_subtitle">{attraction.subDescription}</p>}
+              <div className="detail_meta">
+                {attraction.location && <span>{attraction.location}</span>}
+                {attraction.duration && <span>{attraction.duration}</span>}
+                {attraction.rating && <span>⭐ {attraction.rating}</span>}
               </div>
-            ) : null}
-            <button className="detail_cta_btn" onClick={() => navigate('/')}>
-              Back to Attractions
-            </button>
+              
+              <div className="detail_text" dangerouslySetInnerHTML={{ __html: attraction.fullDescription || attraction.description }} />
+              
+              {(attraction.gallery && attraction.gallery.length > 0) || (attraction.images && attraction.images.length > 0) ? (
+                <div className="detail_gallery">
+                  {(attraction.gallery || attraction.images).map((src, index) => (
+                    <div className="detail_thumb" key={index}>
+                      <img src={src} alt={`${attraction.title} ${index + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              <button className="detail_cta_btn" onClick={() => navigate('/') }>
+                Back to Attractions
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
