@@ -2,7 +2,7 @@
 import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { getApiUrl } from "../config/api";
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: 'Bearer ' + token } : {}; };
 
 
 const AuthContext = createContext();

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../componets/componets';
 import { Link } from 'react-router-dom';
 import SEO from '../componets/SEO';

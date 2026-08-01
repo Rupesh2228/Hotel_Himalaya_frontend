@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import slugify from 'slugify';
 import { getApiUrl } from '../../../config/api';
 import './Manager.css';
 
 const API_URL = getApiUrl();
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: 'Bearer ' + token } : {};
+};
 
 const AttractionManager = () => {
   const [attractions, setAttractions] = useState([]);
@@ -17,10 +22,6 @@ const AttractionManager = () => {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [editingId, setEditingId] = useState(null);
-
-  useEffect(() => {
-    fetchAttractions();
-  }, []);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
@@ -37,6 +38,13 @@ const AttractionManager = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const loadAttractions = async () => {
+      await fetchAttractions();
+    };
+    loadAttractions();
+  }, []);
 
   const handleTitleChange = (e) => {
     const title = e.target.value;
@@ -75,7 +83,7 @@ const AttractionManager = () => {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...getAuthHeaders(),
         },
         body: JSON.stringify(payload)
       });
@@ -100,7 +108,7 @@ const AttractionManager = () => {
     try {
       const res = await fetch(`${API_URL}/api/attractions/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: getAuthHeaders()
       });
       if (res.ok) {
         showToast('success', 'Attraction deleted.');

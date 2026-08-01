@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import slugify from 'slugify';
 import { getApiUrl } from '../../../config/api';
 import './Manager.css';
 
 const API_URL = getApiUrl();
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: 'Bearer ' + token } : {};
+};
 
 const BlogManager = () => {
   const [blogs, setBlogs] = useState([]);
@@ -14,10 +19,6 @@ const BlogManager = () => {
     fullDescription: '', seoTitle: '', metaDescription: '',
     keywords: '', canonical: '', schema: '', status: 'Published'
   });
-
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
 
   const fetchBlogs = async () => {
     try {
@@ -32,6 +33,13 @@ const BlogManager = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const loadBlogs = async () => {
+      await fetchBlogs();
+    };
+    loadBlogs();
+  }, []);
 
   const handleTitleChange = (e) => {
     const title = e.target.value;
@@ -57,7 +65,7 @@ const BlogManager = () => {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+          ...getAuthHeaders()
         },
         body: JSON.stringify(payload)
       });
@@ -89,9 +97,7 @@ const BlogManager = () => {
     try {
       const res = await fetch(`${API_URL}/api/blogs/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: getAuthHeaders()
       });
       if (res.ok) fetchBlogs();
     } catch (err) {

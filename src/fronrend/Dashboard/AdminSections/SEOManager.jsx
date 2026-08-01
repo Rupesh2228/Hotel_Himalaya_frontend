@@ -4,6 +4,11 @@ import './SEOManager.css';
 
 const API_URL = getApiUrl();
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: 'Bearer ' + token } : {};
+};
+
 const PAGES = ['Home', 'About', 'Rooms', 'Tours', 'Events', 'Gallery', 'Attractions', 'Blogs', 'Contact'];
 
 const PAGE_ICONS = {
@@ -29,7 +34,7 @@ const SEOManager = () => {
       setLoading(true);
       try {
         const res = await fetch(`${API_URL}/api/seo/${selectedPage}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: getAuthHeaders()
         });
         const data = await res.json();
         if (data.success && data.data) {
@@ -60,7 +65,7 @@ const SEOManager = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          ...getAuthHeaders(),
         },
         body: JSON.stringify(formData)
       });

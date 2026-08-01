@@ -17,7 +17,7 @@ import AttractionManager from './AdminSections/AttractionManager';
 import BlogManager from './AdminSections/BlogManager';
 import SEOManager from './AdminSections/SEOManager';
 
-const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
+const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: 'Bearer ' + token } : {}; };
 
 
 const normalizeTourBookingModule = (booking) => {
