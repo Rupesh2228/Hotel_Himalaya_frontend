@@ -15,6 +15,7 @@ const Components = () => {
     { to: '/', label: 'Home'},
     { to: '/rooms', label: 'Rooms' },
     { to: '/services', label: 'Services' },
+    {to: '/events', label: 'Events'},
     {to: '/tours', label: 'Tours'},
     { to: '/about', label: 'About Us' },
     { to: '/gallery', label: 'Gallery' },
