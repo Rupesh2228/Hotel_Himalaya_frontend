@@ -666,7 +666,12 @@
 .btn-green, .btn-success { background: var(--green); color: #fff; }
 .btn-emerald { background: #2fa66d; color: #fff; }
 .btn-blue, .btn-info { background: var(--blue); color: #fff; }
-.btn-red, .btn-danger { background: var(--red); color: #fff; }
+button.btn-danger, 
+button.btn-red, 
+button.dnd-delete-btn {
+  background-color: red !important;
+  color: white !important;
+}
 .btn-amber { background: var(--amber); color: #fff; }
 .btn-secondary { background: var(--paper); color: var(--ink); border-color: var(--line-strong); }
 

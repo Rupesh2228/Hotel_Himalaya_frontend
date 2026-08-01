@@ -79,13 +79,14 @@ const SEOManager = () => {
 
   const charCount = (str, max) => {
     const len = (str || '').length;
-    const pct = Math.min(100, (len / max) * 100);
-    const color = pct > 100 ? '#ef4444' : pct > 85 ? '#f59e0b' : '#10b981';
-    return { len, max, pct, color };
+    // Removing strict limitation color coding for max description
+    const color = '#10b981'; // always green
+    return { len, max, color, pct: len > 0 ? 100 : 0 };
   };
 
   const titleStats = charCount(formData.title, 60);
   const descStats  = charCount(formData.metaDescription, 160);
+
 
   return (
     <div className="seo-manager">
