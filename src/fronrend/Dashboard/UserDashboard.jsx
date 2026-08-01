@@ -108,7 +108,7 @@ const UserDashboard = () => {
   const [tourBookings, setTourBookings] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState({})
-  const selectedRoom = rooms.find((room) => room._id === selectedRoomId)
+  const selectedRoom = rooms.find((room) => room._id === selectedRoomId || room.id === selectedRoomId)
   const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
 
@@ -141,7 +141,7 @@ const UserDashboard = () => {
           const roomsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
           setRooms(roomsArray)
           if (roomsArray.length > 0) {
-            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id)
+            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id || roomsArray[0].id)
           }
         }
 
@@ -421,11 +421,12 @@ const UserDashboard = () => {
                 {/* Rooms Grid */}
                 <div className="rooms-booking-grid">
                   {rooms.map((room) => {
-                    const isAvailable = checkRoomAvailability(room._id);
+                    const roomId = room._id || room.id;
+                    const isAvailable = checkRoomAvailability(roomId);
                     const roomCover = room.images && room.images.length > 0 ? room.images[0] : null;
                     
                     return (
-                      <div className="room-booking-card" key={room._id}>
+                      <div className="room-booking-card" key={roomId}>
                         <div className="room-booking-img-wrapper">
                           {roomCover ? (
                             <img src={roomCover} alt={room.title} className="room-booking-img" />
@@ -457,7 +458,7 @@ const UserDashboard = () => {
                               type="button" 
                               className="btn-book-room-action"
                               onClick={() => {
-                                setSelectedRoomId(room._id);
+                                setSelectedRoomId(roomId);
                                 setIsModalOpen(true);
                               }}
                             >
