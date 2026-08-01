@@ -2234,15 +2234,9 @@ const AdminDashboard = () => {
                               className="btn-sm btn-red"
                               onClick={() => handleRejectTourBooking(b._id)}
                             >
-                              <FaTimes /> Cancel
+                              <FaTimes /> Delete
                             </button>
                           )}
-                          <button
-                            className="btn-sm btn-blue-no-hover"
-                            onClick={() => {}}
-                          >
-                            View Details
-                          </button>
                         </td>
                       </tr>
                     ))}
@@ -2310,14 +2304,7 @@ const AdminDashboard = () => {
                               className="btn-sm btn-red"
                               onClick={() => handleDeleteRoomBooking(b._id)}
                             >
-                              Cancel
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-sm btn-blue-no-hover"
-                              onClick={() => {}}
-                            >
-                              View Details
+                              Delete
                             </button>
                           </td>
                         </tr>

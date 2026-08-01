@@ -564,44 +564,92 @@ tbody tr:hover {
   background-color: #f9fafb;
 }
 
-/* FORMS */
+/* FORMS — PREMIUM REDESIGN */
 .booking-form-wrap {
-  background-color: #ffffff;
-  border: 1px solid var(--admin-border);
-  border-radius: 14px;
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 24px;
+  padding: 36px 40px;
+  margin-bottom: 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.1),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(139, 92, 246, 0.15);
+}
+
+.booking-form-wrap::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.booking-form-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
 }
 
 .booking-form-wrap h3 {
   font-family: var(--font-playfair);
-  font-size: 1.2rem;
-  margin: 0 0 20px;
-  color: var(--admin-text-primary);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 28px;
+  color: #f8fafc;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.booking-form-wrap h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.4), transparent);
+  margin-left: 12px;
 }
 
 .form-grid {
   display: grid;
-  gap: 18px;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .form-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--admin-text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(196, 181, 253, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 
 input[type="text"],
@@ -610,25 +658,64 @@ input[type="date"],
 input[type="time"],
 textarea,
 select {
-  background-color: #ffffff;
-  border: 1px solid var(--admin-border);
-  border-radius: 10px;
-  padding: 12px 16px;
-  color: var(--admin-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 12px;
+  padding: 13px 16px;
+  color: #f1f5f9;
   font-family: var(--font-outfit);
   font-size: 0.9rem;
   transition: var(--transition);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+input[type="date"]::placeholder,
+input[type="time"]::placeholder,
+textarea::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+select option {
+  background: #1e1b4b;
+  color: #f1f5f9;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--admin-gold);
-  box-shadow: 0 0 0 3px var(--admin-gold-light);
+  border-color: rgba(139, 92, 246, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 0 20px rgba(139, 92, 246, 0.1);
 }
 
-/* BUTTONS */
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: rgba(139, 92, 246, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+
 button,
 .btn-primary {
   display: inline-flex;
@@ -816,11 +903,7 @@ button svg,
   color: #fff;
 }
 
-.form-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-}
+
 
 /* BADGES */
 .badge {
