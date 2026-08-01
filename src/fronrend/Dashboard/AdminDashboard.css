@@ -1502,3 +1502,54 @@ button.btn-danger svg {
   font-size: 1rem;
 }
 
+/* Semantic Button Colors */
+.btn-green {
+  background-color: #22c55e !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
+}
+.btn-green:hover { background-color: #16a34a !important; }
+
+.btn-amber {
+  background-color: #f59e0b !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+}
+.btn-amber:hover { background-color: #d97706 !important; }
+
+.btn-red {
+  background-color: #ef4444 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+.btn-red:hover { background-color: #dc2626 !important; }
+
+.btn-blue {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+.btn-blue:hover { background-color: #2563eb !important; }
+
+.btn-emerald {
+  background-color: #10b981 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+}
+.btn-emerald:hover { background-color: #059669 !important; }
+
+.btn-blue-no-hover {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.btn-blue-no-hover:hover {
+  background-color: #3b82f6 !important;
+}
+
+

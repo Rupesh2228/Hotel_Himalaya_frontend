@@ -12,6 +12,9 @@ import {
 import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
+import AttractionManager from './AdminSections/AttractionManager';
+import BlogManager from './AdminSections/BlogManager';
+import SEOManager from './AdminSections/SEOManager';
 
 const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
 
@@ -140,6 +143,8 @@ const sectionTitleMap = {
   rooms: 'Rooms',
   tours: 'Manage Tours',
   attractions: 'Attractions',
+  blogs: 'Blogs',
+  seo: 'SEO Management',
   events: 'Events',
   pastEvents: 'Completed Events'
 };
@@ -1707,8 +1712,9 @@ const AdminDashboard = () => {
                   <textarea value={roomForm.description} onChange={(e) => setRoomForm({ ...roomForm, description: e.target.value })} />
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn-success btn-icon">{editingRoomId ? (<><FaEdit /> Update room</>) : (<><FaPlus /> Add room</>)}</button>
+                  <button type="submit" className="btn-green btn-icon">{editingRoomId ? (<><FaEdit /> Save</>) : (<><FaPlus /> Add Room</>)}</button>
                   {editingRoomId ? <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(''); setRoomForm(initialRoomForm); }}>Cancel</button> : null}
+                  <button type="button" className="btn-blue btn-icon" onClick={() => window.location.reload()}>Refresh</button>
                 </div>
               </form>
             </div>
@@ -1730,8 +1736,8 @@ const AdminDashboard = () => {
                       <td>{room.totalMembers || 1}</td>
                       <td>
                         <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || '') }); }}><FaEdit /> Edit</button>
-                          <button type="button" className="btn-danger" onClick={() => handleDeleteRoom(room._id)}><FaTrash /> Delete</button>
+                          <button type="button" className="btn-amber btn-icon" onClick={() => { setEditingRoomId(room._id); setRoomForm({ title: room.title || '', description: room.description || '', price: room.price || '', totalMembers: room.totalMembers || '2', images: Array.isArray(room.images) ? room.images.join(',') : (room.images || '') }); }}><FaEdit /> Edit</button>
+                          <button type="button" className="btn-red btn-icon" onClick={() => handleDeleteRoom(room._id)}><FaTrash /> Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -1742,58 +1748,11 @@ const AdminDashboard = () => {
           </div>
         );
       case 'attractions':
-        return (
-          <div className="admin-panel-slot">
-            {adminError ? <div className="message error">{adminError}</div> : null}
-            {adminMessage ? <div className="message">{adminMessage}</div> : null}
-            <div className="booking-form-wrap">
-              <h3>{editingAttractionId ? 'Edit attraction' : 'Add attraction'}</h3>
-              <form onSubmit={handleAttractionSubmit} className="form-grid">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Title</label>
-                    <input type="text" value={attractionForm.title} onChange={(e) => setAttractionForm({ ...attractionForm, title: e.target.value })} required />
-                  </div>
-                  <div className="form-group">
-                    <label>Image</label>
-                    <DragAndDropUploader value={attractionForm.imageUrl} onChange={(url) => setAttractionForm({ ...attractionForm, imageUrl: url })} />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea value={attractionForm.description} onChange={(e) => setAttractionForm({ ...attractionForm, description: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label>Short description</label>
-                  <input type="text" value={attractionForm.subDescription} onChange={(e) => setAttractionForm({ ...attractionForm, subDescription: e.target.value })} />
-                </div>
-
-                <div className="form-actions">
-                  <button type="submit" className="btn-success btn-icon">{editingAttractionId ? (<><FaEdit /> Update attraction</>) : (<><FaPlus /> Add attraction</>)}</button>
-                  {editingAttractionId ? <button type="button" className="btn-secondary" onClick={() => { setEditingAttractionId(''); setAttractionForm(initialAttractionForm); }}>Cancel</button> : null}
-                </div>
-              </form>
-            </div>
-            <div className="table-wrapper">
-              <table>
-                <thead><tr><th>Attraction</th><th>Actions</th></tr></thead>
-                <tbody>
-                  {attractions.map((attraction) => (
-                    <tr key={attraction._id}>
-                      <td>{attraction.title}</td>
-                      <td>
-                        <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingAttractionId(attraction._id); setAttractionForm({ title: attraction.title || '', description: attraction.description || '', subDescription: attraction.subDescription || '', imageUrl: attraction.imageUrl || '', link: attraction.link || '' }); }}><FaEdit /> Edit</button>
-                          <button type="button" className="btn-danger" onClick={() => handleDeleteAttraction(attraction._id)}><FaTrash /> Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <AttractionManager />;
+      case 'blogs':
+        return <BlogManager />;
+      case 'seo':
+        return <SEOManager />;
       case 'events':
         return (
           <div className="admin-panel-slot">
@@ -1845,8 +1804,9 @@ const AdminDashboard = () => {
                   <DragAndDropUploader value={eventForm.imageUrl} onChange={(url) => setEventForm({ ...eventForm, imageUrl: url })} />
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn-warning btn-icon">{editingEventId ? (<><FaEdit /> Update event</>) : (<><FaCalendarAlt /> Create event</>)}</button>
+                  <button type="submit" className="btn-green btn-icon">{editingEventId ? (<><FaEdit /> Save</>) : (<><FaPlus /> Add Event</>)}</button>
                   {editingEventId ? <button type="button" className="btn-secondary" onClick={() => { setEditingEventId(''); setEventForm(initialEventForm); }}>Cancel</button> : null}
+                  <button type="button" className="btn-blue btn-icon" onClick={() => window.location.reload()}>Refresh</button>
                 </div>
               </form>
             </div>
@@ -1860,8 +1820,8 @@ const AdminDashboard = () => {
                       <td>{event.availableSeats || 0}/{event.totalSeats || 0}</td>
                       <td>
                         <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingEventId(event._id); setEventForm({ title: event.title || '', description: event.description || '', date: event.date || '', time: event.time || '', price: event.price || '', location: event.location || '', availableSeats: event.availableSeats || '', totalSeats: event.totalSeats || '', imageUrl: event.imageUrl || '' }); }}><FaEdit /> Edit</button>
-                          <button type="button" className="btn-danger" onClick={() => handleDeleteEvent(event._id)}><FaTrash /> Delete</button>
+                          <button type="button" className="btn-amber btn-icon" onClick={() => { setEditingEventId(event._id); setEventForm({ title: event.title || '', description: event.description || '', date: event.date || '', time: event.time || '', price: event.price || '', location: event.location || '', availableSeats: event.availableSeats || '', totalSeats: event.totalSeats || '', imageUrl: event.imageUrl || '' }); }}><FaEdit /> Edit</button>
+                          <button type="button" className="btn-red btn-icon" onClick={() => handleDeleteEvent(event._id)}><FaTrash /> Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -2183,8 +2143,9 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button type="submit" className="btn-success btn-icon">{editingTourId ? (<><FaEdit /> Update tour</>) : (<><FaPlus /> Add tour</>)}</button>
+                  <button type="submit" className="btn-green btn-icon">{editingTourId ? (<><FaEdit /> Save</>) : (<><FaPlus /> Add Tour</>)}</button>
                   {editingTourId ? <button type="button" className="btn-secondary" onClick={() => { setEditingTourId(''); setTourForm(initialTourForm); }}>Cancel</button> : null}
+                  <button type="button" className="btn-blue btn-icon" onClick={() => window.location.reload()}>Refresh</button>
                 </div>
               </form>
             </div>
@@ -2202,8 +2163,8 @@ const AdminDashboard = () => {
                       <td>{tour.publishStatus || 'Published'}</td>
                       <td>
                         <div className="form-actions">
-                          <button type="button" className="btn-secondary" onClick={() => { setEditingTourId(tour._id); setTourForm(buildTourFormFromTour(tour)); }}><FaEdit /> Edit</button>
-                          <button type="button" className="btn-danger" onClick={() => handleDeleteTour(tour._id)}><FaTrash /> Delete</button>
+                          <button type="button" className="btn-amber btn-icon" onClick={() => { setEditingTourId(tour._id); setTourForm(buildTourFormFromTour(tour)); }}><FaEdit /> Edit</button>
+                          <button type="button" className="btn-red btn-icon" onClick={() => handleDeleteTour(tour._id)}><FaTrash /> Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -2216,7 +2177,10 @@ const AdminDashboard = () => {
       case 'tour-bookings':
         return (
           <div className="booking-form-wrap">
-            <h3>🏔️ Tour Bookings</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>🏔️ Tour Bookings</h3>
+              <button type="button" className="btn-blue btn-icon" onClick={() => window.location.reload()}>Refresh Bookings</button>
+            </div>
             {tourBookings.length === 0 ? (
               <div className="empty-state">No tour bookings yet.</div>
             ) : (
@@ -2251,25 +2215,33 @@ const AdminDashboard = () => {
                         <td style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           {b.status !== 'Confirmed' && (
                             <button
-                              className="btn-sm btn-approve"
+                              className="btn-sm btn-green"
                               onClick={() => handleApproveTourBooking(b._id)}
                             >
-                              <FaCheck /> Approve
+                              <FaCheck /> Confirm
+                            </button>
+                          )}
+                          {b.status === 'Confirmed' && (
+                            <button
+                              className="btn-sm btn-emerald"
+                              onClick={() => {}}
+                            >
+                              <FaCheck /> Complete
                             </button>
                           )}
                           {b.status !== 'Rejected' && (
                             <button
-                              className="btn-sm btn-reject"
+                              className="btn-sm btn-red"
                               onClick={() => handleRejectTourBooking(b._id)}
                             >
-                              <FaTimes /> Reject
+                              <FaTimes /> Cancel
                             </button>
                           )}
                           <button
-                            className="btn-sm btn-danger"
-                            onClick={() => handleDeleteTourBooking(b._id)}
+                            className="btn-sm btn-blue-no-hover"
+                            onClick={() => {}}
                           >
-                          <FaTrash /> Delete
+                            View Details
                           </button>
                         </td>
                       </tr>
@@ -2286,7 +2258,10 @@ const AdminDashboard = () => {
         return (
           <>
             <div className="booking-form-wrap">
-              <h3>Room booking overview</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0 }}>Room booking overview</h3>
+                <button type="button" className="btn-blue btn-icon" onClick={() => window.location.reload()}>Refresh Bookings</button>
+              </div>
               {roomBookings.length === 0 ? (
                 <div className="empty-state">No room bookings yet.</div>
               ) : (
@@ -2315,18 +2290,34 @@ const AdminDashboard = () => {
                             {!b.verified && b.verificationCode ? (
                               <button
                                 type="button"
-                                className="btn-sm btn-approve"
+                                className="btn-sm btn-green"
                                 onClick={() => handleVerifyRoomBooking(b)}
                               >
-                                Verify
+                                Confirm
+                              </button>
+                            ) : null}
+                            {b.verified ? (
+                              <button
+                                type="button"
+                                className="btn-sm btn-emerald"
+                                onClick={() => {}}
+                              >
+                                Complete
                               </button>
                             ) : null}
                             <button
                               type="button"
-                              className="btn-sm btn-danger"
+                              className="btn-sm btn-red"
                               onClick={() => handleDeleteRoomBooking(b._id)}
                             >
-                              <FaTrash /> Delete
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-sm btn-blue-no-hover"
+                              onClick={() => {}}
+                            >
+                              View Details
                             </button>
                           </td>
                         </tr>
@@ -2365,6 +2356,8 @@ const AdminDashboard = () => {
             { id: 'events', label: 'Manage Events', icon: <FaCalendarAlt /> },
             { id: 'pastEvents', label: 'Completed Events', icon: <FaCalendarAlt /> },
             { id: 'attractions', label: 'Attractions', icon: <FaPlus /> },
+            { id: 'blogs', label: 'Blogs', icon: <FaEdit /> },
+            { id: 'seo', label: 'SEO Management', icon: <FaEdit /> },
             { id: 'gallery', label: 'Gallery Images', icon: <FaPlus /> },
             { id: 'messages', label: 'Messages', icon: <FaEnvelope /> },
             { id: 'reviews', label: 'Reviews', icon: <FaTrash /> },

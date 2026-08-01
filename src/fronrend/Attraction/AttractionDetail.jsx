@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './AttractionDetail.css'
 import Loader from '../componets/Loader'
+import SEO from '../componets/SEO'
 import { subscribeToAttractionChanges } from './attractionEvents'
 import { getApiUrl } from '../../config/api'
 
 const API_URL = getApiUrl()
 
 const AttractionDetail = () => {
-  const { id } = useParams()
+  const { slug, id } = useParams()
+  // Support both old route with id and new route with slug
+  const identifier = slug || id
   const navigate = useNavigate()
   const [attraction, setAttraction] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -16,12 +19,20 @@ const AttractionDetail = () => {
 
   useEffect(() => {
     const fetchAttraction = async () => {
-      if (!id) return
+      if (!identifier) return
       try {
-        const res = await fetch(`${API_URL}/api/attractions/${id}`)
+        // Decide endpoint based on if it's an id or slug. 
+        // For simplicity, we can use the slug endpoint if we assume id passed is actually a slug now, 
+        // or check if it matches a mongo ID format.
+        const isMongoId = identifier.match(/^[0-9a-fA-F]{24}$/)
+        const endpoint = isMongoId 
+          ? `${API_URL}/api/attractions/${identifier}`
+          : `${API_URL}/api/attractions/slug/${identifier}`
+
+        const res = await fetch(endpoint)
         if (!res.ok) throw new Error('Failed to load attraction')
         const data = await res.json()
-        setAttraction(data)
+        setAttraction(data.data || data)
       } catch (err) {
         console.error(err)
         setError('Unable to load attraction details. Please try again.')
@@ -30,36 +41,8 @@ const AttractionDetail = () => {
       }
     }
 
-    const syncFromCache = () => {
-      const stored = localStorage.getItem('himalaya_attractions_db')
-      if (!stored) return
-      try {
-        const parsed = JSON.parse(stored)
-        const nextAttraction = Array.isArray(parsed) ? parsed.find((item) => item._id === id) : null
-        if (nextAttraction) {
-          setAttraction(nextAttraction)
-          setError(null)
-        }
-      } catch {
-        // ignore malformed cache
-      }
-    }
-
     fetchAttraction()
-    syncFromCache()
-
-    const unsubscribe = subscribeToAttractionChanges((updatedAttractions) => {
-      const nextAttraction = Array.isArray(updatedAttractions)
-        ? updatedAttractions.find((item) => item._id === id)
-        : null
-      if (nextAttraction) {
-        setAttraction(nextAttraction)
-        setError(null)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [id])
+  }, [identifier])
 
   if (loading) {
     return (
@@ -82,13 +65,23 @@ const AttractionDetail = () => {
     )
   }
 
+  // Construct custom SEO
+  const customSEO = {
+    title: attraction.seoTitle || attraction.title,
+    metaDescription: attraction.metaDescription || attraction.shortDescription || attraction.description,
+    keywords: attraction.keywords,
+    canonical: attraction.canonical || `${window.location.origin}/attractions/${attraction.slug}`,
+    schema: attraction.schema
+  }
+
   return (
     <div className="attraction_detail_page">
+      <SEO customSEO={customSEO} />
       <div className="detail_wrapper">
     
         <div className="detail_hero">
           <div className="detail_image">
-            <img src={attraction.imageUrl} alt={attraction.title} />
+            <img src={attraction.featuredImage || attraction.imageUrl} alt={attraction.title} />
             <div className="detail_image_overlay"></div>
           </div>
 
@@ -101,18 +94,20 @@ const AttractionDetail = () => {
               {attraction.duration && <span>{attraction.duration}</span>}
               {attraction.rating && <span>⭐ {attraction.rating}</span>}
             </div>
-            <p className="detail_text">{attraction.description}</p>
-            {attraction.images && attraction.images.length > 0 && (
+            
+            <div className="detail_text" dangerouslySetInnerHTML={{ __html: attraction.fullDescription || attraction.description }} />
+            
+            {(attraction.gallery && attraction.gallery.length > 0) || (attraction.images && attraction.images.length > 0) ? (
               <div className="detail_gallery">
-                {attraction.images.map((src, index) => (
+                {(attraction.gallery || attraction.images).map((src, index) => (
                   <div className="detail_thumb" key={index}>
                     <img src={src} alt={`${attraction.title} ${index + 1}`} />
                   </div>
                 ))}
               </div>
-            )}
-            <button className="detail_cta_btn" onClick={() => navigate('/home')}>
-              Back to Home
+            ) : null}
+            <button className="detail_cta_btn" onClick={() => navigate('/attractions')}>
+              Back to Attractions
             </button>
           </div>
         </div>

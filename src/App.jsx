@@ -17,6 +17,9 @@ const Login = lazy(() => import('./fronrend/auth/Login'))
 const AdminDashboard = lazy(() => import('./fronrend/Dashboard/AdminDashboard'))
 const UserDashboard = lazy(() => import('./fronrend/Dashboard/UserDashboard'))
 const AttractionDetail = lazy(() => import('./fronrend/Attraction/AttractionDetail'))
+const Attractions = lazy(() => import('./fronrend/Attraction/Attractions'))
+const Blogs = lazy(() => import('./fronrend/Blogs/Blogs'))
+const BlogDetail = lazy(() => import('./fronrend/Blogs/BlogDetail'))
 const ToursList = lazy(() => import('./fronrend/Tours/ToursList'))
 const TourDetails = lazy(() => import('./fronrend/Tours/TourDetails'))
 const NotFound = lazy(() => import('./fronrend/componets/NotFound'))
@@ -110,7 +113,14 @@ function App() {
           <Route path="/hh-secure-portal-x7k2" element={<Login />} />
           <Route path="/hh-cp-9f3m2q" element={<AdminRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
+          
+          {/* New Routes */}
+          <Route path="/attractions" element={<Attractions />} />
+          <Route path="/attractions/:slug" element={<AttractionDetail />} />
           <Route path="/attraction/:id" element={<AttractionDetail />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
+          
           <Route path="/500" element={<ServerError />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
