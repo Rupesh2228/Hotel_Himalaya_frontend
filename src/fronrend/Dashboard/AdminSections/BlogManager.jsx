@@ -57,7 +57,7 @@ const BlogManager = () => {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}` 
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
         },
         body: JSON.stringify(payload)
       });
@@ -90,7 +90,7 @@ const BlogManager = () => {
       const res = await fetch(`${API_URL}/api/blogs/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       if (res.ok) fetchBlogs();
