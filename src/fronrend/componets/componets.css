@@ -77,6 +77,10 @@ header::after {
 }
 
 header nav.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   padding-left: 400px;
 }
 
@@ -157,7 +161,21 @@ header nav.nav ul {
   text-decoration: none;
   padding: 10px 14px;
   min-height: 44px;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition: color 0.25s ease, transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+.book-now-btn {
+  background: #0f5132;
+  color: #ffffff;
+  border: 1px solid transparent;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: none;
+}
+.book-now-btn:hover,
+.book-now-btn.active {
+  background: #154a35;
+  color: #ffffff;
 }
 
 button.menu__link {
