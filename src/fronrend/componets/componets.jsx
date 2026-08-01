@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
+  BookOpen,
   CalendarDays,
   GalleryHorizontalEnd,
   Home,
@@ -31,6 +32,7 @@ const Components = () => {
     { to: '/tours', label: 'Tours', icon: Map },
     { to: '/gallery', label: 'Gallery', icon: GalleryHorizontalEnd },
     { to: '/events', label: 'Events', icon: CalendarDays },
+    { to: '/blogs', label: 'Blogs', icon: BookOpen },
     { to: '/contact', label: 'Contact', icon: Phone },
   ]
 
