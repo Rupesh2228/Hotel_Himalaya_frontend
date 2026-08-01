@@ -1620,16 +1620,13 @@ const AdminDashboard = () => {
                     <div className="gallery-item" key={ev._id}>
                       {ev.imageUrl && <img src={ev.imageUrl} alt={ev.title} />}
                       <div className="gallery-item-actions">
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button type="button" className="btn-amber" onClick={() => { setPastEventForm({ imageUrl: ev.imageUrl || '', title: ev.title || '', description: ev.description || '' }); setEditingPastEventId(ev._id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                            <FaEdit />
-                          </button>
-                          <button type="button" className="btn-danger" onClick={() => handleDeletePastEvent(ev._id)}>
-                            <FaTrash />
-                          </button>
-                        </div>
+                        <span className="gallery-item-cat-label" style={{ cursor: 'pointer' }} onClick={() => { setPastEventForm({ imageUrl: ev.imageUrl || '', title: ev.title || '', description: ev.description || '' }); setEditingPastEventId(ev._id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                          <FaEdit /> {ev.title || 'Untitled'}
+                        </span>
+                        <button type="button" className="btn-danger" onClick={() => handleDeletePastEvent(ev._id)}>
+                          <FaTrash /> Remove
+                        </button>
                       </div>
-                      <div style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold' }}>{ev.title}</div>
                     </div>
                   ))}
                   {pastEvents.length === 0 && <p className="empty-state">No completed events added yet.</p>}
