@@ -14,7 +14,7 @@ const VIEWS = {
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, login, signup, verifyOTP, resendOTP, forgotPassword, extractError } = useAuth()
+  const { user, login, signup, verifyOTP, resendOTP, forgotPassword, extractError, googleLogin } = useAuth()
 
   const [view, setView] = useState(VIEWS.LOGIN)
   const [loading, setLoading] = useState(false)
@@ -149,55 +149,104 @@ export default function Login() {
 
   const isAdminPage = location.pathname.includes('hh-secure-portal')
 
+  useEffect(() => {
+    if (view === VIEWS.LOGIN && isAdminPage) {
+      let interval;
+      const initGoogle = () => {
+        if (window.google) {
+          if (interval) clearInterval(interval);
+          window.google.accounts.id.initialize({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+            callback: async (response) => {
+              clearMessages()
+              setLoading(true)
+              try {
+                const result = await googleLogin(response.credential, true)
+                const dest = result?.role === 'admin' ? '/hh-cp-9f3m2q' : '/dashboard'
+                navigate(location.state?.from || dest, { replace: true })
+              } catch (err) {
+                setError(extractError(err))
+              } finally {
+                setLoading(false)
+              }
+            },
+          })
+          const btnContainer = document.getElementById('google-signin-btn')
+          if (btnContainer) {
+            window.google.accounts.id.renderButton(btnContainer, { theme: 'outline', size: 'large', text: 'signin_with' })
+          }
+        }
+      }
+      initGoogle()
+      if (!window.google) {
+        interval = setInterval(initGoogle, 100)
+      }
+      return () => { if (interval) clearInterval(interval) }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, isAdminPage])
+
   // ── Render helpers ───────────────────────────────────────────────────────────
 
-  const renderLogin = () => (
-    <form className="auth-form" onSubmit={handleLogin} noValidate>
-      <div className="form-group">
-        <label htmlFor="login-email">Email Address</label>
-        <input
-          id="login-email"
-          type="email"
-          placeholder="your@email.com"
-          value={loginEmail}
-          onChange={e => setLoginEmail(e.target.value)}
-          required
-          autoComplete="email"
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="login-password">Password</label>
-        <div className="input-password-wrap">
-          <input
-            id="login-password"
-            type={showLoginPwd ? 'text' : 'password'}
-            placeholder="••••••••"
-            value={loginPassword}
-            onChange={e => setLoginPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          <button type="button" className="pwd-toggle" onClick={() => setShowLoginPwd(v => !v)} aria-label="Toggle password">
-            {showLoginPwd ? '🙈' : '👁️'}
-          </button>
+  const renderLogin = () => {
+    if (isAdminPage) {
+      return (
+        <div className="auth-form" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 0' }}>
+          <p style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#666', lineHeight: '1.5' }}>
+            Please sign in with your authorized Google account to access the admin portal.
+          </p>
+          <div id="google-signin-btn" style={{ minHeight: '44px' }}></div>
+          {loading && <span className="btn-spinner" style={{ marginTop: '1.5rem' }} />}
         </div>
-      </div>
-      <button type="button" className="link-btn forgot-link" onClick={() => { clearMessages(); setView(VIEWS.FORGOT) }}>
-        Forgot password?
-      </button>
-      <button type="submit" className="auth-submit-btn" disabled={loading}>
-        {loading ? <span className="btn-spinner" /> : 'Sign In'}
-      </button>
-      {!isAdminPage && (
+      )
+    }
+
+    return (
+      <form className="auth-form" onSubmit={handleLogin} noValidate>
+        <div className="form-group">
+          <label htmlFor="login-email">Email Address</label>
+          <input
+            id="login-email"
+            type="email"
+            placeholder="your@email.com"
+            value={loginEmail}
+            onChange={e => setLoginEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="login-password">Password</label>
+          <div className="input-password-wrap">
+            <input
+              id="login-password"
+              type={showLoginPwd ? 'text' : 'password'}
+              placeholder="••••••••"
+              value={loginPassword}
+              onChange={e => setLoginPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+            <button type="button" className="pwd-toggle" onClick={() => setShowLoginPwd(v => !v)} aria-label="Toggle password">
+              {showLoginPwd ? '🙈' : '👁️'}
+            </button>
+          </div>
+        </div>
+        <button type="button" className="link-btn forgot-link" onClick={() => { clearMessages(); setView(VIEWS.FORGOT) }}>
+          Forgot password?
+        </button>
+        <button type="submit" className="auth-submit-btn" disabled={loading}>
+          {loading ? <span className="btn-spinner" /> : 'Sign In'}
+        </button>
         <p className="auth-switch">
           Don&apos;t have an account?{' '}
           <button type="button" className="link-btn" onClick={() => { clearMessages(); setView(VIEWS.SIGNUP) }}>
             Create one
           </button>
         </p>
-      )}
-    </form>
-  )
+      </form>
+    )
+  }
 
   const renderSignup = () => (
     <form className="auth-form" onSubmit={handleSignup} noValidate>
