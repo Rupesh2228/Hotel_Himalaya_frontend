@@ -12,7 +12,8 @@ const Blogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
+  const [activeFilter, setActiveFilter] = useState('all');
+  const pageSize = 8;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,126 +83,169 @@ const Blogs = () => {
     fetchData();
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const filteredItems = useMemo(() => {
+    if (activeFilter === 'all') return items;
+    return items.filter(item => item.itemType === activeFilter);
+  }, [items, activeFilter]);
+
+  const blogCount = useMemo(() => items.filter(i => i.itemType === 'blog').length, [items]);
+  const attractionCount = useMemo(() => items.filter(i => i.itemType === 'attraction').length, [items]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const paginatedItems = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return items.slice(start, start + pageSize);
-  }, [currentPage, items]);
+    return filteredItems.slice(start, start + pageSize);
+  }, [currentPage, filteredItems]);
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  };
 
   if (loading) return <Loader fullScreen />;
 
   return (
-   <>
-    <Navbar />
-    <div className="blogs-page">
+    <>
+      <Navbar />
+      <div className="blogs-page">
+        <SEO page="Blogs" />
+        <div className="blogs-container">
 
-      <SEO page="Blogs" />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-10 rounded-3xl bg-white px-6 py-8 shadow-xl sm:px-10 sm:py-12">
-          <div className="max-w-3xl">
-            <span className="inline-block text-sm font-semibold uppercase tracking-[0.3em] text-blue-700 mb-4">Latest News</span>
-            <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl mb-4">Blog Page</h1>
-            <p className="text-lg leading-8 text-gray-600">
-              Discover fresh stories, travel guides, hotel updates, and inspiring local experiences. Browse our latest posts and stay updated with the newest happenings around Hotel Himalaya.
+          {/* Header */}
+          <div className="blogs-header">
+            <span className="blogs-eyebrow">Latest News</span>
+            <h1 className="blogs-title">Blog &amp; Articles</h1>
+            <p className="blogs-subtitle">
+              Discover fresh stories, travel guides, hotel updates, and inspiring local experiences from Hotel Himalaya.
             </p>
           </div>
-        </div>
 
-        <nav className="mb-8 text-sm text-gray-600" aria-label="Breadcrumb">
-          <ol className="flex items-center gap-2">
-            <li>
-              <Link to="/" className="text-blue-600 hover:text-blue-800">Home</Link>
-            </li>
-            <li>/</li>
-            <li className="font-semibold text-gray-900">Blogs</li>
-          </ol>
-        </nav>
+          {/* Breadcrumb */}
+          <nav className="blogs-breadcrumb" aria-label="Breadcrumb">
+            <ol>
+              <li><Link to="/">Home</Link></li>
+              <li className="sep">/</li>
+              <li className="current">Blogs</li>
+            </ol>
+          </nav>
 
-        {error && (
-          <div className="mb-8 rounded-lg border border-red-200 bg-red-50 p-4 text-center text-red-800">
-            {error}
-          </div>
-        )}
+          {error && <div className="blogs-error">{error}</div>}
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {paginatedItems.map(item => {
-            const linkPath = item.itemType === 'blog' ? `/blog/${item.slug}` : `/attractions/${item.slug}`;
-            const badgeLabel = item.itemType === 'blog' ? 'Blog' : 'Attraction';
-            const publishedAt = item.createdAt ? new Date(item.createdAt).toLocaleString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            }) : 'Unknown date';
+          {/* Category Filter Tabs */}
+          {!error && items.length > 0 && (
+            <div className="blogs-tabs" role="tablist" aria-label="Content filter">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeFilter === 'all'}
+                className={`blogs-tab ${activeFilter === 'all' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('all')}
+              >
+                All <span className="blogs-tab-count">{items.length}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeFilter === 'blog'}
+                className={`blogs-tab ${activeFilter === 'blog' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('blog')}
+              >
+                Blog <span className="blogs-tab-count">{blogCount}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeFilter === 'attraction'}
+                className={`blogs-tab ${activeFilter === 'attraction' ? 'active' : ''}`}
+                onClick={() => handleFilterChange('attraction')}
+              >
+                Attraction <span className="blogs-tab-count">{attractionCount}</span>
+              </button>
+            </div>
+          )}
 
-            return (
-              <article key={item._id} className="blog-card rounded-3xl bg-white shadow-xl overflow-hidden transition-transform duration-300 hover:-translate-y-1">
-                <Link to={linkPath} className="block overflow-hidden">
-                  <div className="blog-card-image relative h-72 overflow-hidden">
+          {/* List */}
+          <div className="blogs-list">
+            {paginatedItems.map(item => {
+              const linkPath = item.itemType === 'blog' ? `/blog/${item.slug}` : `/attractions/${item.slug}`;
+              const badgeLabel = item.itemType === 'blog' ? 'Blog' : 'Attraction';
+              const publishedAt = item.createdAt ? new Date(item.createdAt).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              }) : 'Unknown date';
+
+              return (
+                <article key={item._id} className="blog-row">
+                  <Link to={linkPath} className="blog-row-thumb">
                     <LazyImage
                       src={item.featuredImage || item.imageUrl}
                       alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                      className="blog-row-img"
                     />
-                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm">
-                      {badgeLabel}
-                    </span>
-                  </div>
-                </Link>
-                <div className="p-6 sm:p-8">
-                  <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.25em] text-slate-500">
-                    <span>By Admin</span>
-                    <span>{publishedAt}</span>
-                  </div>
-                  <Link to={linkPath} className="block">
-                    <h2 className="text-2xl font-semibold text-slate-900 hover:text-blue-600 transition-colors mb-3">
-                      {item.title}
-                    </h2>
                   </Link>
-                  <p className="text-sm leading-7 text-slate-600 line-clamp-3 mb-6">
-                    {item.shortDescription || item.description}
-                  </p>
-                  <Link to={linkPath} className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-                    Read More →
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
 
-        {items.length === 0 && (
-          <p className="text-center text-gray-500">No content available at the moment.</p>
-        )}
+                  <div className="blog-row-content">
+                    <div className="blog-row-meta">
+                      <span className="blog-row-badge">{badgeLabel}</span>
+                      <span className="blog-row-dot">·</span>
+                      <span className="blog-row-date">{publishedAt}</span>
+                    </div>
 
-        {items.length > pageSize && (
-          <div className="blog-pagination mt-12 flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="page-button rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPage(index + 1)}
-                className={`page-button rounded-full px-4 py-2 text-sm transition ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="page-button rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Next
-            </button>
+                    <Link to={linkPath}>
+                      <h2 className="blog-row-title">{item.title}</h2>
+                    </Link>
+
+                    <p className="blog-row-excerpt">
+                      {item.shortDescription || item.description}
+                    </p>
+
+                    <Link to={linkPath} className="blog-row-readmore">
+                      Read More →
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        )}
+
+          {filteredItems.length === 0 && !error && (
+            <p className="blogs-empty">
+              {items.length === 0
+                ? 'No content available at the moment.'
+                : `No ${activeFilter === 'all' ? '' : activeFilter} items found.`}
+            </p>
+          )}
+
+          {filteredItems.length > pageSize && (
+            <div className="blog-pagination">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="page-button"
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`page-button ${currentPage === index + 1 ? 'active' : ''}`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="page-button"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };
