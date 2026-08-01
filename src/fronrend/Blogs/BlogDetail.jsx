@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
+import './BlogDetail.css';
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -44,20 +45,20 @@ const BlogDetail = () => {
       }
     };
     fetchBlog();
+    window.scrollTo(0, 0);
   }, [slug]);
 
   if (loading) return <Loader fullScreen />;
 
   if (error || !blog) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
-        <h2 className="text-2xl text-gray-800 mb-4">{error || 'Blog not found.'}</h2>
-        <button 
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 transition"
-          onClick={() => navigate('/blogs')}
-        >
-          Back to Blogs
-        </button>
+      <div className="blog_detail_page">
+        <div className="blog_detail_notfound">
+          <h2>{error || 'Blog not found.'}</h2>
+          <button className="blog_detail_back_btn" onClick={() => navigate('/blogs')}>
+            Back to Blogs
+          </button>
+        </div>
       </div>
     );
   }
@@ -73,49 +74,64 @@ const BlogDetail = () => {
   const publishedAt = blog.createdAt ? new Date(blog.createdAt).toLocaleString('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
+    year: 'numeric'
   }) : 'Unknown date';
 
+  const galleryImages = blog.gallery && blog.gallery.length > 0
+    ? blog.gallery
+    : (blog.images && blog.images.length > 0 ? blog.images : []);
+
   return (
-    <div className="attraction_detail_page">
+    <div className="blog_detail_page">
       <SEO customSEO={customSEO} />
-      <div className="detail_wrapper">
-        <div className="mb-6 text-sm text-slate-500">
-          <Link to="/" className="text-blue-600 hover:text-blue-800">Home</Link>
-          <span className="px-2">/</span>
-          <Link to="/blogs" className="text-blue-600 hover:text-blue-800">Blogs</Link>
-          <span className="px-2">/</span>
-          <span className="font-semibold text-slate-900">{blog.title}</span>
+      <div className="blog_detail_container">
+
+        {/* Breadcrumb */}
+        <div className="blog_detail_breadcrumb">
+          <Link to="/">Home</Link>
+          <span className="sep">/</span>
+          <Link to="/blogs">Blog · Literature</Link>
+          <span className="sep">/</span>
+          <span className="current">{blog.title}</span>
         </div>
 
-        <div className="detail_hero">
-          <div className="detail_image">
-            <img src={blog.featuredImage || blog.imageUrl} alt={blog.title} />
-            <div className="detail_image_overlay"></div>
-          </div>
+        {/* Title + meta */}
+        <h1 className="blog_detail_title">{blog.title}</h1>
+        <div className="blog_detail_meta">
+          <span className="blog_detail_tag">Blog Post</span>
+          <span className="dot">·</span>
+          <span className="blog_detail_date">{publishedAt}</span>
+        </div>
 
-          <div className="detail_content">
-            <span className="detail_tag">Blog Post</span>
-            <h1 className="detail_title">{blog.title}</h1>
-            <p className="detail_subtitle">By Admin • {publishedAt}</p>
-            
-            <div className="detail_text" dangerouslySetInnerHTML={{ __html: blog.fullDescription || blog.description }} />
-            
-            {(blog.gallery && blog.gallery.length > 0) || (blog.images && blog.images.length > 0) ? (
-              <div className="detail_gallery">
-                {(blog.gallery || blog.images).map((src, index) => (
-                  <div className="detail_thumb" key={index}>
-                    <img src={src} alt={`${blog.title} ${index + 1}`} />
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            <button className="detail_cta_btn" onClick={() => navigate('/blogs')}>
-              Back to Blogs
-            </button>
+        {/* Hero image */}
+        {(blog.featuredImage || blog.imageUrl) && (
+          <div className="blog_detail_hero">
+            <img src={blog.featuredImage || blog.imageUrl} alt={blog.title} />
           </div>
+        )}
+
+        {/* Body */}
+        <div
+          className="blog_detail_text"
+          dangerouslySetInnerHTML={{ __html: blog.fullDescription || blog.description }}
+        />
+
+        {/* Gallery */}
+        {galleryImages.length > 0 && (
+          <div className="blog_detail_gallery">
+            {galleryImages.map((src, index) => (
+              <div className="blog_detail_thumb" key={index}>
+                <img src={src} alt={`${blog.title} ${index + 1}`} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="blog_detail_footer">
+          <button className="blog_detail_back_btn" onClick={() => navigate('/blogs')}>
+            ← Back to Blogs
+          </button>
         </div>
       </div>
     </div>
