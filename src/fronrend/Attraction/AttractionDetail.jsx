@@ -113,8 +113,8 @@ const AttractionDetail = () => {
                   ))}
                 </div>
               ) : null}
-              <button className="detail_cta_btn" onClick={() => navigate('/attractions')}>
-                Back to Attractions
+              <button className="detail_cta_btn" onClick={() => navigate('/')}>
+                Back to Home
               </button>
             </div>
           </div>
