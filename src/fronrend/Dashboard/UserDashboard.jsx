@@ -91,7 +91,16 @@ const UserDashboard = () => {
     const fetchBookings = async () => {
       try {
         const query = bookingQuery ? `?${bookingQuery}` : ''
-        const response = await fetch(`${BOOKINGS_API_URL}${query}`)
+        const storedToken = token || localStorage.getItem('token');
+        const headers = storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {};
+        
+        const response = await fetch(`${BOOKINGS_API_URL}${query}`, {
+          headers: {
+            ...headers,
+            'Cache-Control': 'no-cache'
+          },
+          cache: 'no-store'
+        })
         if (response.ok) {
           const data = await response.json()
           const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
