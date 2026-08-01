@@ -15,6 +15,20 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Ensure a persistent device id is available for guest bookings
+  useEffect(() => {
+    try {
+      let id = localStorage.getItem('hotel_device_id');
+      if (!id) {
+        id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('hotel_device_id', id);
+      }
+    } catch (e) {
+      // ignore storage errors
+      console.debug('Failed to ensure hotel_device_id', e && e.message);
+    }
+  }, []);
+
   // ── Token helpers ────────────────────────────────────────────────────────────
 
   const saveToken = (t) => {
