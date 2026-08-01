@@ -1,19 +1,5 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import {
-  BookOpen,
-  CalendarDays,
-  GalleryHorizontalEnd,
-  Home,
-  Hotel,
-  LockKeyhole,
-  Map,
-  Menu,
-  Phone,
-  Sparkles,
-  UserRound,
-  X,
-} from 'lucide-react'
 import logo from '../../img/logo.png'
 import './componets.css'
 import { useAuth } from '../../context/AuthContext'
@@ -26,14 +12,14 @@ const Components = () => {
   const closeMenu = () => setIsMenuOpen(false)
 
   const navLinks = [
-    { to: '/', label: 'Home', icon: Home },
-    { to: '/about', label: 'About Us', icon: Hotel },
-    { to: '/services', label: 'Services', icon: Sparkles },
-    { to: '/tours', label: 'Tours', icon: Map },
-    { to: '/gallery', label: 'Gallery', icon: GalleryHorizontalEnd },
-    { to: '/events', label: 'Events', icon: CalendarDays },
-    { to: '/blogs', label: 'Blogs', icon: BookOpen },
-    { to: '/contact', label: 'Contact', icon: Phone },
+    { to: '/', label: 'Home', icon: '🏠' },
+    { to: '/about', label: 'About Us', icon: '🏨' },
+    { to: '/services', label: 'Services', icon: '✨' },
+    { to: '/tours', label: 'Tours', icon: '🗺️' },
+    { to: '/gallery', label: 'Gallery', icon: '🖼️' },
+    { to: '/events', label: 'Events', icon: '📅' },
+    { to: '/blogs', label: 'Blogs', icon: '📚' },
+    { to: '/contact', label: 'Contact', icon: '📞' },
   ]
 
   return (
@@ -60,7 +46,6 @@ const Components = () => {
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             onClick={toggleMenu}
           >
-            <Menu className="menu-toggle-icon" aria-hidden="true" />
             <span className="bar bar-1" />
             <span className="bar bar-2" />
             <span className="bar bar-3" />
@@ -75,12 +60,11 @@ const Components = () => {
               <span className="drawer-subtitle">Luxury & Comfort</span>
             </div>
             <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
-              <X size={18} aria-hidden="true" />
-            </button>
-          </div>
+              <span aria-hidden="true">×</span>
+            </button>          </div>
 
           <ul>
-            {navLinks.map(({ to, label, icon: Icon }) => (
+            {navLinks.map(({ to, label, icon }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -88,7 +72,7 @@ const Components = () => {
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                   end={to === '/'}
                 >
-                  <Icon className="nav-link-icon" aria-hidden="true" />
+                  <span className="nav-link-emoji" aria-hidden="true">{icon}</span>
                   <span>{label}</span>
                 </NavLink>
               </li>
@@ -101,7 +85,7 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >
-                  <LockKeyhole className="nav-link-icon" aria-hidden="true" />
+                  <span className="nav-link-emoji" aria-hidden="true">🔒</span>
                   <span>Admin Panel</span>
                 </NavLink>
               </li>
@@ -112,7 +96,7 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >
-                  <UserRound className="nav-link-icon" aria-hidden="true" />
+                  <span className="nav-link-emoji" aria-hidden="true">👤</span>
                   <span>Dashboard</span>
                 </NavLink>
               </li>

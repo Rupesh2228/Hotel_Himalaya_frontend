@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
+import Navbar from '../componets/componets';
 import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
 import "./BlogDetails.css"; // Add CSS if needed
 
@@ -82,6 +83,8 @@ const BlogDetail = () => {
     : (blog.images && blog.images.length > 0 ? blog.images : []);
 
   return (
+    <>
+      <Navbar />
     <div className="blog_detail_page">
       <SEO customSEO={customSEO} />
       <div className="blog_detail_container">
@@ -135,6 +138,7 @@ const BlogDetail = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

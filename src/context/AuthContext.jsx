@@ -57,7 +57,10 @@ export const AuthProvider = ({ children }) => {
         setUser(data);
         return data;
       }
-      logout();
+      // Only logout if the token is explicitly invalid/expired
+      if (res.status === 401) {
+        logout();
+      }
       return null;
     } catch (err) {
       console.error("Failed to refresh user:", err);
