@@ -3,6 +3,7 @@ import LastComponent from "../componets/LastComponents";
 import "./Gallery.css";
 
 import { useEffect, useState, useCallback } from 'react';
+import SEO from '../componets/SEO';
 import imgFallback from "../../img/images.jpg";
 import { useNavigate } from 'react-router-dom'
 import { getApiUrl } from '../../config/api'
@@ -75,6 +76,7 @@ const Gallery = () => {
   return (
     <>
       <Components />
+      <SEO page="Gallery" />
 
       {/* Hero Section */}
       <section className="gallery-hero">

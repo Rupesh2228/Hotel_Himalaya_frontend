@@ -1,5 +1,6 @@
 import Components from '../componets/componets'
 import './Aboutus.css'
+import SEO from '../componets/SEO'
 import background from '../../img/background.jpg'
 import LastComponent from '../componets/LastComponents'
 import { useNavigate } from 'react-router-dom'
@@ -17,6 +18,7 @@ const AboutUs = () => {
   return (
     <div className='about_all_pages'>
       <Components />
+      <SEO page="About" />
 
       <main className="main_aboutus">
           <div className="aboutus_intro_img">

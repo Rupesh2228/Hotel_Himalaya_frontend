@@ -3,6 +3,7 @@ import Components from '../componets/componets';
 import LastComponents from '../componets/LastComponents';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import SEO from '../componets/SEO';
 import './Events.css';
 
 const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
@@ -133,6 +134,7 @@ const Events = () => {
   return (
     <div className="events-page">
       <Components />
+      <SEO page="Events" />
       
       <section className="events-hero">
         <div className="hero-content">

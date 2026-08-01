@@ -100,8 +100,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #000000;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   padding: 8px 16px;
@@ -112,17 +112,7 @@
   transition: all 0.2s ease;
 }
 
-.blogs-tab:hover {
-  background-color: #000000;
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.25);
-}
 
-.blogs-tab.active {
-  background-color: #2563eb;
-  border-color: #2563eb;
-  color: #000000;
-}
 
 .blogs-tab-count {
   font-size: 0.75rem;

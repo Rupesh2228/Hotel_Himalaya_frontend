@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCompass, FaChevronRight } from 'react-icons/fa'
 import { getStoredTours, getVisibleTours, subscribeToTourChanges } from './ToursData'
+import SEO from '../componets/SEO'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
 import './ToursList.css'
@@ -42,6 +43,7 @@ const ToursList = () => {
   return (
     <div className="tours_list_page">
       <Components />
+      <SEO page="Tours" />
 
       {/* Hero Header */}
       <section className="tours_hero_header">

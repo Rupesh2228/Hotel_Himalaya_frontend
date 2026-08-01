@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Components from "../componets/componets"
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope, FaClock } from "react-icons/fa";
 import "./Contact.css"
+import SEO from '../componets/SEO'
 import LastComponent from '../componets/LastComponents'
 import background from '../../img/background.jpg'
 import { getApiUrl } from '../../config/api'
@@ -10,6 +11,7 @@ const Contact = () => {
   return (
     <>
       <Components />
+      <SEO page="Contact" />
 
       <main className="contact-page">
         <section className="contact-hero">

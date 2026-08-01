@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './Home.css'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
+import SEO from '../componets/SEO'
 import { subscribeToAttractionChanges } from '../Attraction/attractionEvents'
 import home from '../../img/home.jpg'
 import { getApiUrl } from '../../config/api'
@@ -51,6 +52,7 @@ const Home = () => {
   return (
     <div className="home_page">
       <Components />
+      <SEO page="Home" />
 
       <main className="home_hero">
         <div className="hero_container">
