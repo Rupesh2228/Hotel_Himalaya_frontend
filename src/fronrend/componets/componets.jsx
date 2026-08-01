@@ -13,15 +13,13 @@ const Components = () => {
 
   const navLinks = [
     { to: '/', label: 'Home'},
-    { to: '/about', label: 'About Us', },
-    { to: '/services', label: 'Services',  },
-    { to: '/tours', label: 'Tours',  },
-    { to: '/gallery', label: 'Gallery',  },
-    { to: '/events', label: 'Events',  },
-    { to: '/blogs', label: 'Blogs',  },
-    { to: '/contact', label: 'Contact', },
-    { to: '/book-now', label: 'Book Now',  },
-
+    { to: '/rooms', label: 'Rooms' },
+    { to: '/services', label: 'Services' },
+    {to: '/tours', label: 'Tours'},
+    { to: '/about', label: 'About Us' },
+    { to: '/gallery', label: 'Gallery' },
+    { to: '/blogs', label: 'Blog' },
+    { to: '/contact', label: 'Contact' },
   ]
 
   return (
@@ -79,16 +77,6 @@ const Components = () => {
               </li>
             ))}
 
-            <li className="book-now-item">
-              <NavLink
-                to="/rooms#rooms"
-                onClick={closeMenu}
-                className="menu__link book-now-btn"
-              >
-                Book Now
-              </NavLink>
-            </li>
-
             {user?.role === 'admin' ? (
               <li>
                 <NavLink
@@ -107,7 +95,6 @@ const Components = () => {
                   onClick={closeMenu}
                   className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
                 >
-                  <span className="nav-link-emoji" aria-hidden="true">👤</span>
                   <span>Dashboard</span>
                 </NavLink>
               </li>

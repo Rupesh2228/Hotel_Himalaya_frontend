@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../componets/componets';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../componets/SEO';
 import Loader from '../componets/Loader';
 import LazyImage from '../componets/LazyImage';
@@ -8,6 +8,7 @@ import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
 import './Blogs.css'; // Add CSS if needed
 
 const Blogs = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -169,14 +170,21 @@ const Blogs = () => {
               }) : 'Unknown date';
 
               return (
-                <article key={item._id} className="blog-row">
-                  <Link to={linkPath} className="blog-row-thumb">
+                <article
+                  key={item._id}
+                  className="blog-row blog-row-clickable"
+                  onClick={() => navigate(linkPath)}
+                  role="link"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && navigate(linkPath)}
+                >
+                  <div className="blog-row-thumb">
                     <LazyImage
                       src={item.featuredImage || item.imageUrl}
                       alt={item.title}
                       className="blog-row-img"
                     />
-                  </Link>
+                  </div>
 
                   <div className="blog-row-content">
                     <div className="blog-row-meta">
@@ -185,17 +193,13 @@ const Blogs = () => {
                       <span className="blog-row-date">{publishedAt}</span>
                     </div>
 
-                    <Link to={linkPath}>
-                      <h2 className="blog-row-title">{item.title}</h2>
-                    </Link>
+                    <h2 className="blog-row-title">{item.title}</h2>
 
                     <p className="blog-row-excerpt">
                       {item.shortDescription || item.description}
                     </p>
 
-                    <Link to={linkPath} className="blog-row-readmore">
-                      Read More →
-                    </Link>
+                    <span className="blog-row-readmore">Read More →</span>
                   </div>
                 </article>
               );

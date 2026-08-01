@@ -7,6 +7,7 @@ import { useAuth } from './context/AuthContext'
 const Home = lazy(() => import('./fronrend/Home/Home'))
 const AboutUs = lazy(() => import('./fronrend/About_us/Aboutus'))
 const Service = lazy(() => import('./fronrend/Service/Service'))
+const Rooms = lazy(() => import('./fronrend/Rooms/Rooms'))
 const Contact = lazy(() => import('./fronrend/Contact/Contact'))
 const Gallery = lazy(() => import('./fronrend/Gallery/Gallery'))
 const Events = lazy(() => import('./fronrend/Events/Events'))
@@ -102,7 +103,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<AboutUs />} />
-          <Route path="/rooms" element={<Service />} />
+          <Route path="/rooms" element={<Rooms />} />
           <Route path="/amenities" element={<Service />} />
           <Route path="/services" element={<Service />} />
           <Route path="/contact" element={<Contact />} />

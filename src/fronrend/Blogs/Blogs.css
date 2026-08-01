@@ -156,7 +156,8 @@
   gap: 20px;
   padding: 24px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 12px;
 }
 
 .blog-row:first-child {
@@ -166,6 +167,33 @@
 .blog-row:hover {
   opacity: 0.94;
 }
+
+/* Clickable card styles */
+.blog-row-clickable {
+  cursor: pointer;
+  padding: 20px;
+  border-radius: 14px;
+  border-bottom: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 12px;
+}
+
+.blog-row-clickable:hover {
+  opacity: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.blog-row-clickable:focus {
+  outline: 2px solid #124C38;
+  outline-offset: 2px;
+}
+
+.blog-row-clickable:hover .blog-row-img {
+  transform: scale(1.05);
+}
+
 
 .blog-row-thumb {
   flex-shrink: 0;

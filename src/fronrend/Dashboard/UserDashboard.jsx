@@ -5,23 +5,12 @@ import Components from '../componets/componets'
 import './UserDashboard.css'
 import { getApiUrl } from '../../config/api'
 
-const ROOMS_API_URL = `${getApiUrl()}/api/rooms`
 const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
 const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
 const getBookingsCacheKey = (identifier) => `hotel_user_dashboard_bookings_${identifier || 'guest'}`
 const parseBookingDate = (value) => {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date
-}
-const isBookingConflict = (existingBooking, nextCheckIn, nextCheckOut, roomId) => {
-  if (existingBooking.roomId !== roomId) return false
-  const existingCheckIn = parseBookingDate(existingBooking.checkIn)
-  const existingCheckOut = parseBookingDate(existingBooking.checkOut)
-  const newCheckIn = parseBookingDate(nextCheckIn)
-  const newCheckOut = parseBookingDate(nextCheckOut)
-
-  if (!existingCheckIn || !existingCheckOut || !newCheckIn || !newCheckOut) return false
-  return existingCheckIn <= newCheckOut && newCheckIn <= existingCheckOut
 }
 const getBookingStatus = (booking) => {
   const today = new Date()
@@ -61,7 +50,6 @@ const normalizeTourBooking = (booking) => {
   return { ...booking, _id: bookingId }
 }
 
-
 const getDeviceId = () => {
   let id = localStorage.getItem('hotel_device_id')
   if (!id) {
@@ -73,27 +61,10 @@ const getDeviceId = () => {
 
 const UserDashboard = () => {
   const { user, token } = useAuth()
-  
-  const getTodayStr = () => new Date().toISOString().split('T')[0]
-  const getTomorrowStr = () => {
-    const d = new Date()
-    d.setDate(d.getDate() + 1)
-    return d.toISOString().split('T')[0]
-  }
 
   const [activeTab, setActiveTab] = useState('my-bookings')
-  const [rooms, setRooms] = useState([])
-  const [allBookings, setAllBookings] = useState([])
-  const [selectedRoomId, setSelectedRoomId] = useState('')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [memberCount, setMemberCount] = useState(1)
-  const [checkIn, setCheckIn] = useState(getTodayStr())
-  const [checkOut, setCheckOut] = useState(getTomorrowStr())
-  const [phone, setPhone] = useState('')
-  const [fullName, setFullName] = useState(user?.name || '')
-  const [email, setEmail] = useState(user?.email || '')
-  const deviceId = getDeviceId();
-  const bookingOwnerId = user?.email || deviceId;
+  const deviceId = getDeviceId()
+  const bookingOwnerId = user?.email || deviceId
   const bookingsCacheKey = getBookingsCacheKey(bookingOwnerId)
   const [bookings, setBookings] = useState(() => {
     try {
@@ -106,79 +77,7 @@ const UserDashboard = () => {
   })
   const [eventBookings, setEventBookings] = useState([])
   const [tourBookings, setTourBookings] = useState([])
-  const [submitting, setSubmitting] = useState(false)
-  const [formErrors, setFormErrors] = useState({})
-  const selectedRoom = rooms.find((room) => room._id === selectedRoomId || room.id === selectedRoomId)
-  const recommendedRooms = rooms.filter((room) => Number(room.totalMembers || 0) >= memberCount)
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
-
-  const fetchAllBookings = async () => {
-    try {
-      const response = await fetch(BOOKINGS_API_URL)
-      if (response.ok) {
-        const data = await response.json()
-        // Support both array responses and { data: [...] } shape
-        const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-        setAllBookings(bookingsArray)
-      }
-    } catch (error) {
-      console.error('Error fetching all bookings:', error)
-    }
-  }
-
-  // Fetch reviews from API on mount
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [roomsResponse, bookingsResponse] = await Promise.all([
-          fetch(ROOMS_API_URL),
-          fetch(BOOKINGS_API_URL)
-        ])
-
-        if (roomsResponse.ok) {
-          const data = await roomsResponse.json()
-          // Rooms endpoint may return { data: [...], pagination } — accept either
-          const roomsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-          setRooms(roomsArray)
-          if (roomsArray.length > 0) {
-            setSelectedRoomId((currentSelectedRoomId) => currentSelectedRoomId || roomsArray[0]._id || roomsArray[0].id)
-          }
-        }
-
-        if (bookingsResponse.ok) {
-          const data = await bookingsResponse.json()
-          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-          setAllBookings(bookingsArray)
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-      }
-    }
-    fetchDashboardData()
-  }, [])
-
-  const checkRoomAvailability = (roomId) => {
-    if (!checkIn || !checkOut) return true;
-    
-    const targetCheckIn = parseBookingDate(checkIn);
-    const targetCheckOut = parseBookingDate(checkOut);
-    if (!targetCheckIn || !targetCheckOut || targetCheckOut <= targetCheckIn) return true;
-
-    // Filter bookings for this room that are verified or status !== 'Cancelled'
-    const conflicts = allBookings.filter(b => {
-      if (b.roomId !== roomId) return false;
-      if (b.status === 'Cancelled') return false;
-      
-      const existingCheckIn = parseBookingDate(b.checkIn);
-      const existingCheckOut = parseBookingDate(b.checkOut);
-      if (!existingCheckIn || !existingCheckOut) return false;
-      
-      // Overlap condition
-      return existingCheckIn < targetCheckOut && targetCheckIn < existingCheckOut;
-    });
-
-    return conflicts.length === 0;
-  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -242,138 +141,7 @@ const UserDashboard = () => {
 
 
 
-  const handleRoomBooking = async (e) => {
-    e.preventDefault()
-    
-    console.log('[ROOM-BOOKING] Form submission started')
-    console.log('[ROOM-BOOKING] Selected room:', selectedRoom)
-    console.log('[ROOM-BOOKING] Check-in:', checkIn, 'Check-out:', checkOut)
-
-    const errors = {}
-
-    if (!selectedRoomId) errors.room = 'Please select a room.'
-    if (!checkIn) errors.checkIn = 'Check-in date is required.'
-    if (!checkOut) errors.checkOut = 'Check-out date is required.'
-
-    if (fullName.trim().length < 2) errors.fullName = 'Full Name must be at least 2 characters.'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Please enter a valid email address.'
-    if (phone && !/^\+?[0-9\s\-()]{7,15}$/.test(phone)) errors.phone = 'Please enter a valid phone number.'
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const parsedCheckIn = parseBookingDate(checkIn);
-    if (checkIn && (!parsedCheckIn || parsedCheckIn < today)) {
-      errors.checkIn = 'Check-in date cannot be in the past.'
-    }
-
-    const parsedCheckOut = parseBookingDate(checkOut);
-    if (checkIn && checkOut && (!parsedCheckOut || parsedCheckOut <= parsedCheckIn)) {
-      errors.checkOut = 'Check-out date must be after the check-in date.'
-    }
-
-    if (!selectedRoom) {
-      errors.room = 'Please choose a valid room.'
-    }
-
-    if (Object.keys(errors).length > 0) {
-      console.log('[ROOM-BOOKING] Validation errors:', errors)
-      setFormErrors(errors)
-      return
-    }
-
-    setFormErrors({})
-
-    const existingBookings = bookings
-    const conflictingBooking = existingBookings.find((booking) =>
-      isBookingConflict(booking, checkIn, checkOut, selectedRoom._id)
-    )
-
-    if (conflictingBooking) {
-      console.log('[ROOM-BOOKING] Room conflict detected:', conflictingBooking)
-      alert(`This room is already booked for the selected time.\nRoom:`)
-      return
-    }
-
-    if (memberCount > Number(selectedRoom.totalMembers || 0)) {
-      const message = recommendedRooms.length > 0
-        ? `Selected room allows only ${selectedRoom.totalMembers || 1} members. Recommended rooms:\n${recommendedRooms.map((room) => `- ${room.title} (up to ${room.totalMembers || 1} members)`).join('\n')}`
-        : `Selected room allows only ${selectedRoom.totalMembers || 1} members and no other rooms fit this group.`
-      alert(message)
-      return
-    }
-
-    try {
-      setSubmitting(true)
-      console.log('[ROOM-BOOKING] Sending booking request to API...')
-      
-      const cIn = new Date(checkIn);
-      const cOut = new Date(checkOut);
-      const days = Math.ceil(Math.abs(cOut - cIn) / (1000 * 60 * 60 * 24)) || 1;
-      const computedTotalPrice = selectedRoom.price * days;
-
-      const bookingPayload = {
-        roomId: selectedRoom._id,
-        roomTitle: selectedRoom.title,
-        roomPrice: computedTotalPrice,
-        totalMembers: selectedRoom.totalMembers,
-        members: memberCount,
-        checkIn,
-        checkOut,
-        bookedBy: bookingOwnerId,
-        bookedByName: fullName || user?.name || 'Guest',
-        bookedByEmail: email || user?.email || '',
-        phone: phone || '',
-      }
-      
-      console.log('[ROOM-BOOKING] Payload:', bookingPayload)
-
-      const response = await fetch(BOOKINGS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingPayload),
-      })
-
-      console.log('[ROOM-BOOKING] Response status:', response.status)
-      const data = await response.json()
-      console.log('[ROOM-BOOKING] Response data:', data)
-
-      if (!response.ok) {
-        if (response.status === 409) {
-          alert(`This room is already booked for the selected time.\nRoom`)
-          return
-        }
-        throw new Error(data?.error || 'Failed to book room')
-      }
-
-      setBookings((currentBookings) => [data, ...currentBookings])
-      localStorage.setItem(bookingsCacheKey, JSON.stringify([data, ...bookings]))
-      fetchAllBookings()
-      setIsModalOpen(false)
-      alert(`Room booked successfully!\nRoom: ${selectedRoom.title}\nPrice: ${formatRoomPrice(selectedRoom)}\nMembers: ${memberCount}\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}`)
-
-      setCheckIn(getTodayStr())
-      setCheckOut(getTomorrowStr())
-      setMemberCount(1)
-      setPhone('')
-      if (!user) {
-        setFullName('')
-        setEmail('')
-      }
-      
-      console.log('[ROOM-BOOKING] Booking completed successfully')
-    } catch (error) {
-      console.error('[ROOM-BOOKING] Error:', error)
-      alert(error.message || 'Failed to book room')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-
-
-
-  return (
-    <>
+  return (    <>
       <Components />
       <div className="user-dashboard-wrapper">
         <div className="user-dashboard-header">
@@ -392,6 +160,7 @@ const UserDashboard = () => {
           <aside className="user-dashboard-tabs">
             {/* Tab buttons */}
             {[
+             
               { id: 'my-bookings', label: 'Room Bookings', icon: <FaHistory /> },
               { id: 'event-bookings', label: 'Event Tickets', icon: <FaTicketAlt /> },
               { id: 'tour-bookings', label: 'Tour Bookings', icon: <FaSuitcase /> },

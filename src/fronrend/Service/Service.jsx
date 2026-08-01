@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBed, FaLeaf, FaWifi, FaBell, FaFire, FaBuilding, FaHeart, FaRegHeart, FaStar, FaUser } from "react-icons/fa";
+import { FaBed, FaLeaf, FaWifi, FaBell, FaFire, FaBuilding, FaHeart, FaRegHeart, FaStar, FaUser, FaArrowRight, FaRegCalendarAlt } from "react-icons/fa";
 import "./Service.css";
 import Components from "../componets/componets";
 import SEO from '../componets/SEO';
@@ -290,26 +290,6 @@ const ReviewsList = () => {
   );
 };
 
-const roomOptions = [
-  {
-    title: 'Single Deluxe Room',
-    subtitle: 'Standard',
-    badge: 'Best Seller',
-    guests: '2 Guests',
-    price: 'NPR 2,250',
-    image: roomSingle,
-    alt: 'Single Deluxe Room',
-  },
-  {
-    title: 'Double Deluxe Room',
-    subtitle: 'Premium',
-    badge: 'Best Choice',
-    guests: '3 Guests',
-    price: 'NPR 2,750',
-    image: roomDouble,
-    alt: 'Double Deluxe Room',
-  },
-];
 
 const Service = () => {
   return (
@@ -336,50 +316,7 @@ const Service = () => {
         </div>
       </section>
 
-      <section className="rooms-section" id="rooms">
-        <div className="section-heading">
-          <p>ROOMS</p>
-          <h2>Choose Your Perfect Stay</h2>
-          <div className="hero-divider">
-            <span>❖</span>
-          </div>
-        </div>
 
-        <div className="rooms-grid">
-          {roomOptions.map((room) => (
-            <article key={room.title} className="room-card">
-              <div className="room-image-wrapper">
-                <img src={room.image} alt={room.alt} className="room-image" />
-                <span className="room-badge">{room.badge}</span>
-              </div>
-
-              <div className="room-card-body">
-                <h3>{room.title}</h3>
-                <p className="room-subtitle">{room.subtitle}</p>
-
-                <div className="room-meta">
-                  <span className="room-meta-pill">
-                    <FaBed /> Bed
-                  </span>
-                  <span className="room-meta-pill">
-                    <FaUser /> {room.guests}
-                  </span>
-                </div>
-
-                <div className="room-footer">
-                  <div>
-                    <p className="room-price">{room.price} <span>/ night</span></p>
-                  </div>
-                  <div className="room-actions">
-                    <button type="button" className="room-details-btn">View Details</button>
-                    <Link to="/contact" className="room-book-btn">Book Now</Link>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
 
       {/* Services Section */}
       <section className="services-section">
