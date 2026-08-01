@@ -19,15 +19,16 @@ const AttractionDetail = () => {
 
   useEffect(() => {
     const fetchAttraction = async () => {
-      if (!identifier) return
+      if (!identifier) {
+        setError('No attraction identifier provided.')
+        setLoading(false)
+        return
+      }
+
       try {
-        // Decide endpoint based on if it's an id or slug.
-        // For simplicity, we can use the slug endpoint if we assume id passed is actually a slug now,
-        // or check if it matches a mongo ID format.
-        const isMongoId = identifier.match(/^[0-9a-fA-F]{24}$/)
-        const endpoint = isMongoId
-          ? `${API_URL}/api/attractions/${identifier}`
-          : `${API_URL}/api/attractions/slug/${identifier}`
+        const endpoint = slug
+          ? `${API_URL}/api/attractions/slug/${identifier}`
+          : `${API_URL}/api/attractions/${identifier}`
 
         const res = await fetch(endpoint)
         if (!res.ok) throw new Error('Failed to load attraction')
@@ -42,7 +43,7 @@ const AttractionDetail = () => {
     }
 
     fetchAttraction()
-  }, [identifier])
+  }, [slug, id, identifier])
 
   if (loading) {
     return (
@@ -111,7 +112,7 @@ const AttractionDetail = () => {
                   ))}
                 </div>
               ) : null}
-              <button className="detail_cta_btn" onClick={() => navigate('/')}>
+              <button className="detail_cta_btn" onClick={() => navigate('/attractions')}>
                 Back to Attractions
               </button>
             </div>
