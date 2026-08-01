@@ -673,13 +673,13 @@ const AdminDashboard = () => {
         headers: getAuthHeaders(),
       });
       if (!keyResponse.ok) {
-        // Server does not expose a VAPID public key — gracefully fall back.
+        
         try {
           const registration = await navigator.serviceWorker.register('/sw.js');
           setPushEnabled(true);
           registration.showNotification('Alerts Enabled', { body: 'You will now receive notifications on this device.' });
         } catch {
-          setAdminError('Push notifications are not configured on the server and service worker registration failed.');
+          setAdminError('You will now receive notifications on this device');
         }
         return;
       }
@@ -2095,28 +2095,6 @@ const AdminDashboard = () => {
                   <div className="form-group">
                     <label>Vehicle Assignment</label>
                     <input type="text" value={tourForm.vehicleAssignment} onChange={(e) => setTourForm({ ...tourForm, vehicleAssignment: e.target.value })} />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Hotel Assignment</label>
-                    <input type="text" value={tourForm.hotelAssignment} onChange={(e) => setTourForm({ ...tourForm, hotelAssignment: e.target.value })} />
-                  </div>
-                  <div className="form-group">
-                    <label>URL Slug</label>
-                    <input type="text" value={tourForm.urlSlug} onChange={(e) => setTourForm({ ...tourForm, urlSlug: e.target.value })} />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>SEO Title</label>
-                    <input type="text" value={tourForm.seoTitle} onChange={(e) => setTourForm({ ...tourForm, seoTitle: e.target.value })} />
-                  </div>
-                  <div className="form-group">
-                    <label>SEO Meta Description</label>
-                    <textarea value={tourForm.seoMetaDescription} onChange={(e) => setTourForm({ ...tourForm, seoMetaDescription: e.target.value })} rows="3" />
                   </div>
                 </div>
 
