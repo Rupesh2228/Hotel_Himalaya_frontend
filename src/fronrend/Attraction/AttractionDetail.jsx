@@ -8,6 +8,7 @@ import { getApiUrl } from '../../config/api'
 
 const API_URL = getApiUrl()
 
+// Fixed route handling so slug and legacy id routes both resolve correctly.
 const AttractionDetail = () => {
   const { slug, id } = useParams()
   // Support both old route with id and new route with slug
