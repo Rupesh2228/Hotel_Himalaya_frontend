@@ -12,6 +12,8 @@ import {
 import { getApiUrl } from '../../config/api';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
+import UserList from './AdminSections/UserList';
+import './AdminSections/Manager.css'; // Importing premium form CSS
 import AttractionManager from './AdminSections/AttractionManager';
 import BlogManager from './AdminSections/BlogManager';
 import SEOManager from './AdminSections/SEOManager';
@@ -1560,36 +1562,46 @@ const AdminDashboard = () => {
       
       case 'pastEvents':
         return (
-          <div className="tab-pane fade-in active">
-            <div className="tab-header">
-              <h2>Completed Events</h2>
+          <div className="tab-pane fade-in active mgr-wrapper">
+            <div className="mgr-section-header">
+              <div className="mgr-header-icon">🎉</div>
+              <div>
+                <h2 className="mgr-header-title">Completed Events</h2>
+                <p className="mgr-header-sub">Manage and display past events in the gallery.</p>
+              </div>
             </div>
             
             <div className="admin-grid two-cols">
-              <div className="card">
-                <h3><FaPlus /> Add Completed Event</h3>
-                <form onSubmit={handlePastEventSubmit} className="form-grid">
-                  <div className="form-group full-width">
-                    <label>Event Image (Required)</label>
-                    <DragAndDropUploader value={pastEventForm.imageUrl} onChange={(imageUrl) => setPastEventForm({ ...pastEventForm, imageUrl })} />
+              <div className="mgr-form-card">
+                <div className="mgr-form-card-header">
+                  <h3 className="mgr-form-card-title"><FaPlus /> Add Completed Event</h3>
+                </div>
+                <form onSubmit={handlePastEventSubmit} className="mgr-form">
+                  <div className="mgr-form-grid">
+                    <div className="mgr-form-group mgr-col-full">
+                      <label className="mgr-label">Event Image (Required)</label>
+                      <DragAndDropUploader value={pastEventForm.imageUrl} onChange={(imageUrl) => setPastEventForm({ ...pastEventForm, imageUrl })} />
+                    </div>
+                    <div className="mgr-form-group mgr-col-full">
+                      <label className="mgr-label">Event Title</label>
+                      <input className="mgr-input" type="text" value={pastEventForm.title} onChange={(e) => setPastEventForm({ ...pastEventForm, title: e.target.value })} required placeholder="e.g. New Year Party 2025" />
+                    </div>
+                    <div className="mgr-form-group mgr-col-full">
+                      <label className="mgr-label">Description / Details</label>
+                      <textarea className="mgr-textarea" value={pastEventForm.description} onChange={(e) => setPastEventForm({ ...pastEventForm, description: e.target.value })} required rows="3" placeholder="Briefly describe the completed event..." />
+                    </div>
                   </div>
-                  <div className="form-group full-width">
-                    <label>Event Title</label>
-                    <input type="text" value={pastEventForm.title} onChange={(e) => setPastEventForm({ ...pastEventForm, title: e.target.value })} required placeholder="e.g. New Year Party 2025" />
-                  </div>
-                  <div className="form-group full-width">
-                    <label>Description / Details</label>
-                    <textarea value={pastEventForm.description} onChange={(e) => setPastEventForm({ ...pastEventForm, description: e.target.value })} required rows="3" placeholder="Briefly describe the completed event..." />
-                  </div>
-                  <div className="form-group full-width form-actions">
-                    <button type="submit" className="btn-info btn-icon"><FaPlus /> Add Completed Event</button>
+                  <div className="mgr-actions">
+                    <button type="submit" className="mgr-btn mgr-btn-primary"><FaPlus /> Add Completed Event</button>
                   </div>
                 </form>
               </div>
 
-              <div className="card">
-                <h3>Completed Events List</h3>
-                <div className="gallery-grid">
+              <div className="mgr-form-card">
+                <div className="mgr-form-card-header">
+                  <h3 className="mgr-form-card-title">Completed Events List</h3>
+                </div>
+                <div className="gallery-grid" style={{ padding: '20px' }}>
                   {pastEvents.map((ev) => (
                     <div className="gallery-item" key={ev._id}>
                       {ev.imageUrl && <img src={ev.imageUrl} alt={ev.title} />}
@@ -1610,79 +1622,98 @@ const AdminDashboard = () => {
 
       case 'gallery':
         return (
-          <div className="admin-content animate-fade-in">
-            <div className="admin-content-header">
-              <h2>Gallery Management</h2>
-              <p>Add and remove images from the main hotel gallery.</p>
+          <div className="tab-pane fade-in active mgr-wrapper">
+            <div className="mgr-section-header">
+              <div className="mgr-header-icon">🖼️</div>
+              <div>
+                <h2 className="mgr-header-title">Gallery Management</h2>
+                <p className="mgr-header-sub">Add and remove images from the main hotel gallery.</p>
+              </div>
             </div>
 
             <div className="gallery-admin-container">
-              <div className="gallery-panel-grid">
+              <div className="admin-grid two-cols">
                 {/* Categories Panel */}
-                <div className="gallery-panel-card">
-                  <h3><FaPlus /> Add Gallery Category</h3>
-                  <form onSubmit={handleCategorySubmit} className="form-grid" style={{ marginBottom: '20px', position: 'relative', zIndex: 1 }}>
-                    <div className="form-group">
-                      <label>Category Name</label>
-                      <input type="text" placeholder="e.g. Interior" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
+                <div className="mgr-form-card">
+                  <div className="mgr-form-card-header">
+                    <h3 className="mgr-form-card-title"><FaPlus /> Add Gallery Category</h3>
+                  </div>
+                  <form onSubmit={handleCategorySubmit} className="mgr-form" style={{ paddingBottom: '0' }}>
+                    <div className="mgr-form-grid">
+                      <div className="mgr-form-group mgr-col-full">
+                        <label className="mgr-label">Category Name</label>
+                        <input className="mgr-input" type="text" placeholder="e.g. Interior" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
+                      </div>
                     </div>
-                    <button type="submit" className="btn-success btn-icon" style={{ height: 'fit-content', alignSelf: 'flex-end' }}><FaPlus /> Add Category</button>
+                    <div className="mgr-actions">
+                      <button type="submit" className="mgr-btn mgr-btn-primary"><FaPlus /> Add Category</button>
+                    </div>
                   </form>
-                  <h4>Existing Categories</h4>
-                  <ul className="gallery-category-list">
-                    {galleryCategories.map(cat => (
-                      <li key={cat._id} className="gallery-category-item">
-                        <span>{cat.name}</span>
-                        <button type="button" className="btn-danger btn-sm" onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
-                      </li>
-                    ))}
-                  </ul>
+                  <div style={{ padding: '28px' }}>
+                    <h4 className="mgr-label" style={{ marginBottom: '12px' }}>Existing Categories</h4>
+                    <ul className="gallery-category-list">
+                      {galleryCategories.map(cat => (
+                        <li key={cat._id} className="gallery-category-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', marginBottom: '8px' }}>
+                          <span>{cat.name}</span>
+                          <button type="button" className="btn-danger btn-sm" onClick={() => handleDeleteCategory(cat._id)}><FaTrash /> Delete</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 {/* Upload Panel */}
-                <div className="gallery-panel-card">
-                  <h3><FaPlus /> Add Gallery Image</h3>
-                  <form onSubmit={handleGallerySubmit} className="form-grid">
-                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                      <label>Image URL</label>
-                      <DragAndDropUploader value={galleryForm.url} onChange={(url) => setGalleryForm({ ...galleryForm, url })} />
+                <div className="mgr-form-card">
+                  <div className="mgr-form-card-header">
+                    <h3 className="mgr-form-card-title"><FaPlus /> Add Gallery Image</h3>
+                  </div>
+                  <form onSubmit={handleGallerySubmit} className="mgr-form">
+                    <div className="mgr-form-grid">
+                      <div className="mgr-form-group mgr-col-full">
+                        <label className="mgr-label">Image URL</label>
+                        <DragAndDropUploader value={galleryForm.url} onChange={(url) => setGalleryForm({ ...galleryForm, url })} />
+                      </div>
+                      <div className="mgr-form-group mgr-col-full">
+                        <label className="mgr-label">Title (Optional)</label>
+                        <input className="mgr-input" type="text" placeholder="e.g. Swimming Pool" value={galleryForm.title} onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })} />
+                      </div>
+                      <div className="mgr-form-group mgr-col-full">
+                        <label className="mgr-label">Category</label>
+                        <select className="mgr-select" value={galleryForm.category} onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}>
+                          <option value="">No Category</option>
+                          {galleryCategories.map(c => (
+                            <option key={c._id} value={c._id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label>Title (Optional)</label>
-                      <input type="text" placeholder="e.g. Swimming Pool" value={galleryForm.title} onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })} />
+                    <div className="mgr-actions">
+                      <button type="submit" className="mgr-btn mgr-btn-primary"><FaDownload /> Upload Image</button>
                     </div>
-                    <div className="form-group">
-                      <label>Category</label>
-                      <select value={galleryForm.category} onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}>
-                        <option value="">No Category</option>
-                        {galleryCategories.map(c => (
-                          <option key={c._id} value={c._id}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <button type="submit" className="btn-info btn-icon" style={{ gridColumn: '1 / -1' }}><FaDownload /> Upload Image</button>
                   </form>
                 </div>
               </div>
             </div>
 
             {/* Gallery Grid */}
-            <div className="gallery-grid-header">
-              <h3 className="gallery-grid-title">All Images</h3>
-              <span className="gallery-count-badge">{galleryImages.length} images</span>
-            </div>
-            <div className="gallery-grid">
-              {galleryImages.map((image) => (
-                <div className="gallery-item" key={image._id}>
-                  {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
-                  <div className="gallery-item-actions">
-                    <span className="gallery-item-cat-label">{image.category?.name || 'Uncategorized'}</span>
-                    <button type="button" className="btn-danger" onClick={() => handleDeleteGalleryImage(image._id)}>
-                      <FaTrash /> Remove
-                    </button>
+            <div className="mgr-form-card" style={{ marginTop: '20px' }}>
+              <div className="mgr-form-card-header">
+                <h3 className="mgr-form-card-title">All Images</h3>
+                <span className="gallery-count-badge">{galleryImages.length} images</span>
+              </div>
+              <div className="gallery-grid" style={{ padding: '20px' }}>
+                {galleryImages.map((image) => (
+                  <div className="gallery-item" key={image._id}>
+                    {image.url ? <img src={image.url} alt={image.title || 'Gallery item'} /> : null}
+                    <div className="gallery-item-actions">
+                      <span className="gallery-item-cat-label">{image.category?.name || 'Uncategorized'}</span>
+                      <button type="button" className="btn-danger" onClick={() => handleDeleteGalleryImage(image._id)}>
+                        <FaTrash /> Remove
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         );
