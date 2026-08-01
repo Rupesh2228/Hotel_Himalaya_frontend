@@ -17,10 +17,10 @@
   --gold-800: #1a130d;
 
   --background: #f3f3f3;
-  --surface: #f3f3f3;
-  --surface-soft: #f3f3f3;
+  --surface: #ffffff;
+  --surface-soft: #fafafa;
   --surface-muted: #f3f3f3;
-  --border: rgba(99, 71, 49, 0.16);
+  --border: rgba(99, 71, 49, 0.3);
 
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-display: 'Playfair Display', serif;
@@ -145,7 +145,7 @@ ul { list-style: none; }
 :root {
   --accent-strong: #8c4b1f;
   --accent-soft: #f7efe4;
-  --card-border: rgba(99, 71, 49, 0.16);
+  --card-border: rgba(99, 71, 49, 0.3);
 }
 
 body,
@@ -199,9 +199,18 @@ footer {
 }
 
 input, textarea, select {
-  background: #f3f3f3;
-  border: 1px solid var(--card-border);
+  background: #ffffff;
+  border: 1px solid rgba(99, 71, 49, 0.4);
   color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--gold-500);
+  box-shadow: 0 0 0 3px rgba(181, 107, 47, 0.15);
 }
 
 /* Unified app background */
