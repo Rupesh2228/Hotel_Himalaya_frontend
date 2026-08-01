@@ -121,7 +121,7 @@
 .blogs-tab.active {
   background-color: #2563eb;
   border-color: #2563eb;
-  color: #ffffff;
+  color: #000000;
 }
 
 .blogs-tab-count {
