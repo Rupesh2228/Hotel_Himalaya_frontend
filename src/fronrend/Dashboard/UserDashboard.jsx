@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { FaTicketAlt, FaHistory, FaSuitcase } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import Components from '../componets/componets'
@@ -8,6 +8,12 @@ import { getApiUrl } from '../../config/api'
 const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
 const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
 const getBookingsCacheKey = (identifier) => `hotel_user_dashboard_bookings_${identifier || 'guest'}`
+const buildBookingQuery = (userEmail, deviceId) => {
+  const params = new URLSearchParams();
+  if (userEmail) params.set('bookedByEmail', userEmail);
+  if (deviceId) params.set('bookedBy', deviceId);
+  return params.toString();
+}
 const parseBookingDate = (value) => {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date
@@ -79,10 +85,13 @@ const UserDashboard = () => {
   const [tourBookings, setTourBookings] = useState([])
   const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
 
+  const bookingQuery = useMemo(() => buildBookingQuery(user?.email, deviceId), [user?.email, deviceId])
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await fetch(`${BOOKINGS_API_URL}?bookedBy=${encodeURIComponent(bookingOwnerId)}`)
+        const query = bookingQuery ? `?${bookingQuery}` : ''
+        const response = await fetch(`${BOOKINGS_API_URL}${query}`)
         if (response.ok) {
           const data = await response.json()
           const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
@@ -95,7 +104,7 @@ const UserDashboard = () => {
     }
 
     fetchBookings()
-  }, [bookingOwnerId, bookingsCacheKey])
+  }, [bookingQuery, bookingsCacheKey])
 
   useEffect(() => {
     const fetchEventBookings = async () => {

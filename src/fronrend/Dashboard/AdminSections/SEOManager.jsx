@@ -9,11 +9,11 @@ const getAuthHeaders = () => {
   return token ? { Authorization: 'Bearer ' + token } : {};
 };
 
-const PAGES = ['Home', 'About', 'Rooms', 'Tours', 'Events', 'Gallery', 'Attractions', 'Blogs', 'Contact'];
+const PAGES = ['Home', 'About', 'Rooms', 'Tours', 'Events', 'Gallery', 'Blogs', 'Contact'];
 
 const PAGE_ICONS = {
   Home: '🏠', About: '📖', Rooms: '🛏️', Tours: '🗺️',
-  Events: '🎉', Gallery: '🖼️', Attractions: '🏔️', Blogs: '✍️', Contact: '📬'
+  Events: '🎉', Gallery: '🖼️', Blogs: '✍️', Contact: '📬'
 };
 
 const SEOManager = () => {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaBed, FaUser, FaRegCalendarAlt, FaTimes, FaCheckCircle } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 import './Rooms.css';
 import Components from '../componets/componets';
@@ -8,6 +9,15 @@ import SEO from '../componets/SEO';
 import roomSingle from '../../img/home.jpg';
 
 const today = new Date().toISOString().split('T')[0];
+
+const getDeviceId = () => {
+  let id = localStorage.getItem('hotel_device_id');
+  if (!id) {
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    localStorage.setItem('hotel_device_id', id);
+  }
+  return id;
+};
 
 const initialForm = {
   bookedByName: '',
@@ -20,6 +30,8 @@ const initialForm = {
 };
 
 const Rooms = () => {
+  const { user } = useAuth();
+  const [deviceId] = useState(() => getDeviceId());
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [form, setForm] = useState(initialForm);
@@ -50,6 +62,12 @@ const Rooms = () => {
     };
     fetchRooms();
   }, []);
+
+  useEffect(() => {
+    if (user?.email) {
+      setForm((prev) => ({ ...prev, bookedByEmail: user.email }));
+    }
+  }, [user?.email]);
 
   const openModal = (room) => {
     setSelectedRoom(room);
@@ -99,7 +117,7 @@ const Rooms = () => {
         members: Number(form.members),
         checkIn: form.checkIn,
         checkOut: form.checkOut,
-        bookedBy: form.bookedByEmail || 'guest',
+        bookedBy: user?.email || deviceId,
         bookedByName: form.bookedByName,
         bookedByEmail: form.bookedByEmail,
         phone: form.phone,

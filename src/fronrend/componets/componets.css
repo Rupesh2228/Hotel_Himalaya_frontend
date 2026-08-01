@@ -1022,7 +1022,7 @@ header nav.nav ul li:last-child .menu__link:hover,
   }
 
   .site-header .menu-toggle .bar {
-    display: none !important;
+    display: block !important;
   }
 
   .nav-backdrop {
