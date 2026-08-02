@@ -909,25 +909,41 @@ const AdminDashboard = () => {
 
   const handleDeleteTourBooking = async (bookingId) => {
     if (!window.confirm('Delete this tour booking?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) { setAdminError('Please sign in as an admin first.'); return; }
-      const response = await fetch(apiPath(`/api/tours/bookings/${bookingId}`), {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Unable to delete tour booking.');
+
+      // Client-side quick handling for non-server (local) bookings created by guests
+      const isMongoId = /^[a-fA-F0-9]{24}$/.test(String(bookingId || ''));
+      if (!isMongoId) {
+        // If the id is not a mongo ObjectId, treat it as a local-only booking and remove locally
+        try {
+          const updated = tourBookings.filter((booking) => booking._id !== bookingId);
+          persistTourBookings(updated);
+          setAdminMessage('Local tour booking removed from admin cache.');
+        } catch (err) {
+          console.error('Failed to remove local booking:', err);
+          setAdminError('Failed to remove local booking.');
+        }
+        return;
       }
-      const updated = tourBookings.filter((booking) => booking._id !== bookingId);
-      persistTourBookings(updated);
-      setAdminMessage('Tour booking deleted.');
-    } catch (error) {
-      console.error(error);
-      setAdminError(error.message || 'Unable to delete tour booking.');
-    }
-  };
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) { setAdminError('Please sign in as an admin first.'); return; }
+        const response = await fetch(apiPath(`/api/tours/bookings/${bookingId}`), {
+          method: 'DELETE',
+          headers: getAuthHeaders()
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || 'Unable to delete tour booking.');
+        }
+        const updated = tourBookings.filter((booking) => booking._id !== bookingId);
+        persistTourBookings(updated);
+        setAdminMessage('Tour booking deleted.');
+      } catch (error) {
+        console.error(error);
+        setAdminError(error.message || 'Unable to delete tour booking.');
+      }
+    };
 
   const handleDeleteMessage = async (messageId) => {
     if (!window.confirm('Delete this message?')) return;

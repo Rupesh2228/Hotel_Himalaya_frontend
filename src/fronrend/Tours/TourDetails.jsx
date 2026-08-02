@@ -155,7 +155,8 @@ const handleBookNowSubmit = async (e) => {
   try {
     const headers = { 'Content-Type': 'application/json' };
     const token = localStorage.getItem('token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    // duplicate header assignment removed: `Bearer ${token}`;
     
     const response = await fetch(`${getApiUrl()}/api/tours/book`, {
       method: 'POST',
