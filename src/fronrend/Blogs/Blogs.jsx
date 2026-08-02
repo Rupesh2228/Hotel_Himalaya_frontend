@@ -36,43 +36,28 @@ const Blogs = () => {
 
       try {
         let blogsData;
-        let attractionsData;
 
         try {
-          [blogsData, attractionsData] = await Promise.all([
-            fetchJson(`${backendUrl}/api/blogs`),
-            fetchJson(`${backendUrl}/api/attractions`)
-          ]);
+          blogsData = await fetchJson(`${backendUrl}/api/blogs`);
         } catch (firstError) {
           if (backendUrl !== DEFAULT_LIVE_BACKEND_URL) {
-            [blogsData, attractionsData] = await Promise.all([
-              fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/blogs`),
-              fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/attractions`)
-            ]);
+            blogsData = await fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/blogs`);
           } else {
             throw firstError;
           }
         }
 
-        const combined = [];
-
+        const blogItems = [];
         if (blogsData?.success) {
           const publishedBlogs = blogsData.data
             .filter(b => b.status === 'Published')
             .map(b => ({ ...b, itemType: 'blog' }));
-          combined.push(...publishedBlogs);
+          blogItems.push(...publishedBlogs);
         }
 
-        if (attractionsData?.success) {
-          const publishedAttractions = attractionsData.data
-            .filter(a => a.status === 'Published')
-            .map(a => ({ ...a, itemType: 'attraction' }));
-          combined.push(...publishedAttractions);
-        }
+        blogItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-        combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-        setItems(combined);
+        setItems(blogItems);
         setCurrentPage(1);
       } catch (err) {
         console.error('Error fetching or processing blog data:', err);
@@ -90,7 +75,6 @@ const Blogs = () => {
   }, [items, activeFilter]);
 
   const blogCount = useMemo(() => items.filter(i => i.itemType === 'blog').length, [items]);
-  const attractionCount = useMemo(() => items.filter(i => i.itemType === 'attraction').length, [items]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const paginatedItems = useMemo(() => {
