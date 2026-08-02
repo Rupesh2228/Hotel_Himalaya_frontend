@@ -89,7 +89,9 @@ const TourDetails = () => {
 
 // Duplicate handleBookNowSubmit removed
 
-const handleBookNowSubmit = async (e) => { try {
+const handleBookNowSubmit = async (e) => {
+  let serverBooking = null;
+  try {
   if (bookingInProgressRef.current) return;
   bookingInProgressRef.current = true;
   e.preventDefault();
@@ -175,7 +177,6 @@ const handleBookNowSubmit = async (e) => { try {
       })
     });
     
-    let serverBooking = null;
     try {
       const data = await response.json().catch(() => (null));
       if (!response.ok) {
