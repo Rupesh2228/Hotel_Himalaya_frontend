@@ -2287,38 +2287,14 @@ const AdminDashboard = () => {
                             {getTourBookingStatusLabel(b.status)}
                           </span>
                         </td>
-                        <td style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                          {b.status !== 'Confirmed' && (
-                            <button
-                              className="btn-sm btn-green"
-                              onClick={() => handleApproveTourBooking(b._id)}
-                            >
-                              <FaCheck /> Confirm
-                            </button>
-                          )}
-                          {b.status === 'Confirmed' && (
-                            <button
-                              className="btn-sm btn-emerald"
-                              onClick={() => {}}
-                            >
-                              <FaCheck /> Complete
-                            </button>
-                          )}
-                          {b.status !== 'Rejected' && (
-                            <button
-                              className="btn-sm btn-red"
-                              onClick={() => handleRejectTourBooking(b._id)}
-                            >
-                              <FaTimes /> Reject
-                            </button>
-                          )}
-                          <button
-                            className="btn-sm btn-danger"
-                            onClick={() => handleDeleteTourBooking(b._id)}
-                          >
-                            <FaTrash /> Remove
-                          </button>
-                        </td>
+                        <td>
+                                                  <button
+                                                    className="btn-sm btn-danger"
+                                                    onClick={() => handleDeleteTourBooking(b._id)}
+                                                  >
+                                                    <FaTrash /> Delete
+                                                  </button>
+                                                </td>
                       </tr>
                     ))}
                   </tbody>
