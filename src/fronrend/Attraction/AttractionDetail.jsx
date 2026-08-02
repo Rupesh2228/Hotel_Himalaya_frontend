@@ -70,6 +70,34 @@ const AttractionDetail = () => {
     )
   }
 
+  // Normalize description/html to avoid excessive whitespace and empty paragraphs
+  const normalizeDescription = (input) => {
+    if (!input) return ''
+    let out = input
+
+    // If it looks like HTML, do conservative normalization
+    if (/<[a-z][\s\S]*>/i.test(out)) {
+      out = out.replace(/\u200B/g, '') // remove zero-width spaces
+      out = out.replace(/&nbsp;/g, ' ')
+      // remove empty paragraph tags that may create large gaps
+      out = out.replace(/<p>(?:\s|&nbsp;|<br\/?\s*>)*<\/p>/gi, '')
+      // collapse multiple spaces between text nodes
+      out = out.replace(/(>)(\s{2,})(<)/g, '$1 $3')
+      // trim leading/trailing whitespace between tags
+      out = out.replace(/>\s+/g, '>').replace(/\s+</g, '<')
+      return out
+    }
+
+    // Plain text: convert double newlines to paragraphs and collapse spaces
+    out = out.replace(/\r/g, '')
+    out = out.split(/\n{2,}/).map(para => {
+      const t = para.replace(/\s+/g, ' ').trim()
+      return t ? `<p>${t}</p>` : ''
+    }).join('')
+
+    return out
+  }
+
   // Construct custom SEO
   const customSEO = {
     title: attraction.seoTitle || attraction.title,
@@ -78,6 +106,8 @@ const AttractionDetail = () => {
     canonical: attraction.canonical || `${window.location.origin}/attractions/${attraction.slug}`,
     schema: attraction.seoSchema || attraction.schema
   }
+
+  const detailHtml = normalizeDescription(attraction.fullDescription || attraction.description)
 
   return (
     <>
