@@ -4,6 +4,14 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
+body.nav-locked {
+  overflow: hidden;
+}
+
 :root {
   --nav-height: 76px;
   --nav-bg: #ffffff;
@@ -13,15 +21,17 @@
   --transition: 0.3s ease;
 }
 
-/* ===== Header ===== */
+/* ===== Header — solid, always opaque, sits above everything ===== */
 .site-header {
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
   background-color: var(--nav-bg);
+  opacity: 1;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
+  z-index: 2000;
+  isolation: isolate; /* keeps its own stacking context so page content never bleeds through */
 }
 
 .nav-header {
@@ -32,12 +42,14 @@
   margin: 0 auto;
   padding: 0 20px;
   height: var(--nav-height);
+  background-color: var(--nav-bg);
 }
 
 /* ===== Logo ===== */
 .logo {
   margin: 0;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .logo a {
@@ -62,6 +74,37 @@
   color: var(--nav-text);
 }
 
+/* ===== Right side: auth link + hamburger, ALWAYS on the same line ===== */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.auth-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: var(--nav-accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color var(--transition), opacity var(--transition);
+}
+
+.auth-link:hover {
+  opacity: 0.88;
+}
+
+.auth-link.active {
+  background-color: #97700a;
+}
+
 /* ===== Hamburger toggle (mobile) ===== */
 .menu-toggle {
   display: flex;
@@ -74,8 +117,9 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  z-index: 1100;
+  z-index: 2100;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .menu-toggle .bar {
@@ -107,7 +151,7 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--transition), visibility var(--transition);
-  z-index: 999;
+  z-index: 1900;
 }
 
 .nav-backdrop.open {
@@ -121,12 +165,13 @@
   top: 0;
   right: 0;
   height: 100vh;
+  height: 100dvh; /* fixes mobile browser chrome causing content to peek through at bottom */
   width: min(var(--nav-drawer-width), 85vw);
   background-color: var(--nav-bg);
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   transform: translateX(100%);
   transition: transform var(--transition);
-  z-index: 1050;
+  z-index: 1950;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -143,6 +188,7 @@
   padding: 20px;
   border-bottom: 1px solid #eee;
   position: relative;
+  background-color: var(--nav-bg);
 }
 
 .drawer-logo {
@@ -198,6 +244,7 @@
   padding: 10px 0;
   display: flex;
   flex-direction: column;
+  background-color: var(--nav-bg);
 }
 
 .nav ul li {
@@ -228,14 +275,10 @@
   font-weight: 600;
 }
 
-.nav-link-emoji {
-  font-size: 15px;
-}
-
 /* ===== Small mobile ===== */
 @media (max-width: 380px) {
   .logo-wordmark {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .logo img {
@@ -244,6 +287,11 @@
 
   .nav {
     width: 100vw;
+  }
+
+  .auth-link {
+    padding: 7px 12px;
+    font-size: 12px;
   }
 }
 
@@ -254,7 +302,7 @@
   }
 }
 
-/* ===== Desktop: horizontal nav ===== */
+/* ===== Desktop: horizontal nav, auth link stays inline on the right ===== */
 @media (min-width: 992px) {
   .menu-toggle {
     display: none;
@@ -262,6 +310,10 @@
 
   .nav-backdrop {
     display: none;
+  }
+
+  .nav-header {
+    gap: 24px;
   }
 
   .nav {
@@ -274,6 +326,8 @@
     overflow: visible;
     display: flex;
     flex-direction: row;
+    flex: 1;
+    justify-content: center;
   }
 
   .nav-drawer-header {
@@ -285,6 +339,7 @@
     align-items: center;
     gap: 4px;
     padding: 0;
+    background-color: transparent;
   }
 
   .nav ul li {
@@ -309,6 +364,10 @@
     border-bottom-color: var(--nav-accent);
     background-color: transparent;
     color: var(--nav-accent);
+  }
+
+  .auth-link {
+    padding: 9px 20px;
   }
 }
 

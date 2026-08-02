@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { 
   FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, 
@@ -89,7 +89,9 @@ const TourDetails = () => {
 
 // Duplicate handleBookNowSubmit removed
 
-const handleBookNowSubmit = async (e) => {
+const handleBookNowSubmit = async (e) => { try {
+  if (bookingInProgressRef.current) return;
+  bookingInProgressRef.current = true;
   e.preventDefault();
 
   const minTravelDate = getMinTravelDate();
@@ -244,10 +246,12 @@ const handleBookNowSubmit = async (e) => {
 
   // Redirect to dashboard
   navigate('/dashboard');
+  } catch (err) { console.error('Booking handler error:', err); alert('Booking failed: ' + (err.message || err)); } finally { bookingInProgressRef.current = false }
 };
 
   // Scroll to booking form ref
   const bookingCardRef = useRef(null)
+  const bookingInProgressRef = useRef(false)
 
   useEffect(() => {
     const syncTourFromList = (allTours) => {
@@ -1081,3 +1085,4 @@ const handleBookNowSubmit = async (e) => {
 }
 
 export default TourDetails
+

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import logo from '../../img/logo.png'
 import './componets.css'
@@ -11,12 +11,18 @@ const Components = () => {
   const toggleMenu = () => setIsMenuOpen((open) => !open)
   const closeMenu = () => setIsMenuOpen(false)
 
+  // Lock page scroll while the mobile drawer is open
+  useEffect(() => {
+    document.body.classList.toggle('nav-locked', isMenuOpen)
+    return () => document.body.classList.remove('nav-locked')
+  }, [isMenuOpen])
+
   const navLinks = [
-    { to: '/', label: 'Home'},
+    { to: '/', label: 'Home' },
     { to: '/rooms', label: 'Rooms' },
     { to: '/services', label: 'Services' },
-    {to: '/events', label: 'Events'},
-    {to: '/tours', label: 'Tours'},
+    { to: '/events', label: 'Events' },
+    { to: '/tours', label: 'Tours' },
     { to: '/about', label: 'About Us' },
     { to: '/gallery', label: 'Gallery' },
     { to: '/blogs', label: 'Blog' },
@@ -40,68 +46,67 @@ const Components = () => {
             </NavLink>
           </h1>
 
-          <button
-            type="button"
-            className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
-            aria-expanded={isMenuOpen}
-            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-            onClick={toggleMenu}
-          >
-            <span className="bar bar-1" />
-            <span className="bar bar-2" />
-            <span className="bar bar-3" />
-          </button>
-        </div>
-
-        <nav className={isMenuOpen ? 'nav open' : 'nav'} aria-label="Main navigation">
-          <div className="nav-drawer-header">
-            <img src={logo} alt="Hotel Himalaya INN Khona Khona INN Khona" className="drawer-logo" />
-            <div className="drawer-hotel-name">
-              <span className="drawer-title">Hotel Himalaya INN Khona </span>
-              <span className="drawer-subtitle">Luxury & Comfort</span>
+          <nav className={isMenuOpen ? 'nav open' : 'nav'} aria-label="Main navigation">
+            <div className="nav-drawer-header">
+              <img src={logo} alt="Hotel Himalaya INN Khona Khona INN Khona" className="drawer-logo" />
+              <div className="drawer-hotel-name">
+                <span className="drawer-title">Hotel Himalaya INN Khona </span>
+                <span className="drawer-subtitle">Luxury & Comfort</span>
+              </div>
+              <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
+                <span aria-hidden="true">×</span>
+              </button>
             </div>
-            <button className="drawer-close-btn" onClick={closeMenu} aria-label="Close menu">
-              <span aria-hidden="true">×</span>
-            </button>          </div>
 
-          <ul>
-            {navLinks.map(({ to, label }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                  end={to === '/'}
-                >
-                  <span>{label}</span>
-                </NavLink>
-              </li>
-            ))}
+            <ul>
+              {navLinks.map(({ to, label }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    onClick={closeMenu}
+                    className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
+                    end={to === '/'}
+                  >
+                    <span>{label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
+          <div className="nav-right">
             {user?.role === 'admin' ? (
-              <li>
-                <NavLink
-                  to="/hh-cp-9f3m2q"
-                  onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                >
-                  <span className="nav-link-emoji" aria-hidden="true">🔒</span>
-                  <span>Admin Panel</span>
-                </NavLink>
-              </li>
+              <NavLink
+                to="/hh-cp-9f3m2q"
+                onClick={closeMenu}
+                className={({ isActive }) => isActive ? 'auth-link active' : 'auth-link'}
+              >
+                <span className="nav-link-emoji" aria-hidden="true">🔒</span>
+                <span>Admin</span>
+              </NavLink>
             ) : (
-              <li>
-                <NavLink
-                  to="/dashboard"
-                  onClick={closeMenu}
-                  className={({ isActive }) => isActive ? 'menu__link active' : 'menu__link'}
-                >
-                  <span>Dashboard</span>
-                </NavLink>
-              </li>
+              <NavLink
+                to="/dashboard"
+                onClick={closeMenu}
+                className={({ isActive }) => isActive ? 'auth-link active' : 'auth-link'}
+              >
+                <span>Dashboard</span>
+              </NavLink>
             )}
-          </ul>
-        </nav>
+
+            <button
+              type="button"
+              className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              onClick={toggleMenu}
+            >
+              <span className="bar bar-1" />
+              <span className="bar bar-2" />
+              <span className="bar bar-3" />
+            </button>
+          </div>
+        </div>
       </header>
     </>
   )
