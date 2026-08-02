@@ -76,7 +76,7 @@ const AttractionDetail = () => {
     metaDescription: attraction.metaDescription || attraction.shortDescription || attraction.description,
     keywords: attraction.keywords,
     canonical: attraction.canonical || `${window.location.origin}/attractions/${attraction.slug}`,
-    schema: attraction.schema
+    schema: attraction.seoSchema || attraction.schema
   }
 
   return (

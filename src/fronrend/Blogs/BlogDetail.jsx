@@ -69,7 +69,7 @@ const BlogDetail = () => {
     metaDescription: blog.metaDescription || blog.shortDescription,
     keywords: blog.keywords,
     canonical: blog.canonical || `${window.location.origin}/blog/${blog.slug}`,
-    schema: blog.schema
+    schema: blog.seoSchema || blog.schema
   };
 
   const publishedAt = blog.createdAt ? new Date(blog.createdAt).toLocaleString('en-US', {

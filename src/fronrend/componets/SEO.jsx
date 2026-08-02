@@ -76,8 +76,8 @@ const SEO = ({ page, customSEO }) => {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={metaTitle} />
       {metaDescription && <meta name="twitter:description" content={metaDescription} />}
-      {seoData?.schema && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: seoData.schema }} />
+      {(seoData?.schema || seoData?.seoSchema) && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: seoData.schema || seoData.seoSchema }} />
       )}
     </>
   );
