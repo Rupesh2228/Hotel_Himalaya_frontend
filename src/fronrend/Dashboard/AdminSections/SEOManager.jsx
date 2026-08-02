@@ -19,7 +19,7 @@ const PAGE_ICONS = {
 const SEOManager = () => {
   const [selectedPage, setSelectedPage] = useState('Home');
   const [formData, setFormData] = useState({
-    title: '', metaDescription: '', keywords: '', canonical: '', schema: ''
+    title: '', metaDescription: '', keywords: '', canonical: '', slug: '', schema: ''
   });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,10 +43,11 @@ const SEOManager = () => {
             metaDescription: data.data.metaDescription || '',
             keywords: data.data.keywords || '',
             canonical: data.data.canonical || '',
-            schema: data.data.schema || ''
+            slug: data.data.slug || '',
+            schema: data.data.schema || data.data.seoSchema || ''
           });
         } else {
-          setFormData({ title: '', metaDescription: '', keywords: '', canonical: '', schema: '' });
+          setFormData({ title: '', metaDescription: '', keywords: '', canonical: '', slug: '', schema: '' });
         }
       } catch {
         showToast('error', 'Failed to load SEO data.');
@@ -165,20 +166,37 @@ const SEOManager = () => {
 
             <div className="seo-field">
               <div className="seo-label-row">
-                <label className="seo-label" htmlFor="seo-keywords">
-                  🔑 Keywords
+                <label className="seo-label" htmlFor="seo-slug">
+                  🔗 Page Slug
                 </label>
-                <span className="seo-hint-inline">comma separated</span>
+                <span className="seo-hint-inline">url-friendly</span>
               </div>
               <input
-                id="seo-keywords"
+                id="seo-slug"
                 className="seo-input"
                 type="text"
-                placeholder="hotel nepal, himalaya inn, luxury stay khona"
-                value={formData.keywords}
-                onChange={e => setFormData({ ...formData, keywords: e.target.value })}
+                placeholder="about-us"
+                value={formData.slug}
+                onChange={e => setFormData({ ...formData, slug: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="seo-field">
+            <div className="seo-label-row">
+              <label className="seo-label" htmlFor="seo-keywords">
+                🔑 Keywords
+              </label>
+              <span className="seo-hint-inline">comma separated</span>
+            </div>
+            <input
+              id="seo-keywords"
+              className="seo-input"
+              type="text"
+              placeholder="hotel nepal, himalaya inn, luxury stay khona"
+              value={formData.keywords}
+              onChange={e => setFormData({ ...formData, keywords: e.target.value })}
+            />
           </div>
 
           {/* Canonical URL — full width */}
@@ -239,7 +257,7 @@ const SEOManager = () => {
               <p className="seo-preview-label">🔍 Google Preview</p>
               <div className="seo-preview-card">
                 <p className="seo-preview-url">
-                  {formData.canonical || `https://www.hotelhimalayainn.com/${selectedPage.toLowerCase()}`}
+                  {formData.canonical || `https://www.hotelhimalayainn.com/${formData.slug || selectedPage.toLowerCase()}`}
                 </p>
                 <p className="seo-preview-title">{formData.title || 'Page Title'}</p>
                 <p className="seo-preview-desc">
@@ -254,7 +272,7 @@ const SEOManager = () => {
             <button
               type="button"
               className="seo-btn seo-btn--ghost"
-              onClick={() => setFormData({ title: '', metaDescription: '', keywords: '', canonical: '', schema: '' })}
+              onClick={() => setFormData({ title: '', metaDescription: '', keywords: '', canonical: '', slug: '', schema: '' })}
             >
               🗑️ Clear Fields
             </button>
