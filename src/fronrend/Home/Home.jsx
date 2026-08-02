@@ -82,12 +82,12 @@ const Home = () => {
               {attractions.map(a => (
                 <div className="attraction_card" key={a._id}>
                   <div className="attraction_card_image">
-                    <img src={a.imageUrl} alt={a.title} />
+                    <img src={a.imageUrl || a.featuredImage} alt={a.title} />
                   </div>
                   <div className="attraction_card_body">
                     <div className="attraction_card_info">
                       <h3 className="attraction_card_name">{a.title}</h3>
-                      <p className="attraction_card_desc">{a.subDescription || a.description}</p>
+                      <p className="attraction_card_desc">{a.subDescription || a.description || a.shortDescription}</p>
                     </div>
                     <button
                       onClick={() => navigate(`/attraction/${a._id}`)}

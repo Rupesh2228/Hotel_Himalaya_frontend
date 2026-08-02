@@ -95,7 +95,7 @@ const AttractionDetail = () => {
             <div className="detail_content">
               <span className="detail_tag">Nearby Attraction</span>
               <h1 className="detail_title">{attraction.title}</h1>
-              {attraction.subDescription && <p className="detail_subtitle">{attraction.subDescription}</p>}
+              {(attraction.subDescription || attraction.shortDescription) && <p className="detail_subtitle">{attraction.subDescription || attraction.shortDescription}</p>}
               <div className="detail_meta">
                 {attraction.location && <span>{attraction.location}</span>}
                 {attraction.duration && <span>{attraction.duration}</span>}

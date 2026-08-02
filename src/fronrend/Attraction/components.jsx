@@ -19,8 +19,8 @@ export const AttractionCard = ({ attraction }) => {
 
         <div className="p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">{attraction?.title}</h3>
-          {attraction?.shortDescription && (
-            <p className="text-sm text-gray-600 line-clamp-3">{attraction.shortDescription}</p>
+          {(attraction?.shortDescription || attraction?.subDescription) && (
+            <p className="text-sm text-gray-600 line-clamp-3">{attraction.shortDescription || attraction.subDescription}</p>
           )}
         </div>
       </Link>

@@ -169,7 +169,7 @@ const AttractionManager = () => {
       title: attraction.title || '',
       slug: attraction.slug || (attraction.title ? slugify(attraction.title, { lower: true, strict: true }) : ''),
       featuredImage: attraction.featuredImage || attraction.imageUrl || '',
-      shortDescription: attraction.shortDescription || '',
+      shortDescription: attraction.shortDescription || attraction.subDescription || '',
       fullDescription: attraction.fullDescription || attraction.description || ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -178,12 +178,16 @@ const AttractionManager = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
+    const imageValue = formData.featuredImage;
     const payload = {
       title: formData.title,
       slug: formData.slug || slugify(formData.title || '', { lower: true, strict: true }),
-      featuredImage: formData.featuredImage,
+      featuredImage: imageValue,
+      imageUrl: imageValue,
       shortDescription: formData.shortDescription,
+      subDescription: formData.shortDescription,
       fullDescription: formData.fullDescription,
+      description: formData.fullDescription,
     };
     try {
       const method = editingId ? 'PUT' : 'POST';
@@ -233,7 +237,7 @@ const AttractionManager = () => {
   const filteredAttractions = attractions.filter(a =>
     !normalizedSearch ||
     (a.title || '').toLowerCase().includes(normalizedSearch) ||
-    (a.shortDescription || '').toLowerCase().includes(normalizedSearch)
+    ((a.shortDescription || a.subDescription || '')).toLowerCase().includes(normalizedSearch)
   );
 
   return (
