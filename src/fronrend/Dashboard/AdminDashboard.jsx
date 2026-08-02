@@ -440,14 +440,48 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleApproveTourBooking = (bookingId) => {
-    const updated = tourBookings.map((b) => (b._id === bookingId ? { ...b, status: 'Confirmed' } : b));
-    persistTourBookings(updated);
+  const handleApproveTourBooking = async (bookingId) => {
+    if (!window.confirm('Mark this tour booking as Confirmed?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) { setAdminError('Please sign in as an admin first.'); return; }
+      const response = await fetch(apiPath(`/api/tours/bookings/${bookingId}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ status: 'Confirmed' })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Unable to confirm booking.');
+
+      const updated = tourBookings.map((b) => (b._id === bookingId ? (data.data || { ...b, status: 'Confirmed' }) : b));
+      persistTourBookings(updated);
+      setAdminMessage('Tour booking confirmed.');
+    } catch (error) {
+      console.error(error);
+      setAdminError(error.message || 'Unable to confirm booking.');
+    }
   };
 
-  const handleRejectTourBooking = (bookingId) => {
-    const updated = tourBookings.map((b) => (b._id === bookingId ? { ...b, status: 'Rejected' } : b));
-    persistTourBookings(updated);
+  const handleRejectTourBooking = async (bookingId) => {
+    if (!window.confirm('Mark this tour booking as Rejected?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) { setAdminError('Please sign in as an admin first.'); return; }
+      const response = await fetch(apiPath(`/api/tours/bookings/${bookingId}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ status: 'Rejected' })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Unable to reject booking.');
+
+      const updated = tourBookings.map((b) => (b._id === bookingId ? (data.data || { ...b, status: 'Rejected' }) : b));
+      persistTourBookings(updated);
+      setAdminMessage('Tour booking rejected.');
+    } catch (error) {
+      console.error(error);
+      setAdminError(error.message || 'Unable to reject booking.');
+    }
   };
 
   const getTourBookingStatusLabel = (status) => {
@@ -873,11 +907,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteTourBooking = (bookingId) => {
+  const handleDeleteTourBooking = async (bookingId) => {
     if (!window.confirm('Delete this tour booking?')) return;
-    const updated = tourBookings.filter((booking) => booking._id !== bookingId);
-    persistTourBookings(updated);
-    setAdminMessage('Tour booking deleted.');
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) { setAdminError('Please sign in as an admin first.'); return; }
+      const response = await fetch(apiPath(`/api/tours/bookings/${bookingId}`), {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to delete tour booking.');
+      }
+      const updated = tourBookings.filter((booking) => booking._id !== bookingId);
+      persistTourBookings(updated);
+      setAdminMessage('Tour booking deleted.');
+    } catch (error) {
+      console.error(error);
+      setAdminError(error.message || 'Unable to delete tour booking.');
+    }
   };
 
   const handleDeleteMessage = async (messageId) => {
