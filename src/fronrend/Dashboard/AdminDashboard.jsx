@@ -2329,7 +2329,7 @@ const AdminDashboard = () => {
                           <small>📍 {b.address ? `${b.address}, ` : ''}{b.country}</small>
                         </td>
                         <td>{b.date || 'N/A'}</td>
-                        <td>{b.adults + (b.children || 0)} ({b.adults}A {b.children || 0}C)</td>
+                        <td>{b.adults + (b.children || 0)}</td>
                         <td>Rs. {b.total}</td>
                         <td>{b.paymentMethod === 'pay_at_site' ? 'Pay at Site' : b.paymentMethod || 'Pay at Site'}</td>
                         <td>
