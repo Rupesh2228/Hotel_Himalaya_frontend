@@ -10,14 +10,121 @@ const getAuthHeaders = () => {
   return token ? { Authorization: 'Bearer ' + token } : {};
 };
 
+const DragAndDropUploader = ({ value, onChange }) => {
+  const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleUpload = async (files) => {
+    setUploading(true);
+    setError('');
+    const uploadedUrls = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setError('Only image files are allowed (JPEG, PNG, WEBP, GIF).');
+        continue;
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/upload`, {
+          method: 'POST',
+          headers: token ? { Authorization: 'Bearer ' + token } : {},
+          body: formData,
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || `Upload failed (${response.status})`);
+        }
+        if (data.url) uploadedUrls.push(data.url);
+      } catch (err) {
+        setError(err.message || 'Failed to upload image. Please try again.');
+        setUploading(false);
+        return;
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      onChange(uploadedUrls[0]);
+    }
+    setUploading(false);
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleUpload(Array.from(e.dataTransfer.files));
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleUpload(Array.from(e.target.files));
+    }
+  };
+
+  const uniqueId = `dnd-${Math.random().toString(36).slice(2, 10)}`;
+  return (
+    <div className="dnd-uploader-container">
+      <div
+        className={`dnd-upload-zone ${dragActive ? 'active' : ''} ${uploading ? 'uploading' : ''}`}
+        onDragEnter={handleDrag}
+        onDragOver={handleDrag}
+        onDragLeave={handleDrag}
+        onDrop={handleDrop}
+      >
+        <input
+          type="file"
+          id={uniqueId}
+          accept="image/*"
+          onChange={handleFileSelect}
+          style={{ display: 'none' }}
+        />
+        <label htmlFor={uniqueId} className="dnd-upload-label">
+          {uploading ? (
+            <span>Uploading...</span>
+          ) : (
+            <>
+              <span className="dnd-upload-icon">📁</span>
+              <span>Drag & Drop image here or <strong>browse</strong></span>
+            </>
+          )}
+        </label>
+      </div>
+      {error && <div className="dnd-error">{error}</div>}
+      {value && (
+        <div className="dnd-preview-grid">
+          <div className="dnd-preview-item">
+            <img src={value} alt="Preview" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AttractionManager = () => {
   const [attractions, setAttractions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
-    title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
-    fullDescription: '', seoTitle: '', metaDescription: '',
-    keywords: '', canonical: '', schema: '', status: 'Published'
+    title: '', slug: '', featuredImage: '', shortDescription: '', fullDescription: ''
   });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
@@ -52,18 +159,18 @@ const AttractionManager = () => {
   };
 
   const resetForm = () => {
-    setFormData({
-      title: '', slug: '', featuredImage: '', gallery: '', shortDescription: '',
-      fullDescription: '', seoTitle: '', metaDescription: '', keywords: '', canonical: '', schema: '', status: 'Published'
-    });
+    setFormData({ title: '', slug: '', featuredImage: '', shortDescription: '', fullDescription: '' });
     setEditingId(null);
   };
 
   const handleEdit = (attraction) => {
     setEditingId(attraction._id);
     setFormData({
-      ...attraction,
-      gallery: attraction.gallery ? attraction.gallery.join(', ') : ''
+      title: attraction.title || '',
+      slug: attraction.slug || (attraction.title ? slugify(attraction.title, { lower: true, strict: true }) : ''),
+      featuredImage: attraction.featuredImage || attraction.imageUrl || '',
+      shortDescription: attraction.shortDescription || '',
+      fullDescription: attraction.fullDescription || attraction.description || ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -72,9 +179,11 @@ const AttractionManager = () => {
     e.preventDefault();
     setSaving(true);
     const payload = {
-      ...formData,
-      status: formData.status || 'Published',
-      gallery: formData.gallery ? formData.gallery.split(',').map(s => s.trim()) : [],
+      title: formData.title,
+      slug: formData.slug || slugify(formData.title || '', { lower: true, strict: true }),
+      featuredImage: formData.featuredImage,
+      shortDescription: formData.shortDescription,
+      fullDescription: formData.fullDescription,
     };
     try {
       const method = editingId ? 'PUT' : 'POST';
@@ -180,30 +289,10 @@ const AttractionManager = () => {
               <input required className="mgr-input" placeholder="e.g. Phewa Lake" value={formData.title} onChange={handleTitleChange} />
             </div>
 
-            {/* Slug */}
-            <div className="mgr-form-group">
-              <label className="mgr-label">Slug</label>
-              <input required className="mgr-input" placeholder="auto-generated" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} />
-            </div>
-            
-            <div className="mgr-form-group">
-              <label className="mgr-label">Status</label>
-              <select className="mgr-input" value={formData.status || 'Published'} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
-              </select>
-            </div>
-
-            {/* Featured Image */}
-            <div className="mgr-form-group">
-              <label className="mgr-label">Featured Image URL <span className="mgr-required">*</span></label>
-              <input required className="mgr-input" placeholder="https://..." value={formData.featuredImage} onChange={e => setFormData({ ...formData, featuredImage: e.target.value })} />
-            </div>
-
-            {/* Gallery */}
-            <div className="mgr-form-group">
-              <label className="mgr-label">Gallery URLs <span style={{ fontWeight: 400, color: '#9ca3af', textTransform: 'none', letterSpacing: 0 }}>(comma separated)</span></label>
-              <input className="mgr-input" placeholder="url1, url2, url3" value={formData.gallery} onChange={e => setFormData({ ...formData, gallery: e.target.value })} />
+            {/* Image Upload */}
+            <div className="mgr-form-group mgr-col-full">
+              <label className="mgr-label">Image <span className="mgr-required">*</span></label>
+              <DragAndDropUploader value={formData.featuredImage} onChange={(featuredImage) => setFormData({ ...formData, featuredImage })} />
             </div>
 
             {/* Short Description */}
@@ -214,39 +303,8 @@ const AttractionManager = () => {
 
             {/* Full Description */}
             <div className="mgr-form-group mgr-col-full">
-              <label className="mgr-label">Full Description <span style={{ fontWeight: 400, color: '#9ca3af', textTransform: 'none', letterSpacing: 0 }}>(HTML allowed)</span></label>
+              <label className="mgr-label">Full Description <span className="mgr-required">*</span></label>
               <textarea required className="mgr-textarea" rows="5" placeholder="Full detail page content..." value={formData.fullDescription} onChange={e => setFormData({ ...formData, fullDescription: e.target.value })} />
-            </div>
-
-            {/* SEO Divider */}
-            <div className="mgr-section-divider">
-              <span className="mgr-section-divider-label">🔍 SEO Settings</span>
-              <div className="mgr-section-divider-line"></div>
-            </div>
-
-            <div className="mgr-form-group">
-              <label className="mgr-label">SEO Title</label>
-              <input className="mgr-input" placeholder="Custom title for Google" value={formData.seoTitle} onChange={e => setFormData({ ...formData, seoTitle: e.target.value })} />
-            </div>
-
-            <div className="mgr-form-group">
-              <label className="mgr-label">Keywords</label>
-              <input className="mgr-input" placeholder="comma separated" value={formData.keywords} onChange={e => setFormData({ ...formData, keywords: e.target.value })} />
-            </div>
-
-            <div className="mgr-form-group">
-              <label className="mgr-label">Canonical URL</label>
-              <input className="mgr-input" placeholder="https://..." value={formData.canonical} onChange={e => setFormData({ ...formData, canonical: e.target.value })} />
-            </div>
-
-            <div className="mgr-form-group">
-              <label className="mgr-label">Meta Description</label>
-              <textarea className="mgr-textarea" rows="3" value={formData.metaDescription} onChange={e => setFormData({ ...formData, metaDescription: e.target.value })} />
-            </div>
-
-            <div className="mgr-form-group mgr-col-full">
-              <label className="mgr-label">Schema JSON-LD</label>
-              <textarea className="mgr-textarea mgr-textarea--mono" rows="3" value={formData.schema} onChange={e => setFormData({ ...formData, schema: e.target.value })} placeholder='{"@context": "https://schema.org", "@type": "TouristAttraction"}' />
             </div>
           </div>
 
