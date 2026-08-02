@@ -573,7 +573,7 @@ const AdminDashboard = () => {
       const authHeaders = getAuthHeaders();
 
       try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes] = await Promise.all([
+        const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes, tourBookingsRes] = await Promise.all([
           fetch(apiPath('/api/bookings'), { headers: getAuthHeaders() }),
           fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
           fetch(apiPath('/api/rooms')),
@@ -584,8 +584,9 @@ const AdminDashboard = () => {
           fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
           fetch(apiPath('/api/messages'), { headers: authHeaders }),
           fetch(apiPath('/api/reviews')),
-          fetch(apiPath('/api/past-events'))
-        ]);
+                  fetch(apiPath('/api/past-events')),
+                  fetch(apiPath('/api/tours/admin/bookings'), { headers: authHeaders })
+                ]);
 
         const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
         const usersData = usersRes.ok ? await usersRes.json() : [];
@@ -598,6 +599,7 @@ const AdminDashboard = () => {
         const messagesData = messagesRes.ok ? await messagesRes.json() : [];
         const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
         const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
+                const tourBookingsData = tourBookingsRes.ok ? await tourBookingsRes.json() : [];
 
         setRoomBookings(Array.isArray(bookingsData.data) ? bookingsData.data : (Array.isArray(bookingsData) ? bookingsData : []));
         setUsers(Array.isArray(usersData) ? usersData : (Array.isArray(usersData?.data) ? usersData.data : []));
@@ -610,6 +612,14 @@ const AdminDashboard = () => {
         setMessages(Array.isArray(messagesData) ? messagesData : (Array.isArray(messagesData?.data) ? messagesData.data : []));
         setReviews(Array.isArray(reviewsData) ? reviewsData : (Array.isArray(reviewsData?.data) ? reviewsData.data : []));
         setPastEvents(Array.isArray(pastEventsData) ? pastEventsData : (Array.isArray(pastEventsData?.data) ? pastEventsData.data : []));
+        // If admin-side tour bookings are available from the server, prefer them for admin view
+        const serverTourBookings = Array.isArray(tourBookingsData?.data) ? tourBookingsData.data : (Array.isArray(tourBookingsData) ? tourBookingsData : []);
+        if (serverTourBookings && serverTourBookings.length > 0) {
+          setTourBookings(serverTourBookings);
+        } else {
+          // Fall back to localStorage-backed tour bookings
+          loadTourBookings();
+        }
       } catch (error) {
         console.error(error);
         setEventBookingsError('Could not load admin dashboard data right now.');
