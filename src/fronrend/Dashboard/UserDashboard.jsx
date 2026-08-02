@@ -49,11 +49,33 @@ const getEventBookingStatusClass = (status) => {
 }
 
 const normalizeTourBooking = (booking) => {
-  const bookingId = booking?._id || booking?.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-  if (bookingId.startsWith('tb_')) {
-    return { ...booking, _id: bookingId.replace(/^tb_/, 'tour_') }
+  const item = booking || {}
+  const bookingId = item._id || item.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  const normalizedId = bookingId.startsWith('tb_') ? bookingId.replace(/^tb_/, 'tour_') : bookingId
+  const adults = Number(item.adults ?? item.adultCount ?? 0)
+  const children = Number(item.children ?? item.childCount ?? 0)
+  const tourPrice = Number(item.tourPrice ?? item.price ?? item.totalPrice ?? 0)
+  const calculatedTotal = tourPrice
+    ? Math.round(adults * tourPrice + children * tourPrice * 0.7)
+    : 0
+
+  return {
+    ...item,
+    _id: normalizedId,
+    tourTitle: item.tourTitle || item.title || item.name || 'Tour Booking',
+    tourCoverImage: item.tourCoverImage || item.coverImage || item.imageUrl || item.tourImage || '',
+    date: item.date || item.travelDate || item.tourDate || '',
+    fullName: item.fullName || item.bookedByName || item.bookedBy || '',
+    phoneNumber: item.phoneNumber || item.bookedByPhone || item.phone || '',
+    email: item.email || item.bookedByEmail || '',
+    address: item.address || '',
+    paymentMethod: item.paymentMethod || item.payment || 'pay_at_site',
+    total: Number(item.total ?? item.amount ?? item.totalPrice ?? calculatedTotal),
+    adults,
+    children,
+    status: item.status || 'Pending',
+    createdAt: item.createdAt || item.bookedAt || new Date().toISOString(),
   }
-  return { ...booking, _id: bookingId }
 }
 
 const getDeviceId = () => {
@@ -155,7 +177,7 @@ const UserDashboard = () => {
         if (response.ok) {
           const data = await response.json();
           const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-          setTourBookings(toursArray);
+          setTourBookings(toursArray.map(normalizeTourBooking));
         }
       } catch (error) {
         console.error('Error fetching tour bookings:', error);
@@ -202,7 +224,7 @@ const UserDashboard = () => {
         const resp = await fetch(url, { cache: 'no-store' });
         const data = await resp.json();
         const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-        setTourBookings(toursArray);
+        setTourBookings(toursArray.map(normalizeTourBooking));
       } catch (err) {
         console.error('Error fetching guest tour bookings:', err);
       }
@@ -365,13 +387,16 @@ const UserDashboard = () => {
                               <strong>Children:</strong> {b.children}
                             </div>
                             <div className="tour-booking-detail-item">
-                              <strong>Lead Traveler:</strong> {b.fullName}
+                              <strong>Lead Traveler:</strong> {b.fullName || b.bookedByName || user?.name || 'Guest'}
+                            </div>
+                            <div className="tour-booking-detail-item">
+                              <strong>Email:</strong> {b.email || b.bookedByEmail || user?.email || 'N/A'}
                             </div>
                             <div className="tour-booking-detail-item">
                               <strong>Payment:</strong> {b.paymentMethod === 'pay_at_site' ? 'Pay at Site' : b.paymentMethod || 'Pay at Site'}
                             </div>
                             <div className="tour-booking-detail-item">
-                              <strong>Contact:</strong> {b.phoneNumber || 'N/A'}
+                              <strong>Contact:</strong> {b.phoneNumber || b.bookedByPhone || 'N/A'}
                             </div>
                             <div className="tour-booking-detail-item">
                               <strong>Address:</strong> {b.address || 'N/A'}
