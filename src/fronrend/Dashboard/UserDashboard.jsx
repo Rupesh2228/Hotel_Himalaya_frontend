@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { FaTicketAlt, FaHistory, FaSuitcase } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import Components from '../componets/componets'
@@ -63,6 +63,7 @@ const normalizeTourBooking = (booking) => {
     phoneNumber: item.phoneNumber || item.bookedByPhone || item.phone || '',
     email: item.email || item.bookedByEmail || '',
     address: item.address || '',
+    country: item.country || '',
     paymentMethod: item.paymentMethod || item.payment || 'pay_at_site',
     total: Number(item.total ?? item.amount ?? item.totalPrice ?? calculatedTotal),
     adults,
@@ -362,9 +363,6 @@ const UserDashboard = () => {
                                 Booked on {new Date(b.createdAt).toLocaleDateString()}
                               </div>
                             </div>
-                            <span className={`tour-booking-badge ${getTourBookingStatusClass(b.status)}`}>
-                              {getTourBookingStatusLabel(b.status)}
-                            </span>
                           </div>
 
                           <div className="tour-booking-details">
@@ -390,7 +388,7 @@ const UserDashboard = () => {
                               <strong>Contact:</strong> {b.phoneNumber || b.bookedByPhone || 'N/A'}
                             </div>
                             <div className="tour-booking-detail-item">
-                              <strong>Address:</strong> {b.address || 'N/A'}
+                              <strong>Address:</strong> {b.address || 'N/A'}{b.country ? `, ${b.country}` : ''}
                             </div>
                           </div>
 

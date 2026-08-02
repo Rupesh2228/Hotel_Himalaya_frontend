@@ -615,7 +615,27 @@ const AdminDashboard = () => {
         // If admin-side tour bookings are available from the server, prefer them for admin view
         const serverTourBookings = Array.isArray(tourBookingsData?.data) ? tourBookingsData.data : (Array.isArray(tourBookingsData) ? tourBookingsData : []);
         if (serverTourBookings && serverTourBookings.length > 0) {
-          setTourBookings(serverTourBookings);
+          // Normalize server booking shape to the UI's expected keys (tourTitle, fullName, date, total, etc.)
+          const normalized = serverTourBookings.map((bk) => ({
+            _id: bk._id,
+            tourId: bk.tourId && (bk.tourId._id || bk.tourId) ,
+            tourTitle: bk.tourName || (bk.tourId && bk.tourId.title) || bk.tourTitle || 'Untitled Tour',
+            tourCoverImage: bk.tourCoverImage || (bk.tourId && bk.tourId.coverImage) || '',
+            fullName: bk.bookedByName || bk.fullName || 'Guest',
+            bookedBy: bk.bookedByEmail || bk.bookedBy || bk.email || '',
+            email: bk.bookedByEmail || bk.email || '',
+            phoneNumber: bk.bookedByPhone || bk.phoneNumber || bk.phone || '',
+            date: bk.travelDate || bk.date || '',
+            adults: (typeof bk.adults === 'number') ? bk.adults : (bk.guests || 0),
+            children: (typeof bk.children === 'number') ? bk.children : 0,
+            total: bk.totalPrice ?? bk.total ?? 0,
+            paymentMethod: bk.paymentMethod || 'pay_at_site',
+            status: bk.status || 'Pending',
+            createdAt: bk.createdAt,
+            country: bk.country || '',
+            address: bk.address || ''
+          }));
+          setTourBookings(normalized);
         } else {
           // Fall back to localStorage-backed tour bookings
           loadTourBookings();
@@ -2290,12 +2310,11 @@ const AdminDashboard = () => {
                   <thead>
                     <tr>
                       <th>Tour</th>
-                      <th>Guest</th>
+                      <th>Guest Details</th>
                       <th>Date</th>
                       <th>People</th>
                       <th>Total</th>
                       <th>Payment</th>
-                      <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -2303,16 +2322,16 @@ const AdminDashboard = () => {
                     {tourBookings.map((b) => (
                       <tr key={b._id}>
                         <td>{b.tourTitle}</td>
-                        <td>{b.fullName}<br/><small>{b.bookedBy}</small></td>
+                        <td>
+                          <strong>{b.fullName}</strong><br/>
+                          <small>✉️ {b.email || b.bookedBy}</small><br/>
+                          <small>📞 {b.phoneNumber}</small><br/>
+                          <small>📍 {b.address ? `${b.address}, ` : ''}{b.country}</small>
+                        </td>
                         <td>{b.date || 'N/A'}</td>
                         <td>{b.adults + (b.children || 0)} ({b.adults}A {b.children || 0}C)</td>
                         <td>Rs. {b.total}</td>
                         <td>{b.paymentMethod === 'pay_at_site' ? 'Pay at Site' : b.paymentMethod || 'Pay at Site'}</td>
-                        <td>
-                          <span className={`badge ${getTourBookingStatusClass(b.status)}`}>
-                            {getTourBookingStatusLabel(b.status)}
-                          </span>
-                        </td>
                         <td>
                                                   <button
                                                     className="btn-sm btn-danger"
