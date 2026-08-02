@@ -216,6 +216,12 @@ const handleBookNowSubmit = async (e) => {
     console.error('Failed to save tour booking to localStorage:', error);
   }
 
+} catch (error) {
+  console.error('Booking flow failed:', error);
+  alert(error.message || 'Failed to complete booking');
+  return;
+}
+
   console.log('Booking submitted:', serverBooking || bookingInfo);
   alert(`Tour booking submitted. Payment method: ${paymentMethod}. Status: ${(serverBooking && serverBooking.status) || 'Pending'}.`);
 
