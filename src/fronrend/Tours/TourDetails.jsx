@@ -173,30 +173,51 @@ const handleBookNowSubmit = async (e) => {
       })
     });
     
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || 'Failed to book tour');
+    let serverBooking = null;
+    try {
+      const data = await response.json().catch(() => (null));
+      if (!response.ok) {
+        throw new Error((data && data.error) || 'Failed to book tour');
+      }
+      serverBooking = data;
+    } catch (error) {
+      console.error('Failed to book tour via API:', error);
+      alert(error.message || 'Error occurred while booking tour');
+      return;
     }
-  } catch (error) {
-    console.error('Failed to book tour via API:', error);
-    alert(error.message || 'Error occurred while booking tour');
-    return;
-  }
-
-  // Persist to local storage for backward compatibility
+  
+  // Persist to local storage for backward compatibility — use server returned booking so IDs match database
   try {
     const storageKeys = ['himalaya_tour_bookings', 'hotel_tour_bookings', 'tour_bookings'];
+    const bookingToStore = serverBooking ? {
+      _id: serverBooking._id,
+      tourId: serverBooking.tourId || tour._id,
+      tourTitle: serverBooking.tourName || tour.title,
+      tourCoverImage: serverBooking.tourCoverImage || tour.coverImage,
+      date: serverBooking.travelDate || selectedDate,
+      adults: serverBooking.adults ?? numAdults,
+      children: serverBooking.children ?? numChildren,
+      total: serverBooking.totalPrice ?? serverBooking.total ?? finalTotal,
+      fullName: serverBooking.bookedByName || fullName,
+      email: serverBooking.bookedByEmail || email,
+      phoneNumber: serverBooking.bookedByPhone || phoneNumber,
+      address: serverBooking.address || address,
+      paymentMethod: serverBooking.paymentMethod || paymentMethod,
+      status: serverBooking.status || 'Pending',
+      createdAt: serverBooking.createdAt || new Date().toISOString()
+    } : bookingInfo;
+
     storageKeys.forEach((storageKey) => {
       const existingBookings = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existingBookings.push(bookingInfo);
+      existingBookings.push(bookingToStore);
       localStorage.setItem(storageKey, JSON.stringify(existingBookings));
     });
   } catch (error) {
     console.error('Failed to save tour booking to localStorage:', error);
   }
 
-  console.log('Booking submitted:', bookingInfo);
-  alert('Tour booking submitted. Payment method: Pay at Site. Status: Pending approval from admin.');
+  console.log('Booking submitted:', serverBooking || bookingInfo);
+  alert(`Tour booking submitted. Payment method: ${paymentMethod}. Status: ${(serverBooking && serverBooking.status) || 'Pending'}.`);
 
   // Reset form data
   setFullName('');
