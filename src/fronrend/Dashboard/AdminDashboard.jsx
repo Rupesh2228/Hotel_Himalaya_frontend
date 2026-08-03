@@ -741,9 +741,10 @@ const AdminDashboard = () => {
         try {
           const registration = await navigator.serviceWorker.register('/sw.js');
           setPushEnabled(true);
+          setAdminMessage('Device notifications are enabled.');
           registration.showNotification('Alerts Enabled', { body: 'You will now receive notifications on this device.' });
         } catch {
-          setAdminError('You will now receive notifications on this device');
+          setAdminError('Could not enable device notifications.');
         }
         return;
       }
