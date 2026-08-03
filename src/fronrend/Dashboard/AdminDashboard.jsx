@@ -666,7 +666,22 @@ const AdminDashboard = () => {
         const data = await response.json().catch(() => []);
         // Normalize response that may be { data: [...] } or an array
         const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
-        setNotifications(list);
+        
+        setNotifications((prev) => {
+          if (localStorage.getItem('localNotificationsEnabled') === 'true' && 'Notification' in window && Notification.permission === 'granted') {
+            const newUnread = list.filter(n => !n.read && !prev.find(p => p._id === n._id));
+            if (prev.length > 0) { // Only notify for new items, not on initial load
+              newUnread.forEach(n => {
+                navigator.serviceWorker.ready.then(registration => {
+                  registration.showNotification(n.title || 'New Alert', { body: n.message || '' });
+                }).catch(() => {
+                  new Notification(n.title || 'New Alert', { body: n.message || '' });
+                });
+              });
+            }
+          }
+          return list;
+        });
       }
     } catch (error) {
       console.error('Could not load admin notifications:', error);
@@ -741,6 +756,7 @@ const AdminDashboard = () => {
         try {
           const registration = await navigator.serviceWorker.register('/sw.js');
           setPushEnabled(true);
+          localStorage.setItem('localNotificationsEnabled', 'true');
           setAdminMessage('Device notifications are enabled.');
           registration.showNotification('Alerts Enabled', { body: 'You will now receive notifications on this device.' });
         } catch {
@@ -762,6 +778,7 @@ const AdminDashboard = () => {
       });
       if (!response.ok) throw new Error('Could not save this device for notifications.');
       setPushEnabled(true);
+      localStorage.setItem('localNotificationsEnabled', 'true');
       setAdminMessage('Device notifications are enabled.');
       registration.showNotification('Alerts Enabled', { body: 'You will now receive push notifications on this device.' });
     } catch (error) {
@@ -782,6 +799,7 @@ const AdminDashboard = () => {
         });
         await subscription.unsubscribe();
       }
+      localStorage.removeItem('localNotificationsEnabled');
       setPushEnabled(false);
       setAdminMessage('Device notifications are disabled on this device.');
     } catch {
@@ -793,7 +811,13 @@ const AdminDashboard = () => {
     const checkDeviceNotificationStatus = async () => {
       if (!('serviceWorker' in navigator)) return;
       const registration = await navigator.serviceWorker.getRegistration('/sw.js');
-      if (registration && await registration.pushManager.getSubscription()) setPushEnabled(true);
+      if (registration) {
+        if (await registration.pushManager.getSubscription()) {
+          setPushEnabled(true);
+        } else if (localStorage.getItem('localNotificationsEnabled') === 'true') {
+          setPushEnabled(true);
+        }
+      }
     };
     checkDeviceNotificationStatus();
   }, []);
