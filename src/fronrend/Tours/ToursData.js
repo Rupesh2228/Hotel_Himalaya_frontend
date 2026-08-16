@@ -2,6 +2,7 @@
 // Includes default high-quality data and methods to persist edits to localStorage
 
 import { getApiUrl } from '../../config/api';
+import { apiRequest } from '../../utils/apiClient';
 
 const getAuthHeaders = () => { const token = localStorage.getItem('token'); return token ? { Authorization: `Bearer ${token}` } : {}; };
 
@@ -458,10 +459,8 @@ const broadcastTourChange = (tours, reason = 'updated') => {
 
 export const getStoredTours = async () => {
   try {
-    const response = await fetch(`${API_URL}/api/tours`);
-    if (!response.ok) throw new Error('Failed to fetch tours');
-    const parsedTours = await response.json();
-    const normalizedTours = Array.isArray(parsedTours) ? parsedTours.map(normalizeTour) : DEFAULT_TOURS.map(normalizeTour);
+    const parsedTours = await apiRequest('/api/tours');
+    const normalizedTours = Array.isArray(parsedTours) ? parsedTours.map(normalizeTour) : (Array.isArray(parsedTours?.data) ? parsedTours.data.map(normalizeTour) : DEFAULT_TOURS.map(normalizeTour));
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(normalizedTours));
     return normalizedTours;
   } catch (e) {

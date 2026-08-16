@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCompass, FaChevronRight } from 'react-icons/fa'
 import { getStoredTours, getVisibleTours, subscribeToTourChanges } from './ToursData'
@@ -6,18 +6,31 @@ import SEO from '../componets/SEO'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
 import './ToursList.css'
+import { TourCardSkeleton } from '../componets/SkeletonLoader'
+import { ApiErrorCard } from '../componets/ErrorState'
 
 const ToursList = () => {
   const navigate = useNavigate()
   const [tours, setTours] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const visibleTours = getVisibleTours(tours)
 
-  useEffect(() => {
-    const loadTours = async () => {
+  const loadTours = async () => {
+    try {
+      setLoading(true)
+      setError(null)
       const fetchedTours = await getStoredTours()
       setTours(fetchedTours)
+    } catch (err) {
+      console.error(err)
+      setError('Unable to load expeditions. Please try again.')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadTours()
 
     const unsubscribe = subscribeToTourChanges((updatedTours) => {
@@ -67,9 +80,21 @@ const ToursList = () => {
           </div>
         </div>
 
-        <div className="tours_grid">
-          {visibleTours
-            .map((tour) => {
+        {loading ? (
+          <TourCardSkeleton count={3} />
+        ) : error ? (
+          <ApiErrorCard 
+            title="Unable to load expeditions" 
+            message={error} 
+            onRetry={loadTours} 
+          />
+        ) : visibleTours.length === 0 ? (
+          <div className="empty-state" style={{ textAlign: 'center', padding: '3rem', color: '#888' }}>
+            No expeditions available at the moment. Please check back later.
+          </div>
+        ) : (
+          <div className="tours_grid">
+            {visibleTours.map((tour) => {
               const discountedPrice = calculateDiscountedPrice(tour.price, tour.discount)
 
               return (
@@ -192,7 +217,8 @@ const ToursList = () => {
                 </div>
               )
             })}
-        </div>
+          </div>
+        )}
       </main>
 
       <footer className="home_footer">

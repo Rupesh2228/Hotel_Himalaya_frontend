@@ -141,3 +141,83 @@
     opacity: 0.5;
   }
 }
+
+/* Clean modern Error State styling */
+.api-error-card {
+  background: #ffffff;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 480px;
+  margin: 32px auto;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.api-error-title {
+  color: #b91c1c;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.api-error-message {
+  color: #4b5563;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.api-error-btn {
+  background-color: #124C38;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.api-error-btn:hover {
+  background-color: #0b3023;
+}
+
+.api-error-btn:active {
+  transform: scale(0.98);
+}
+
+/* Stale refresh warning bar */
+.stale-refresh-warning {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #d97706;
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  color: #92400e;
+  font-size: 0.875rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stale-refresh-btn {
+  background: none;
+  border: none;
+  color: #b45309;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+  margin-left: 12px;
+}
+
+.stale-refresh-btn:hover {
+  color: #78350f;
+}
+

@@ -757,6 +757,13 @@ tbody tr:hover {
 .badge-user { background: var(--blue-tint); color: var(--blue); }
 .badge-google { background: var(--blue-tint); color: var(--blue); }
 .badge-local { background: var(--paper-soft); color: var(--ink-soft); border: 1px solid var(--line-strong); }
+/* Booking status badge classes */
+.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-success { background: #d1fae5; color: #065f46; }
+.badge-error { background: #fee2e2; color: #991b1b; }
+/* Button variants */
+.btn-emerald { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.btn-emerald:hover { background: #a7f3d0; }
 
 .role-updating {
   margin-left: 8px;

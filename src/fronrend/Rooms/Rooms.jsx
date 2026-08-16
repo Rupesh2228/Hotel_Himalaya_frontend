@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaBed, FaUser, FaRegCalendarAlt, FaTimes, FaCheckCircle } from 'react-icons/fa';
+import { useState, useEffect, useCallback } from 'react';
+import { FaBed, FaUser, FaRegCalendarAlt, FaTimes, FaCheckCircle, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 import './Rooms.css';
@@ -7,6 +7,9 @@ import Components from '../componets/componets';
 import LastComponent from '../componets/LastComponents';
 import SEO from '../componets/SEO';
 import roomSingle from '../../img/home.jpg';
+import { apiRequest } from '../../utils/apiClient';
+import { RoomCardSkeleton } from '../componets/SkeletonLoader';
+import { ApiErrorCard, StaleRefreshWarning } from '../componets/ErrorState';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -20,13 +23,13 @@ const getDeviceId = () => {
 };
 
 const initialForm = {
-  bookedByName: '',
+  guestName: '',
   phone: '',
-  bookedByEmail: '',
-  address: '',
-  members: 1,
+  guestEmail: '',
+  guests: 1,
   checkIn: '',
   checkOut: '',
+  specialRequest: '',
 };
 
 const Rooms = () => {
@@ -38,6 +41,7 @@ const Rooms = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(null);
+  const [roomsLoading, setRoomsLoading] = useState(true);
 
   const resolveRoomImage = (images) => {
     if (Array.isArray(images)) return images[0] || roomSingle;
@@ -48,30 +52,63 @@ const Rooms = () => {
     return roomSingle;
   };
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await fetch(`${getApiUrl()}/api/rooms`);
-        if (response.ok) {
-          const data = await response.json();
-          setRooms(Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []));
-        }
-      } catch (err) {
-        console.error('Error fetching rooms:', err);
+  const [roomsError, setRoomsError] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchRooms = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setRoomsLoading(true);
+    }
+    try {
+      const data = await apiRequest('/api/rooms');
+      const roomsArray = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+      setRooms(roomsArray);
+      localStorage.setItem('himalaya_rooms_db', JSON.stringify(roomsArray));
+      setRoomsError(null);
+    } catch (err) {
+      console.error('Error fetching rooms:', err);
+      if (rooms.length === 0) {
+        setRoomsError(err.message || 'Unable to connect to the server');
       }
-    };
-    fetchRooms();
-  }, []);
+    } finally {
+      setRoomsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [rooms.length]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('himalaya_rooms_db');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setRooms(parsed);
+        setRoomsLoading(false);
+      } catch {
+        // ignore malformed cache
+      }
+    }
+    fetchRooms(!!stored);
+  }, [fetchRooms]);
 
   useEffect(() => {
     if (user?.email) {
-      setForm((prev) => ({ ...prev, bookedByEmail: user.email }));
+      setForm((prev) => ({ ...prev, guestEmail: user.email }));
     }
-  }, [user?.email]);
+    if (user?.name) {
+      setForm((prev) => ({ ...prev, guestName: user.name }));
+    }
+  }, [user?.email, user?.name]);
 
   const openModal = (room) => {
     setSelectedRoom(room);
-    setForm({ ...initialForm, members: 1 });
+    setForm({
+      ...initialForm,
+      guests: 1,
+      guestEmail: user?.email || '',
+      guestName: user?.name || '',
+    });
     setError('');
     setSuccess(null);
   };
@@ -98,6 +135,19 @@ const Rooms = () => {
     e.preventDefault();
     setError('');
 
+    // Frontend validation
+    if (!form.guestName?.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+    if (!form.guestEmail?.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+    if (!form.phone?.trim()) {
+      setError('Please enter your phone number.');
+      return;
+    }
     if (!form.checkIn || !form.checkOut) {
       setError('Please select check-in and check-out dates.');
       return;
@@ -111,17 +161,19 @@ const Rooms = () => {
     try {
       const payload = {
         roomId: selectedRoom._id,
-        roomTitle: selectedRoom.title,
-        roomPrice: selectedRoom.price,
-        totalMembers: selectedRoom.totalMembers,
-        members: Number(form.members),
+        // New field names
+        guestName: form.guestName.trim(),
+        guestEmail: form.guestEmail.trim(),
+        phone: form.phone.trim(),
+        guests: Number(form.guests) || 1,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
+        specialRequest: form.specialRequest?.trim() || '',
+        // Legacy field aliases for backward compatibility
+        bookedByName: form.guestName.trim(),
+        bookedByEmail: form.guestEmail.trim(),
+        members: Number(form.guests) || 1,
         bookedBy: user?.email || deviceId,
-        bookedByName: form.bookedByName,
-        bookedByEmail: form.bookedByEmail,
-        phone: form.phone,
-        address: form.address,
       };
 
       const res = await fetch(`${getApiUrl()}/api/bookings`, {
@@ -132,11 +184,17 @@ const Rooms = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || 'Booking failed. Please try again.');
+        // Handle validation errors array
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+          setError(data.errors.map((e) => e.msg || e.message).join('. '));
+        } else {
+          setError(data.error || 'Booking failed. Please try again.');
+        }
       } else {
         setSuccess(data);
       }
     } catch (err) {
+      console.error('Booking error:', err);
       setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
@@ -163,32 +221,53 @@ const Rooms = () => {
         </p>
       </section>
 
-      <section className="rooms-section" id="rooms">
-        <div className="rooms-grid">
-          {rooms.map((room) => (
-            <article key={room._id} className="room-card">
-              <div className="room-image-wrapper">
-                <img src={resolveRoomImage(room.images)} alt={room.title || 'Hotel Room'} className="room-image" />
-              </div>
-              <div className="room-card-body">
-                <h3>{room.title}</h3>
-                <p className="room-subtitle">{room.description}</p>
-                <div className="room-meta">
-                  <span className="room-meta-pill"><FaBed /> Bed</span>
-                  <span className="room-meta-pill"><FaUser /> {room.totalMembers || 2} Guests</span>
+      <section className="rooms-section" id="rooms" style={{ position: 'relative' }}>
+        {roomsError && rooms.length > 0 && (
+          <StaleRefreshWarning 
+            message="⚠️ Connection error. Showing cached rooms list." 
+            onRetry={() => fetchRooms(true)} 
+          />
+        )}
+
+        {roomsLoading && rooms.length === 0 ? (
+          <RoomCardSkeleton count={3} />
+        ) : roomsError && rooms.length === 0 ? (
+          <ApiErrorCard 
+            title="Unable to load rooms" 
+            message={roomsError} 
+            onRetry={() => fetchRooms(false)} 
+          />
+        ) : rooms.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#888' }}>
+            No rooms available at the moment. Please check back soon.
+          </div>
+        ) : (
+          <div className="rooms-grid" style={{ opacity: isRefreshing ? 0.7 : 1, transition: 'opacity 0.2s' }}>
+            {rooms.map((room) => (
+              <article key={room._id} className="room-card">
+                <div className="room-image-wrapper">
+                  <img src={resolveRoomImage(room.images)} alt={room.title || 'Hotel Room'} className="room-image" />
                 </div>
-                <div className="room-footer">
-                  <p className="room-price">NPR {room.price} <span>/ night</span></p>
-                  <div className="room-actions">
-                    <button type="button" className="room-book-btn" onClick={() => openModal(room)}>
-                      Book Now <FaRegCalendarAlt size={14} />
-                    </button>
+                <div className="room-card-body">
+                  <h3>{room.title}</h3>
+                  <p className="room-subtitle">{room.description}</p>
+                  <div className="room-meta">
+                    <span className="room-meta-pill"><FaBed /> Bed</span>
+                    <span className="room-meta-pill"><FaUser /> {room.totalMembers || 2} Guests</span>
+                  </div>
+                  <div className="room-footer">
+                    <p className="room-price">NPR {room.price} <span>/ night</span></p>
+                    <div className="room-actions">
+                      <button type="button" className="room-book-btn" onClick={() => openModal(room)}>
+                        Book Now <FaRegCalendarAlt size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <div className="last-finished_footer">
@@ -206,17 +285,31 @@ const Rooms = () => {
             {success ? (
               <div className="booking-success">
                 <FaCheckCircle className="booking-success-icon" />
-                <h2>Booking Confirmed!</h2>
-                <p>Your booking for <strong>{success.roomTitle}</strong> has been received.</p>
-                <div className="booking-success-code">
-                  Verification Code: <strong>{success.verificationCode}</strong>
-                </div>
-                <p className="booking-success-note">Please save this code. You will need it at check-in.</p>
+                <h2>Booking Submitted!</h2>
+                <p>Your booking request for <strong>{success.roomName || success.roomTitle || selectedRoom.title}</strong> has been received.</p>
+
+                {success.bookingId && (
+                  <div className="booking-success-code">
+                    Booking ID: <strong>{success.bookingId}</strong>
+                  </div>
+                )}
+                {success.verificationCode && (
+                  <div className="booking-success-code" style={{ marginTop: '0.5rem' }}>
+                    Verification Code: <strong>{success.verificationCode}</strong>
+                  </div>
+                )}
+
+                <p className="booking-success-note">
+                  ✉️ A confirmation email has been sent to <strong>{success.guestEmail || form.guestEmail}</strong>. Your booking is currently <strong>Pending</strong> and will be confirmed by our team shortly.
+                </p>
+
                 <div className="booking-success-details">
                   <span>📅 Check-in: <strong>{success.checkIn}</strong></span>
                   <span>📅 Check-out: <strong>{success.checkOut}</strong></span>
-                  <span>💰 Total: <strong>NPR {success.roomPrice}</strong></span>
+                  <span>👥 Guests: <strong>{success.guests || form.guests}</strong></span>
+                  <span>💰 Total: <strong>NPR {(success.totalPrice || totalPrice).toLocaleString()}</strong></span>
                 </div>
+
                 <button className="booking-close-btn" onClick={closeModal} type="button">Done</button>
               </div>
             ) : (
@@ -227,22 +320,24 @@ const Rooms = () => {
                   <p className="booking-room-price">NPR {selectedRoom.price} / night</p>
                 </div>
 
-                <form className="booking-form" onSubmit={handleSubmit}>
+                <form className="booking-form" onSubmit={handleSubmit} noValidate>
+                  {/* Row 1: Name + Phone */}
                   <div className="booking-form-row">
                     <div className="booking-field">
-                      <label htmlFor="bookedByName">Full Name *</label>
+                      <label htmlFor="guestName"><FaUser size={11} /> Guest Full Name *</label>
                       <input
-                        id="bookedByName"
+                        id="guestName"
                         type="text"
-                        name="bookedByName"
+                        name="guestName"
                         placeholder="Your full name"
-                        value={form.bookedByName}
+                        value={form.guestName}
                         onChange={handleChange}
                         required
+                        autoComplete="name"
                       />
                     </div>
                     <div className="booking-field">
-                      <label htmlFor="phone">Phone Number *</label>
+                      <label htmlFor="phone"><FaPhone size={11} /> Phone Number *</label>
                       <input
                         id="phone"
                         type="tel"
@@ -251,47 +346,35 @@ const Rooms = () => {
                         value={form.phone}
                         onChange={handleChange}
                         required
+                        autoComplete="tel"
                       />
                     </div>
                   </div>
 
+                  {/* Row 2: Email + Guests */}
                   <div className="booking-form-row">
                     <div className="booking-field">
-                      <label htmlFor="bookedByEmail">Email *</label>
+                      <label htmlFor="guestEmail"><FaEnvelope size={11} /> Email Address *</label>
                       <input
-                        id="bookedByEmail"
+                        id="guestEmail"
                         type="email"
-                        name="bookedByEmail"
+                        name="guestEmail"
                         placeholder="your@email.com"
-                        value={form.bookedByEmail}
+                        value={form.guestEmail}
                         onChange={handleChange}
                         required
+                        autoComplete="email"
                       />
                     </div>
                     <div className="booking-field">
-                      <label htmlFor="address">Address *</label>
+                      <label htmlFor="guests"><FaUser size={11} /> Number of Guests *</label>
                       <input
-                        id="address"
-                        type="text"
-                        name="address"
-                        placeholder="Your address"
-                        value={form.address}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="booking-form-row">
-                    <div className="booking-field">
-                      <label htmlFor="members">Number of Guests *</label>
-                      <input
-                        id="members"
+                        id="guests"
                         type="number"
-                        name="members"
+                        name="guests"
                         min="1"
                         max={selectedRoom.totalMembers || 10}
-                        value={form.members}
+                        value={form.guests}
                         onChange={handleChange}
                         required
                       />
@@ -299,6 +382,7 @@ const Rooms = () => {
                     </div>
                   </div>
 
+                  {/* Row 3: Dates */}
                   <div className="booking-form-row">
                     <div className="booking-field">
                       <label htmlFor="checkIn">Check-in Date *</label>
@@ -326,17 +410,40 @@ const Rooms = () => {
                     </div>
                   </div>
 
+                  {/* Row 4: Special Request */}
+                  <div className="booking-form-row">
+                    <div className="booking-field" style={{ flex: '1 1 100%' }}>
+                      <label htmlFor="specialRequest">Special Request <span style={{ fontWeight: 400, color: '#888' }}>(optional)</span></label>
+                      <textarea
+                        id="specialRequest"
+                        name="specialRequest"
+                        placeholder="Any special requests or requirements? (early check-in, dietary needs, room preferences…)"
+                        value={form.specialRequest}
+                        onChange={handleChange}
+                        rows={3}
+                        maxLength={500}
+                        style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                      />
+                      <span className="booking-field-hint">{form.specialRequest.length}/500 characters</span>
+                    </div>
+                  </div>
+
+                  {/* Price Summary */}
                   {nights > 0 && (
                     <div className="booking-summary">
-                      <span>{nights} night{nights > 1 ? 's' : ''} × NPR {selectedRoom.price}</span>
-                      <strong>Total: NPR {totalPrice}</strong>
+                      <span>{nights} night{nights > 1 ? 's' : ''} × NPR {selectedRoom.price.toLocaleString()}</span>
+                      <strong>Total: NPR {totalPrice.toLocaleString()}</strong>
                     </div>
                   )}
 
-                  {error && <p className="booking-error">{error}</p>}
+                  {error && <p className="booking-error" role="alert">{error}</p>}
 
                   <button type="submit" className="booking-submit-btn" disabled={loading}>
-                    {loading ? 'Processing...' : 'Confirm Booking'}
+                    {loading ? (
+                      <span>Processing<span style={{ animation: 'pulse 1s infinite' }}>…</span></span>
+                    ) : (
+                      <>Confirm Booking <FaCheckCircle size={14} /></>
+                    )}
                   </button>
                 </form>
               </>

@@ -7,6 +7,10 @@ import LazyImage from '../componets/LazyImage';
 import { getApiUrl, DEFAULT_LIVE_BACKEND_URL } from '../../config/api';
 import './Blogs.css'; // Add CSS if needed
 
+import { apiRequest } from '../../utils/apiClient';
+import { BlogCardSkeleton } from '../componets/SkeletonLoader';
+import { ApiErrorCard } from '../componets/ErrorState';
+
 const Blogs = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
@@ -16,56 +20,33 @@ const Blogs = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const pageSize = 8;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const apiUrl = getApiUrl();
-      const backendUrl = apiUrl || DEFAULT_LIVE_BACKEND_URL;
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const blogsData = await apiRequest('/api/blogs');
 
-      const fetchJson = async (url) => {
-        const response = await fetch(url, { headers: { Accept: 'application/json' } });
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ${url}: ${response.status}`);
-        }
-        const text = await response.text();
-        try {
-          return JSON.parse(text);
-        } catch {
-          throw new Error(`Unexpected non-JSON response from ${url}`);
-        }
-      };
-
-      try {
-        let blogsData;
-
-        try {
-          blogsData = await fetchJson(`${backendUrl}/api/blogs`);
-        } catch (firstError) {
-          if (backendUrl !== DEFAULT_LIVE_BACKEND_URL) {
-            blogsData = await fetchJson(`${DEFAULT_LIVE_BACKEND_URL}/api/blogs`);
-          } else {
-            throw firstError;
-          }
-        }
-
-        const blogItems = [];
-        if (blogsData?.success) {
-          const publishedBlogs = blogsData.data
-            .filter(b => b.status === 'Published')
-            .map(b => ({ ...b, itemType: 'blog' }));
-          blogItems.push(...publishedBlogs);
-        }
-
-        blogItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-        setItems(blogItems);
-        setCurrentPage(1);
-      } catch (err) {
-        console.error('Error fetching or processing blog data:', err);
-        setError('Unable to load blogs. Please check your backend configuration.');
-      } finally {
-        setLoading(false);
+      const blogItems = [];
+      if (blogsData?.success) {
+        const publishedBlogs = (blogsData.data || [])
+          .filter(b => b.status === 'Published')
+          .map(b => ({ ...b, itemType: 'blog' }));
+        blogItems.push(...publishedBlogs);
       }
-    };
+
+      blogItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      setItems(blogItems);
+      setCurrentPage(1);
+    } catch (err) {
+      console.error('Error fetching blog data:', err);
+      setError(err.message || 'Unable to load blogs. Please check your network connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -142,55 +123,64 @@ const Blogs = () => {
             </div>
           )}
 
-          {/* List */}
-          <div className="blogs-list">
-            {paginatedItems.map(item => {
-              const linkPath = item.itemType === 'blog' ? `/blog/${item.slug}` : `/attractions/${item.slug}`;
-              const badgeLabel = item.itemType === 'blog' ? 'Blog' : 'Attraction';
-              const publishedAt = item.createdAt ? new Date(item.createdAt).toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              }) : 'Unknown date';
+          {loading ? (
+            <BlogCardSkeleton count={3} />
+          ) : error ? (
+            <ApiErrorCard 
+              title="Unable to load articles" 
+              message={error} 
+              onRetry={fetchData} 
+            />
+          ) : (
+            <div className="blogs-list">
+              {paginatedItems.map(item => {
+                const linkPath = item.itemType === 'blog' ? `/blog/${item.slug}` : `/attractions/${item.slug}`;
+                const badgeLabel = item.itemType === 'blog' ? 'Blog' : 'Attraction';
+                const publishedAt = item.createdAt ? new Date(item.createdAt).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                }) : 'Unknown date';
 
-              return (
-                <article
-                  key={item._id}
-                  className="blog-row blog-row-clickable"
-                  onClick={() => navigate(linkPath)}
-                  role="link"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate(linkPath)}
-                >
-                  <div className="blog-row-thumb">
-                    <LazyImage
-                      src={item.featuredImage || item.imageUrl}
-                      alt={item.title}
-                      className="blog-row-img"
-                    />
-                  </div>
-
-                  <div className="blog-row-content">
-                    <div className="blog-row-meta">
-                      <span className="blog-row-badge">{badgeLabel}</span>
-                      <span className="blog-row-dot">·</span>
-                      <span className="blog-row-date">{publishedAt}</span>
+                return (
+                  <article
+                    key={item._id}
+                    className="blog-row blog-row-clickable"
+                    onClick={() => navigate(linkPath)}
+                    role="link"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && navigate(linkPath)}
+                  >
+                    <div className="blog-row-thumb">
+                      <LazyImage
+                        src={item.featuredImage || item.imageUrl}
+                        alt={item.title}
+                        className="blog-row-img"
+                      />
                     </div>
 
-                    <h2 className="blog-row-title">{item.title}</h2>
+                    <div className="blog-row-content">
+                      <div className="blog-row-meta">
+                        <span className="blog-row-badge">{badgeLabel}</span>
+                        <span className="blog-row-dot">·</span>
+                        <span className="blog-row-date">{publishedAt}</span>
+                      </div>
 
-                    <p className="blog-row-excerpt">
-                      {item.shortDescription || item.description}
-                    </p>
+                      <h2 className="blog-row-title">{item.title}</h2>
 
-                    <span className="blog-row-readmore">Read More →</span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                      <p className="blog-row-excerpt">
+                        {item.shortDescription || item.description}
+                      </p>
 
-          {filteredItems.length === 0 && !error && (
+                      <span className="blog-row-readmore">Read More →</span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          {!loading && filteredItems.length === 0 && !error && (
             <p className="blogs-empty">
               {items.length === 0
                 ? 'No content available at the moment.'

@@ -925,6 +925,26 @@ body {
   background: #fff;
 }
 
+.booking-field textarea {
+  padding: 12px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  color: #222;
+  background: #fafafa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.booking-field textarea:focus {
+  border-color: #124C38;
+  box-shadow: 0 0 0 3px rgba(18, 76, 56, 0.12);
+  background: #fff;
+}
+
 .booking-field-hint {
   font-size: 0.78rem;
   color: #999;

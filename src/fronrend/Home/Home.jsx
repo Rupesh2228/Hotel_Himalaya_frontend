@@ -1,53 +1,72 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Home.css'
 import Components from '../componets/componets'
 import LastComponents from '../componets/LastComponents'
 import SEO from '../componets/SEO'
 import { subscribeToAttractionChanges } from '../Attraction/attractionEvents'
+import { AttractionCardSkeleton } from '../componets/SkeletonLoader'
+import { ApiErrorCard, StaleRefreshWarning } from '../componets/ErrorState'
 import home from '../../img/home.jpg'
-import { getApiUrl } from '../../config/api'
-
-const API_URL = getApiUrl()
+import { apiRequest } from '../../utils/apiClient'
 
 const Home = () => {
   const navigate = useNavigate()
   const [attractions, setAttractions] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const fetchAttractions = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    
+    try {
+      const data = await apiRequest('/api/attractions');
+      // Unwrap backend pagination payload if necessary
+      const attractionsArray = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.data) ? data.data : []);
+      
+      setAttractions(attractionsArray);
+      localStorage.setItem('himalaya_attractions_db', JSON.stringify(attractionsArray));
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch attractions:', err);
+      // Only set UI error state if we have absolutely no cache data
+      if (attractions.length === 0) {
+        setError(err.message || 'Unable to connect to server');
+      }
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [attractions.length]);
 
   useEffect(() => {
-    const fetchAttractions = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/attractions`)
-        if (res.ok) {
-          const data = await res.json()
-          // Backend returns { data: [], pagination: {} } — unwrap the data array
-          const attractionsArray = Array.isArray(data)
-            ? data
-            : (Array.isArray(data?.data) ? data.data : [])
-          setAttractions(attractionsArray)
-        }
-      } catch (err) {
-        console.error('Failed to fetch attractions:', err)
-      }
-    }
-
-    const stored = localStorage.getItem('himalaya_attractions_db')
+    const stored = localStorage.getItem('himalaya_attractions_db');
     if (stored) {
       try {
-        setAttractions(JSON.parse(stored))
+        const parsed = JSON.parse(stored);
+        setAttractions(parsed);
+        setLoading(false);
       } catch {
         // ignore malformed cache
       }
     }
 
-    fetchAttractions()
+    // Trigger either background refresh or initial load
+    fetchAttractions(!!stored);
 
     const unsubscribe = subscribeToAttractionChanges((updatedAttractions) => {
-      setAttractions(Array.isArray(updatedAttractions) ? updatedAttractions : [])
-    })
+      setAttractions(Array.isArray(updatedAttractions) ? updatedAttractions : []);
+    });
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, [fetchAttractions]);
 
   return (
     <div className="home_page">
@@ -74,11 +93,32 @@ const Home = () => {
         </div>
       </main>
 
-      {attractions.length > 0 && (
-        <section className="attractions_section">
-          <div className="attractions_container">
-            <h2 className="attractions_title">Explore Nearby Attractions</h2>
-            <div className="attractions_grid">
+      <section className="attractions_section">
+        <div className="attractions_container">
+          <h2 className="attractions_title">Explore Nearby Attractions</h2>
+          
+          {/* Stale refresh indicator */}
+          {error && attractions.length > 0 && (
+            <StaleRefreshWarning 
+              message="⚠️ Connection error. Displaying offline attractions info." 
+              onRetry={() => fetchAttractions(true)} 
+            />
+          )}
+
+          {loading && attractions.length === 0 ? (
+            <AttractionCardSkeleton count={3} />
+          ) : error && attractions.length === 0 ? (
+            <ApiErrorCard 
+              title="Unable to load attractions" 
+              message={error} 
+              onRetry={() => fetchAttractions(false)} 
+            />
+          ) : attractions.length === 0 ? (
+            <div className="empty-state" style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+              No nearby attractions listed at the moment.
+            </div>
+          ) : (
+            <div className="attractions_grid" style={{ opacity: isRefreshing ? 0.7 : 1, transition: 'opacity 0.2s' }}>
               {attractions.map(a => (
                 <div className="attraction_card" key={a._id}>
                   <div className="attraction_card_image">
@@ -100,9 +140,9 @@ const Home = () => {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
       <section className="stats_section">
         <div className="stats_grid">

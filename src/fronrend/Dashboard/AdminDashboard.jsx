@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { io } from 'socket.io-client';
 import { FaBed, FaBell, FaBellSlash, FaCalendarAlt, FaDownload, FaEdit, FaEnvelope, FaPlus, FaTicketAlt, FaTrash, FaUsers, FaBars, FaSignOutAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
@@ -10,6 +11,8 @@ import {
   deleteTourOnServer
 } from '../Tours/ToursData';
 import { getApiUrl } from '../../config/api';
+import { apiRequest } from '../../utils/apiClient';
+import { TableSkeleton, DashboardStatsSkeleton } from '../componets/SkeletonLoader';
 import './AdminDashboard.css';
 import { broadcastAttractionChange } from '../Attraction/attractionEvents';
 import './AdminSections/Manager.css'; // Importing premium form CSS
@@ -347,6 +350,52 @@ const AdminDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const socketRef = useRef(null);
+
+  // ── Socket.IO real-time notifications ─────────────────────────────────────
+  useEffect(() => {
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      console.log('[SOCKET] Connected to server:', socket.id);
+      // Join admin room to receive admin-only notifications
+      socket.emit('join_admin_room');
+    });
+
+    socket.on('new_notification', (notification) => {
+      console.log('[SOCKET] New real-time notification received:', notification);
+      setNotifications((prev) => {
+        // Avoid duplicates
+        if (prev.find((n) => n._id === notification._id)) return prev;
+        return [notification, ...prev];
+      });
+      // Also show a browser Notification if permission granted (but SW push hasn't fired)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification(notification.title || '🔔 New Booking', {
+            body: notification.message || '',
+            icon: '/favicon.ico',
+          });
+        } catch (e) {
+          // Some browsers block this if SW is handling it — that's fine
+        }
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('[SOCKET] Disconnected from server');
+    });
+
+    socket.on('connect_error', (err) => {
+      console.warn('[SOCKET] Connection error (non-fatal):', err.message);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
 
   const [typed, setTyped] = useState('');
@@ -570,36 +619,24 @@ const AdminDashboard = () => {
         return;
       }
 
-      const authHeaders = getAuthHeaders();
-
       try {
-        const [bookingsRes, usersRes, roomsRes, galleryRes, galleryCatsRes, attractionsRes, eventsRes, eventBookingsRes, messagesRes, reviewsRes, pastEventsRes, tourBookingsRes] = await Promise.all([
-          fetch(apiPath('/api/bookings'), { headers: getAuthHeaders() }),
-          fetch(apiPath('/api/admin/users'), { headers: authHeaders }),
-          fetch(apiPath('/api/rooms')),
-          fetch(apiPath('/api/gallery')),
-          fetch(apiPath('/api/gallery/categories')),
-          fetch(apiPath('/api/attractions')),
-          fetch(apiPath('/api/events')),
-          fetch(apiPath('/api/events/admin/bookings'), { headers: authHeaders }),
-          fetch(apiPath('/api/messages'), { headers: authHeaders }),
-          fetch(apiPath('/api/reviews')),
-                  fetch(apiPath('/api/past-events')),
-                  fetch(apiPath('/api/tours/admin/bookings'), { headers: authHeaders })
-                ]);
+        setLoadingAdminData(true);
+        setAdminError('');
 
-        const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
-        const usersData = usersRes.ok ? await usersRes.json() : [];
-        const roomsData = roomsRes.ok ? await roomsRes.json() : [];
-        const galleryData = galleryRes.ok ? await galleryRes.json() : [];
-        const galleryCatsData = galleryCatsRes.ok ? await galleryCatsRes.json() : [];
-        const attractionsData = attractionsRes.ok ? await attractionsRes.json() : [];
-        const eventsData = eventsRes.ok ? await eventsRes.json() : [];
-        const eventBookingsData = eventBookingsRes.ok ? await eventBookingsRes.json() : [];
-        const messagesData = messagesRes.ok ? await messagesRes.json() : [];
-        const reviewsData = reviewsRes.ok ? await reviewsRes.json() : [];
-        const pastEventsData = pastEventsRes.ok ? await pastEventsRes.json() : [];
-                const tourBookingsData = tourBookingsRes.ok ? await tourBookingsRes.json() : [];
+        const [bookingsData, usersData, roomsData, galleryData, galleryCatsData, attractionsData, eventsData, eventBookingsData, messagesData, reviewsData, pastEventsData, tourBookingsData] = await Promise.all([
+          apiRequest('/api/bookings').catch(() => []),
+          apiRequest('/api/admin/users').catch(() => []),
+          apiRequest('/api/rooms').catch(() => []),
+          apiRequest('/api/gallery').catch(() => []),
+          apiRequest('/api/gallery/categories').catch(() => []),
+          apiRequest('/api/attractions').catch(() => []),
+          apiRequest('/api/events').catch(() => []),
+          apiRequest('/api/events/admin/bookings').catch(() => []),
+          apiRequest('/api/messages').catch(() => []),
+          apiRequest('/api/reviews').catch(() => []),
+          apiRequest('/api/past-events').catch(() => []),
+          apiRequest('/api/tours/admin/bookings').catch(() => [])
+        ]);
 
         setRoomBookings(Array.isArray(bookingsData.data) ? bookingsData.data : (Array.isArray(bookingsData) ? bookingsData : []));
         setUsers(Array.isArray(usersData) ? usersData : (Array.isArray(usersData?.data) ? usersData.data : []));
@@ -612,10 +649,9 @@ const AdminDashboard = () => {
         setMessages(Array.isArray(messagesData) ? messagesData : (Array.isArray(messagesData?.data) ? messagesData.data : []));
         setReviews(Array.isArray(reviewsData) ? reviewsData : (Array.isArray(reviewsData?.data) ? reviewsData.data : []));
         setPastEvents(Array.isArray(pastEventsData) ? pastEventsData : (Array.isArray(pastEventsData?.data) ? pastEventsData.data : []));
-        // If admin-side tour bookings are available from the server, prefer them for admin view
+        
         const serverTourBookings = Array.isArray(tourBookingsData?.data) ? tourBookingsData.data : (Array.isArray(tourBookingsData) ? tourBookingsData : []);
         if (serverTourBookings && serverTourBookings.length > 0) {
-          // Normalize server booking shape to the UI's expected keys (tourTitle, fullName, date, total, etc.)
           const normalized = serverTourBookings.map((bk) => ({
             _id: bk._id,
             tourId: bk.tourId && (bk.tourId._id || bk.tourId) ,
@@ -637,14 +673,11 @@ const AdminDashboard = () => {
           }));
           setTourBookings(normalized);
         } else {
-          // Fall back to localStorage-backed tour bookings
           loadTourBookings();
         }
       } catch (error) {
         console.error(error);
-        setEventBookingsError('Could not load admin dashboard data right now.');
-        setMessagesError('Could not load messages right now.');
-        setReviewsError('Could not load reviews right now.');
+        setAdminError('Failed to load dashboard data. Please try again.');
       } finally {
         setLoadingAdminData(false);
         setLoadingEventBookings(false);
@@ -921,23 +954,23 @@ const AdminDashboard = () => {
   };
 
   const handleVerifyRoomBooking = async (booking) => {
-    if (!booking || booking.verified) return;
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    return handleUpdateBookingStatus(booking._id, 'Confirmed');
+  };
 
+  const handleUpdateBookingStatus = async (bookingId, newStatus) => {
+    if (!window.confirm(`Set booking status to "${newStatus}"?`)) return;
     try {
-      const response = await fetch(apiPath(`/api/admin/bookings/${booking._id}/verify`), {
-        method: 'PUT',
+      const response = await fetch(apiPath(`/api/admin/bookings/${bookingId}/status`), {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-
-        body: JSON.stringify({ verificationCode: booking.verificationCode, verifiedBy: user?.name || 'admin' })
+        body: JSON.stringify({ status: newStatus })
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || 'Unable to verify booking.');
-      setRoomBookings((current) => current.map((item) => (item._id === booking._id ? data : item)));
-      setAdminMessage('Room booking verified.');
+      if (!response.ok) throw new Error(data.error || `Unable to update booking status to ${newStatus}.`);
+      setRoomBookings((current) => current.map((item) => (item._id === bookingId ? { ...item, ...data, status: newStatus } : item)));
+      setAdminMessage(`Booking status updated to ${newStatus}.`);
     } catch (error) {
-      setAdminError(error.message || 'Unable to verify booking.');
+      setAdminError(error.message || 'Unable to update booking status.');
     }
   };
 
@@ -2375,67 +2408,133 @@ const AdminDashboard = () => {
         );
       case 'bookings':
       case '':
-      default:
+      default: {
+        const statusColors = {
+          Pending: 'badge-pending',
+          Confirmed: 'badge-active',
+          Ongoing: 'badge-blue',
+          Completed: 'badge-success',
+          Cancelled: 'badge-error',
+          Booked: 'badge-active',
+          Verified: 'badge-success',
+        };
+        const [bookingSearch, setBookingSearch] = React.useState('');
+        const [bookingStatusFilter, setBookingStatusFilter] = React.useState('');
+        const filteredBookings = roomBookings.filter((b) => {
+          const term = bookingSearch.toLowerCase();
+          const nameMatch = (b.guestName || b.bookedByName || '').toLowerCase().includes(term);
+          const emailMatch = (b.guestEmail || b.bookedByEmail || '').toLowerCase().includes(term);
+          const idMatch = (b.bookingId || b._id || '').toLowerCase().includes(term);
+          const phoneMatch = (b.phone || '').toLowerCase().includes(term);
+          const textMatch = !term || nameMatch || emailMatch || idMatch || phoneMatch;
+          const statusMatch = !bookingStatusFilter || (b.status || 'Pending') === bookingStatusFilter;
+          return textMatch && statusMatch;
+        });
+
+        const getNextStatuses = (current) => {
+          const flow = { Pending: ['Confirmed', 'Cancelled'], Confirmed: ['Ongoing', 'Cancelled'], Ongoing: ['Completed', 'Cancelled'], Completed: [], Cancelled: [] };
+          return flow[current] || [];
+        };
+
         return (
           <>
             <div className="booking-form-wrap">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0 }}>Room booking overview</h3>
-                <button type="button" className="btn-blue btn-icon" onClick={() => window.location.reload()}>Refresh Bookings</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <h3 style={{ margin: 0 }}>Room Bookings
+                  <span style={{ marginLeft: '0.75rem', fontSize: '0.85rem', fontWeight: 400, color: '#888' }}>
+                    ({filteredBookings.length} of {roomBookings.length})
+                  </span>
+                </h3>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, ID, phone…"
+                    value={bookingSearch}
+                    onChange={(e) => setBookingSearch(e.target.value)}
+                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.875rem', minWidth: '220px' }}
+                  />
+                  <select
+                    value={bookingStatusFilter}
+                    onChange={(e) => setBookingStatusFilter(e.target.value)}
+                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.875rem' }}
+                  >
+                    <option value="">All statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                  <button type="button" className="btn-blue btn-icon" onClick={() => { setBookingSearch(''); setBookingStatusFilter(''); }}>Clear</button>
+                </div>
               </div>
-              {roomBookings.length === 0 ? (
-                <div className="empty-state">No room bookings yet.</div>
+
+              {/* Summary badges */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                {['Pending', 'Confirmed', 'Ongoing', 'Completed', 'Cancelled'].map((s) => {
+                  const count = roomBookings.filter((b) => (b.status || 'Pending') === s).length;
+                  return count > 0 ? (
+                    <span key={s} className={`badge ${statusColors[s] || 'badge-pending'}`} style={{ cursor: 'pointer' }} onClick={() => setBookingStatusFilter(s === bookingStatusFilter ? '' : s)}>
+                      {s}: {count}
+                    </span>
+                  ) : null;
+                })}
+              </div>
+
+              {filteredBookings.length === 0 ? (
+                <div className="empty-state">{roomBookings.length === 0 ? 'No room bookings yet.' : 'No bookings match your search/filter.'}</div>
               ) : (
                 <div className="table-wrapper">
                   <table>
                     <thead>
-                      <tr><th>Room</th><th>Booked By</th><th>Email</th><th>Phone</th><th>Price</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Code</th><th>Actions</th></tr>
+                      <tr>
+                        <th>ID</th><th>Room</th><th>Guest</th><th>Email</th><th>Phone</th><th>Guests</th><th>Check-in</th><th>Check-out</th><th>Price</th><th>Status</th><th>Special Request</th><th>Actions</th>
+                      </tr>
                     </thead>
                     <tbody>
-                      {roomBookings.map((b) => (
-                        <tr key={b._id}>
-                          <td>{b.roomTitle}</td>
-                          <td>{b.bookedByName}</td>
-                          <td>{b.bookedByEmail || '—'}</td>
-                          <td>{b.phone || '—'}</td>
-                          <td>Rs. {b.roomPrice}</td>
-                          <td>{b.checkIn || '—'}</td>
-                          <td>{b.checkOut || '—'}</td>
-                          <td>
-                            <span className={`badge ${b.verified ? 'badge-active' : 'badge-pending'}`}>
-                              {b.verified ? 'Verified' : b.status || 'Booked'}
-                            </span>
-                          </td>
-                          <td>{b.verificationCode || '—'}</td>
-                          <td style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                            {!b.verified && b.verificationCode ? (
-                              <button
-                                type="button"
-                                className="btn-sm btn-green"
-                                onClick={() => handleVerifyRoomBooking(b)}
-                              >
-                                Confirm
+                      {filteredBookings.map((b) => {
+                        const currentStatus = b.status || 'Pending';
+                        const nextStatuses = getNextStatuses(currentStatus);
+                        const guestName = b.guestName || b.bookedByName || '—';
+                        const guestEmail = b.guestEmail || b.bookedByEmail || '—';
+                        const totalPrice = b.totalPrice ?? b.roomPrice ?? 0;
+                        const guestsCount = b.guests ?? b.members ?? '—';
+                        return (
+                          <tr key={b._id}>
+                            <td><code style={{ fontSize: '0.75rem', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>{b.bookingId || b._id?.slice(-6)}</code></td>
+                            <td><strong>{b.roomName || b.roomTitle || '—'}</strong></td>
+                            <td>{guestName}</td>
+                            <td><a href={`mailto:${guestEmail}`} style={{ color: '#3b82f6', textDecoration: 'none' }}>{guestEmail}</a></td>
+                            <td>{b.phone || '—'}</td>
+                            <td style={{ textAlign: 'center' }}>{guestsCount}</td>
+                            <td>{b.checkIn || '—'}</td>
+                            <td>{b.checkOut || '—'}</td>
+                            <td>NPR {totalPrice.toLocaleString()}</td>
+                            <td>
+                              <span className={`badge ${statusColors[currentStatus] || 'badge-pending'}`}>{currentStatus}</span>
+                            </td>
+                            <td style={{ maxWidth: '150px', fontSize: '0.8rem', color: '#666' }}>
+                              {b.specialRequest || <em style={{ color: '#bbb' }}>None</em>}
+                            </td>
+                            <td style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', minWidth: '120px' }}>
+                              {nextStatuses.map((ns) => (
+                                <button
+                                  key={ns}
+                                  type="button"
+                                  className={`btn-sm ${ns === 'Cancelled' ? 'btn-red' : ns === 'Confirmed' ? 'btn-green' : ns === 'Ongoing' ? 'btn-blue' : 'btn-emerald'}`}
+                                  onClick={() => handleUpdateBookingStatus(b._id, ns)}
+                                  title={`Mark as ${ns}`}
+                                >
+                                  {ns}
+                                </button>
+                              ))}
+                              <button type="button" className="btn-sm btn-red" onClick={() => handleDeleteRoomBooking(b._id)} title="Delete booking" style={{ background: '#fee2e2', color: '#991b1b', border: 'none' }}>
+                                Del
                               </button>
-                            ) : null}
-                            {b.verified ? (
-                              <button
-                                type="button"
-                                className="btn-sm btn-emerald"
-                                onClick={() => {}}
-                              >
-                                Complete
-                              </button>
-                            ) : null}
-                            <button
-                              type="button"
-                              className="btn-sm btn-red"
-                              onClick={() => handleDeleteRoomBooking(b._id)}
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -2443,8 +2542,10 @@ const AdminDashboard = () => {
             </div>
           </>
         );
+      }
     }
   };
+
 
   return (
     <div className="admin-layout">
@@ -2600,17 +2701,21 @@ const AdminDashboard = () => {
         </header>
 
         <div className="admin-content">
-          <div className="admin-overview-grid">
-            {stats.map((stat) => (
-              <div className="stat-card" key={stat.label}>
-                <div className={`stat-card-icon ${stat.tone}`}>{stat.icon}</div>
-                <div className="stat-card-content">
-                  <div className="stat-card-value">{stat.value}</div>
-                  <div className="stat-card-label">{stat.label}</div>
+          {loadingAdminData ? (
+            <DashboardStatsSkeleton />
+          ) : (
+            <div className="admin-overview-grid">
+              {stats.map((stat) => (
+                <div className="stat-card" key={stat.label}>
+                  <div className={`stat-card-icon ${stat.tone}`}>{stat.icon}</div>
+                  <div className="stat-card-content">
+                    <div className="stat-card-value">{stat.value}</div>
+                    <div className="stat-card-label">{stat.label}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <section className="admin-page-section open">
             <div className="section-header">
@@ -2619,7 +2724,11 @@ const AdminDashboard = () => {
             </div>
             <div className="section-divider" />
             <div className="admin-panel-slot">
-              {loadingAdminData ? <div className="empty-state">Loading admin data…</div> : renderPanel()}
+              {loadingAdminData ? (
+                <div style={{ padding: '24px', background: '#fff', borderRadius: '8px' }}>
+                  <TableSkeleton rows={6} columns={6} />
+                </div>
+              ) : renderPanel()}
             </div>
           </section>
         </div>
