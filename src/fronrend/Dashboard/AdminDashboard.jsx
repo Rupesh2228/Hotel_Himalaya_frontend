@@ -351,6 +351,10 @@ const AdminDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const socketRef = useRef(null);
+  
+  // Booking filter states declared at component top level to respect React Hook rules
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [bookingStatusFilter, setBookingStatusFilter] = useState('');
 
   // ── Socket.IO real-time notifications ─────────────────────────────────────
   useEffect(() => {
@@ -624,7 +628,7 @@ const AdminDashboard = () => {
         setAdminError('');
 
         const [bookingsData, usersData, roomsData, galleryData, galleryCatsData, attractionsData, eventsData, eventBookingsData, messagesData, reviewsData, pastEventsData, tourBookingsData] = await Promise.all([
-          apiRequest('/api/bookings').catch(() => []),
+          apiRequest('/api/admin/bookings').catch(() => []),
           apiRequest('/api/admin/users').catch(() => []),
           apiRequest('/api/rooms').catch(() => []),
           apiRequest('/api/gallery').catch(() => []),
@@ -2418,8 +2422,6 @@ const AdminDashboard = () => {
           Booked: 'badge-active',
           Verified: 'badge-success',
         };
-        const [bookingSearch, setBookingSearch] = React.useState('');
-        const [bookingStatusFilter, setBookingStatusFilter] = React.useState('');
         const filteredBookings = roomBookings.filter((b) => {
           const term = bookingSearch.toLowerCase();
           const nameMatch = (b.guestName || b.bookedByName || '').toLowerCase().includes(term);
