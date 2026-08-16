@@ -363,7 +363,10 @@ const AdminDashboard = () => {
     const token = localStorage.getItem('token');
 
     const socket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
+      // Start with polling so Render's infrastructure can negotiate properly,
+      // then Socket.IO upgrades to WebSocket automatically. This avoids the
+      // "WebSocket closed before connection established" warning on cold starts.
+      transports: ['polling', 'websocket'],
       // Pass JWT in the handshake so the server can authenticate on connect
       auth: { token: token || '' },
     });
