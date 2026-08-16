@@ -620,14 +620,15 @@ const AdminDashboard = () => {
     loadTours();
     loadTourBookings();
 
+    // Only listen for cross-tab storage changes (e.g. new tour booking in another tab).
+    // Removed the 'focus' listener — it triggered an API call on every tab switch,
+    // compounding the rate-limit problem. The dashboard full-load on mount is sufficient.
     const refreshTourBookings = () => loadTourBookings();
     window.addEventListener('storage', refreshTourBookings);
-    window.addEventListener('focus', refreshTourBookings);
 
     return () => {
       mounted = false;
       window.removeEventListener('storage', refreshTourBookings);
-      window.removeEventListener('focus', refreshTourBookings);
     };
   }, []);
 
@@ -746,12 +747,28 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
+    // Initial load
     loadNotifications();
-    const timer = window.setInterval(loadNotifications, 30000);
-    window.addEventListener('focus', loadNotifications);
+
+    // Background sync every 5 minutes — Socket.IO handles real-time delivery,
+    // so this is only a safety net for missed events (e.g. tab was hidden).
+    const timer = window.setInterval(loadNotifications, 5 * 60 * 1000);
+
+    // Re-sync when the tab regains focus, but throttle to at most once per 60s
+    // to avoid rapid tab-switching causing a burst of API requests.
+    let lastFocusFetch = 0;
+    const onFocus = () => {
+      const now = Date.now();
+      if (now - lastFocusFetch > 60_000) {
+        lastFocusFetch = now;
+        loadNotifications();
+      }
+    };
+    window.addEventListener('focus', onFocus);
+
     return () => {
       window.clearInterval(timer);
-      window.removeEventListener('focus', loadNotifications);
+      window.removeEventListener('focus', onFocus);
     };
   }, [loadNotifications]);
 
