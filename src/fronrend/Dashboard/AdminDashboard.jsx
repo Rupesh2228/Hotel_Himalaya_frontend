@@ -10,7 +10,7 @@ import {
   updateTourOnServer,
   deleteTourOnServer
 } from '../Tours/ToursData';
-import { getApiUrl } from '../../config/api';
+import { getApiUrl, getApiBaseUrl } from '../../config/api';
 import { apiRequest } from '../../utils/apiClient';
 import { TableSkeleton, DashboardStatsSkeleton } from '../componets/SkeletonLoader';
 import './AdminDashboard.css';
@@ -358,14 +358,29 @@ const AdminDashboard = () => {
 
   // ── Socket.IO real-time notifications ─────────────────────────────────────
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
-    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+    // Always use the same backend URL that API calls use — never localhost in production
+    const socketUrl = getApiBaseUrl() || window.location.origin;
+    const token = localStorage.getItem('token');
+
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      // Pass JWT in the handshake so the server can authenticate on connect
+      auth: { token: token || '' },
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('[SOCKET] Connected to server:', socket.id);
-      // Join admin room to receive admin-only notifications
-      socket.emit('join_admin_room');
+      // Also send token in the event payload for the secured join handler
+      socket.emit('join_admin_room', { token: token || '' });
+    });
+
+    socket.on('admin_room_joined', (data) => {
+      console.log('[SOCKET] Successfully joined admin notification room:', data?.message);
+    });
+
+    socket.on('admin_room_error', (data) => {
+      console.warn('[SOCKET] Admin room access denied (non-fatal):', data?.message);
     });
 
     socket.on('new_notification', (notification) => {
