@@ -181,6 +181,15 @@ const Rooms = () => {
         body: JSON.stringify(payload),
       });
 
+      // Update local storage cache so User Dashboard displays the new booking immediately
+      try {
+        const bookingOwnerId = user?.email || deviceId;
+        const cacheKey = `hotel_user_dashboard_bookings_${bookingOwnerId}`;
+        const stored = localStorage.getItem(cacheKey);
+        const list = stored ? JSON.parse(stored) : [];
+        localStorage.setItem(cacheKey, JSON.stringify([data, ...list.filter((b) => b._id !== data._id && b.bookingId !== data.bookingId)]));
+      } catch (_) {}
+
       setSuccess(data);
     } catch (err) {
       console.error('Booking error:', err);

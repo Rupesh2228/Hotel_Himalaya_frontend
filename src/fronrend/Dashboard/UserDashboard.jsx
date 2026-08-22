@@ -3,10 +3,8 @@ import { FaTicketAlt, FaHistory, FaSuitcase } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import Components from '../componets/componets'
 import './UserDashboard.css'
-import { getApiUrl } from '../../config/api'
+import { apiRequest } from '../../utils/apiClient'
 
-const BOOKINGS_API_URL = `${getApiUrl()}/api/bookings`
-const EVENT_BOOKINGS_API_URL = `${getApiUrl()}/api/events/my-bookings`
 const getBookingsCacheKey = (identifier) => `hotel_user_dashboard_bookings_${identifier || 'guest'}`
 const buildBookingQuery = (userEmail, deviceId) => {
   const params = new URLSearchParams();
@@ -108,22 +106,10 @@ const UserDashboard = () => {
     const fetchBookings = async () => {
       try {
         const query = bookingQuery ? `?${bookingQuery}` : ''
-        const storedToken = token || localStorage.getItem('token');
-        const headers = storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {};
-
-        const response = await fetch(`${BOOKINGS_API_URL}${query}`, {
-          headers: {
-            ...headers,
-            'Cache-Control': 'no-cache'
-          },
-          cache: 'no-store'
-        })
-        if (response.ok) {
-          const data = await response.json()
-          const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-          setBookings(bookingsArray)
-          localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
-        }
+        const data = await apiRequest(`/api/bookings${query}`);
+        const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+        setBookings(bookingsArray)
+        localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
       } catch (error) {
         console.error('Error fetching bookings:', error)
       }
@@ -135,51 +121,37 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchEventBookings = async () => {
       const storedToken = token || localStorage.getItem('token');
-      if (!storedToken) return;
       try {
-        const response = await fetch(EVENT_BOOKINGS_API_URL, {
-          headers: {
-            'Authorization': `Bearer ${storedToken}`,
-            'Cache-Control': 'no-cache'
-          },
-          cache: 'no-store'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          // Safely set eventBookings in case API returns nested data array
-          const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-          setEventBookings(eventsArray);
-        }
-      } catch (error) {
-        console.error('Error fetching event bookings:', error);
+        const endpoint = storedToken 
+          ? '/api/events/my-bookings'
+          : `/api/events/my-bookings-by-email?${bookingQuery}`;
+        const data = await apiRequest(endpoint);
+        const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+        setEventBookings(eventsArray);
+      } catch (err) {
+        console.error('Error fetching event bookings:', err);
       }
     };
+
     fetchEventBookings();
-  }, [token]);
+  }, [token, bookingQuery]);
 
   useEffect(() => {
     const fetchTourBookings = async () => {
       const storedToken = token || localStorage.getItem('token');
-      if (!storedToken) return;
       try {
-        const response = await fetch(`${getApiUrl()}/api/tours/my-bookings`, {
-          headers: {
-            'Authorization': `Bearer ${storedToken}`,
-            'Cache-Control': 'no-cache'
-          },
-          cache: 'no-store'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-          setTourBookings(toursArray.map(normalizeTourBooking));
-        }
+        const endpoint = storedToken
+          ? '/api/tours/my-bookings'
+          : `/api/tours/my-bookings-guest?${bookingQuery}`;
+        const data = await apiRequest(endpoint);
+        const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+        setTourBookings(toursArray.map(normalizeTourBooking));
       } catch (error) {
         console.error('Error fetching tour bookings:', error);
       }
     };
     fetchTourBookings();
-  }, [token]);
+  }, [token, bookingQuery]);
 
 
 
