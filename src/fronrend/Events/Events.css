@@ -180,33 +180,15 @@
 }
 .emc-meta-icon { font-size: 0.9rem; }
 
-/* Progress bar */
-.emc-progress-wrap {
+/* Booked seats count */
+.emc-booked-count {
+  font-size: 0.82rem;
+  color: #8c7b6e;
+  font-weight: 600;
+  margin-top: 2px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 2px;
-}
-.emc-progress-bar {
-  flex: 1;
-  height: 4px;
-  background: #e8ddd5;
-  border-radius: 99px;
-  overflow: hidden;
-}
-.emc-progress-fill {
-  height: 100%;
-  background: #2a7a45;
-  border-radius: 99px;
-  transition: width 0.5s ease;
-}
-.emc-progress-fill--orange { background: #d97706; }
-.emc-progress-fill--red    { background: #dc2626; }
-.emc-progress-label {
-  font-size: 0.75rem;
-  color: #8c7b6e;
-  white-space: nowrap;
-  flex-shrink: 0;
+  gap: 6px;
 }
 
 /* Footer */

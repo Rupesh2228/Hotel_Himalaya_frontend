@@ -209,18 +209,10 @@ const Events = () => {
                       </span>
                     </div>
 
-                    {/* Seat progress bar */}
+                    {/* Booked count without line */}
                     {event.totalSeats > 0 && (
-                      <div className="emc-progress-wrap">
-                        <div className="emc-progress-bar">
-                          <div
-                            className={`emc-progress-fill ${soldOutPercent >= 90 ? 'emc-progress-fill--red' : soldOutPercent >= 60 ? 'emc-progress-fill--orange' : ''}`}
-                            style={{ width: `${soldOutPercent}%` }}
-                          />
-                        </div>
-                        <span className="emc-progress-label">
-                          {event.totalSeats - event.availableSeats} / {event.totalSeats} booked
-                        </span>
+                      <div className="emc-booked-count">
+                        👥 {event.totalSeats - event.availableSeats} / {event.totalSeats} booked
                       </div>
                     )}
 
