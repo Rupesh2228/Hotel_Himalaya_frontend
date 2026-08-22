@@ -176,26 +176,22 @@ const Rooms = () => {
         bookedBy: user?.email || deviceId,
       };
 
-      const res = await fetch(`${getApiUrl()}/api/bookings`, {
+      const data = await apiRequest('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        // Handle validation errors array
-        if (Array.isArray(data.errors) && data.errors.length > 0) {
-          setError(data.errors.map((e) => e.msg || e.message).join('. '));
-        } else {
-          setError(data.error || 'Booking failed. Please try again.');
-        }
-      } else {
-        setSuccess(data);
-      }
+      setSuccess(data);
     } catch (err) {
       console.error('Booking error:', err);
-      setError('Network error. Please check your connection and try again.');
+      const errDetails = err?.details;
+      if (errDetails && Array.isArray(errDetails.errors) && errDetails.errors.length > 0) {
+        setError(errDetails.errors.map((e) => e.msg || e.message).join('. '));
+      } else if (errDetails && (errDetails.error || errDetails.message)) {
+        setError(errDetails.error || errDetails.message);
+      } else {
+        setError(err.message || 'Booking failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

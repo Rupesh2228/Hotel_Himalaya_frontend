@@ -2463,15 +2463,8 @@ const AdminDashboard = () => {
           const emailMatch = (b.guestEmail || b.bookedByEmail || '').toLowerCase().includes(term);
           const idMatch = (b.bookingId || b._id || '').toLowerCase().includes(term);
           const phoneMatch = (b.phone || '').toLowerCase().includes(term);
-          const textMatch = !term || nameMatch || emailMatch || idMatch || phoneMatch;
-          const statusMatch = !bookingStatusFilter || (b.status || 'Pending') === bookingStatusFilter;
-          return textMatch && statusMatch;
+          return !term || nameMatch || emailMatch || idMatch || phoneMatch;
         });
-
-        const getNextStatuses = (current) => {
-          const flow = { Pending: ['Confirmed', 'Cancelled'], Confirmed: ['Ongoing', 'Cancelled'], Ongoing: ['Completed', 'Cancelled'], Completed: [], Cancelled: [] };
-          return flow[current] || [];
-        };
 
         return (
           <>
@@ -2488,50 +2481,26 @@ const AdminDashboard = () => {
                     placeholder="Search by name, email, ID, phone…"
                     value={bookingSearch}
                     onChange={(e) => setBookingSearch(e.target.value)}
-                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.875rem', minWidth: '220px' }}
+                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.875rem', minWidth: '240px' }}
                   />
-                  <select
-                    value={bookingStatusFilter}
-                    onChange={(e) => setBookingStatusFilter(e.target.value)}
-                    style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.875rem' }}
-                  >
-                    <option value="">All statuses</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="Ongoing">Ongoing</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                  <button type="button" className="btn-blue btn-icon" onClick={() => { setBookingSearch(''); setBookingStatusFilter(''); }}>Clear</button>
+                  {bookingSearch && (
+                    <button type="button" className="btn-blue btn-icon" onClick={() => setBookingSearch('')}>Clear</button>
+                  )}
                 </div>
               </div>
 
-              {/* Summary badges */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                {['Pending', 'Confirmed', 'Ongoing', 'Completed', 'Cancelled'].map((s) => {
-                  const count = roomBookings.filter((b) => (b.status || 'Pending') === s).length;
-                  return count > 0 ? (
-                    <span key={s} className={`badge ${statusColors[s] || 'badge-pending'}`} style={{ cursor: 'pointer' }} onClick={() => setBookingStatusFilter(s === bookingStatusFilter ? '' : s)}>
-                      {s}: {count}
-                    </span>
-                  ) : null;
-                })}
-              </div>
-
               {filteredBookings.length === 0 ? (
-                <div className="empty-state">{roomBookings.length === 0 ? 'No room bookings yet.' : 'No bookings match your search/filter.'}</div>
+                <div className="empty-state">{roomBookings.length === 0 ? 'No room bookings yet.' : 'No bookings match your search.'}</div>
               ) : (
                 <div className="table-wrapper">
                   <table>
                     <thead>
                       <tr>
-                        <th>ID</th><th>Room</th><th>Guest</th><th>Email</th><th>Phone</th><th>Guests</th><th>Check-in</th><th>Check-out</th><th>Price</th><th>Status</th><th>Special Request</th><th>Actions</th>
+                        <th>ID</th><th>Room</th><th>Guest</th><th>Email</th><th>Phone</th><th>Guests</th><th>Check-in</th><th>Check-out</th><th>Price</th><th>Special Request</th><th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredBookings.map((b) => {
-                        const currentStatus = b.status || 'Pending';
-                        const nextStatuses = getNextStatuses(currentStatus);
                         const guestName = b.guestName || b.bookedByName || '—';
                         const guestEmail = b.guestEmail || b.bookedByEmail || '—';
                         const totalPrice = b.totalPrice ?? b.roomPrice ?? 0;
@@ -2547,26 +2516,18 @@ const AdminDashboard = () => {
                             <td>{b.checkIn || '—'}</td>
                             <td>{b.checkOut || '—'}</td>
                             <td>NPR {totalPrice.toLocaleString()}</td>
-                            <td>
-                              <span className={`badge ${statusColors[currentStatus] || 'badge-pending'}`}>{currentStatus}</span>
-                            </td>
                             <td style={{ maxWidth: '150px', fontSize: '0.8rem', color: '#666' }}>
                               {b.specialRequest || <em style={{ color: '#bbb' }}>None</em>}
                             </td>
-                            <td style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', minWidth: '120px' }}>
-                              {nextStatuses.map((ns) => (
-                                <button
-                                  key={ns}
-                                  type="button"
-                                  className={`btn-sm ${ns === 'Cancelled' ? 'btn-red' : ns === 'Confirmed' ? 'btn-green' : ns === 'Ongoing' ? 'btn-blue' : 'btn-emerald'}`}
-                                  onClick={() => handleUpdateBookingStatus(b._id, ns)}
-                                  title={`Mark as ${ns}`}
-                                >
-                                  {ns}
-                                </button>
-                              ))}
-                              <button type="button" className="btn-sm btn-red" onClick={() => handleDeleteRoomBooking(b._id)} title="Delete booking" style={{ background: '#fee2e2', color: '#991b1b', border: 'none' }}>
-                                Del
+                            <td>
+                              <button
+                                type="button"
+                                className="btn-sm btn-red"
+                                onClick={() => handleDeleteRoomBooking(b._id)}
+                                title="Delete booking"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                              >
+                                <FaTrash size={11} /> Delete
                               </button>
                             </td>
                           </tr>
