@@ -8,8 +8,15 @@ import { apiRequest } from '../../utils/apiClient'
 const getBookingsCacheKey = (identifier) => `hotel_user_dashboard_bookings_${identifier || 'guest'}`
 const buildBookingQuery = (userEmail, deviceId) => {
   const params = new URLSearchParams();
-  if (userEmail) params.set('bookedByEmail', userEmail);
-  if (deviceId) params.set('bookedBy', deviceId);
+  if (userEmail) {
+    params.set('email', userEmail);
+    params.set('bookedByEmail', userEmail);
+    params.set('guestEmail', userEmail);
+  }
+  if (deviceId) {
+    params.set('deviceId', deviceId);
+    params.set('bookedBy', deviceId);
+  }
   return params.toString();
 }
 const parseBookingDate = (value) => {
@@ -39,7 +46,6 @@ const getTourBookingStatusClass = (status) => {
   return 'rejected'
 }
 
-
 const normalizeTourBooking = (booking) => {
   const item = booking || {}
   const bookingId = item._id || item.id || `tour_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -47,23 +53,21 @@ const normalizeTourBooking = (booking) => {
   const adults = Number(item.adults ?? item.adultCount ?? 0)
   const children = Number(item.children ?? item.childCount ?? 0)
   const tourPrice = Number(item.tourPrice ?? item.price ?? item.totalPrice ?? 0)
-  const calculatedTotal = tourPrice
-    ? Math.round(adults * tourPrice + children * tourPrice * 0.7)
-    : 0
+  const totalVal = Number(item.totalPrice ?? item.total ?? item.amount ?? (tourPrice ? Math.round(adults * tourPrice + children * tourPrice * 0.7) : 0))
 
   return {
     ...item,
     _id: normalizedId,
-    tourTitle: item.tourTitle || item.title || item.name || 'Tour Booking',
-    tourCoverImage: item.tourCoverImage || item.coverImage || item.imageUrl || item.tourImage || '',
-    date: item.date || item.travelDate || item.tourDate || '',
-    fullName: item.fullName || item.bookedByName || item.bookedBy || '',
-    phoneNumber: item.phoneNumber || item.bookedByPhone || item.phone || '',
-    email: item.email || item.bookedByEmail || '',
+    tourTitle: item.tourName || item.tourTitle || item.tourId?.title || item.title || item.name || 'Tour Booking',
+    tourCoverImage: item.tourCoverImage || item.tourId?.coverImage || item.coverImage || item.imageUrl || item.tourImage || '',
+    date: item.travelDate || item.date || item.tourDate || '',
+    fullName: item.bookedByName || item.fullName || item.bookedBy || '',
+    phoneNumber: item.bookedByPhone || item.phoneNumber || item.phone || '',
+    email: item.bookedByEmail || item.email || '',
     address: item.address || '',
     country: item.country || '',
     paymentMethod: item.paymentMethod || item.payment || 'pay_at_site',
-    total: Number(item.total ?? item.amount ?? item.totalPrice ?? calculatedTotal),
+    total: totalVal,
     adults,
     children,
     status: item.status || 'Pending',
@@ -98,7 +102,6 @@ const UserDashboard = () => {
   })
   const [eventBookings, setEventBookings] = useState([])
   const [tourBookings, setTourBookings] = useState([])
-  const formatRoomPrice = (room) => `Rs. ${Number(room?.roomPrice || room?.price || 0).toLocaleString()}`
 
   const bookingQuery = useMemo(() => buildBookingQuery(user?.email, deviceId), [user?.email, deviceId])
 
@@ -153,53 +156,8 @@ const UserDashboard = () => {
     fetchTourBookings();
   }, [token, bookingQuery]);
 
-
-
-  // Guest fetchers: when no token present, fetch bookings by email/deviceId using public endpoints
-  useEffect(() => {
-    // Only run for guests (no token)
-    const storedToken = token || localStorage.getItem('token');
-    if (storedToken) return;
-    const fetchGuestEventBookings = async () => {
-      try {
-        const params = new URLSearchParams();
-        if (user?.email) params.set('email', user.email);
-        if (deviceId) params.set('deviceId', deviceId);
-        if (!params.toString()) return;
-        const url = `${getApiUrl()}/api/events/my-bookings-by-email` + `?${params.toString()}`;
-        const resp = await fetch(url, { cache: 'no-store' });
-        const data = await resp.json();
-        const eventsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-        setEventBookings(eventsArray);
-      } catch (err) {
-        console.error('Error fetching guest event bookings:', err);
-      }
-    };
-    fetchGuestEventBookings();
-  }, [user?.email, deviceId, token]);
-
-  useEffect(() => {
-    const storedToken = token || localStorage.getItem('token');
-    if (storedToken) return;
-    const fetchGuestTourBookings = async () => {
-      try {
-        const params = new URLSearchParams();
-        if (user?.email) params.set('email', user.email);
-        if (deviceId) params.set('deviceId', deviceId);
-        if (!params.toString()) return;
-        const url = `${getApiUrl()}/api/tours/my-bookings-guest` + `?${params.toString()}`;
-        const resp = await fetch(url, { cache: 'no-store' });
-        const data = await resp.json();
-        const toursArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
-        setTourBookings(toursArray.map(normalizeTourBooking));
-      } catch (err) {
-        console.error('Error fetching guest tour bookings:', err);
-      }
-    };
-    fetchGuestTourBookings();
-  }, [user?.email, deviceId, token]);
-
-  return (    <>
+  return (
+    <>
       <Components />
       <div className="user-dashboard-wrapper">
         <div className="user-dashboard-header">
@@ -218,7 +176,6 @@ const UserDashboard = () => {
           <aside className="user-dashboard-tabs">
             {/* Tab buttons */}
             {[
-             
               { id: 'my-bookings', label: 'Room Bookings', icon: <FaHistory /> },
               { id: 'event-bookings', label: 'Event Tickets', icon: <FaTicketAlt /> },
               { id: 'tour-bookings', label: 'Tour Bookings', icon: <FaSuitcase /> },
@@ -233,7 +190,6 @@ const UserDashboard = () => {
                 <span>{tab.label}</span>
               </button>
             ))}
-
           </aside>
 
           {/* Tab Content */}
@@ -250,7 +206,7 @@ const UserDashboard = () => {
                         <tr>
                           <th>Room</th>
                           <th>Price</th>
-                          <th>Code</th>
+                          <th>Booking ID</th>
                           <th>Status</th>
                           <th>Guests</th>
                           <th>Check-in</th>
@@ -258,21 +214,28 @@ const UserDashboard = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {bookings.map((booking) => (
-                          <tr key={booking._id || booking.id}>
-                            <td><strong>{booking.roomTitle || booking.title}</strong></td>
-                            <td>{formatRoomPrice(booking)}</td>
-                            <td><span className="verification-code">{booking.verificationCode || '-'}</span></td>
-                            <td>
-                              <span className={`badge ${booking.verified ? 'badge-completed' : 'badge-active'}`}>
-                                {booking.verified ? 'Verified Successfully' : `Booked - ${booking.status || getBookingStatus(booking)}`}
-                              </span>
-                            </td>
-                            <td>{booking.members} of {booking.totalMembers || 1}</td>
-                            <td>{booking.checkIn}</td>
-                            <td>{booking.checkOut}</td>
-                          </tr>
-                        ))}
+                        {bookings.map((booking) => {
+                          const roomTitle = booking.roomName || booking.roomTitle || booking.title || 'Room';
+                          const priceVal = booking.totalPrice ?? booking.roomPrice ?? booking.price ?? 0;
+                          const code = booking.bookingId || booking.verificationCode || booking._id?.slice(-6) || '-';
+                          const guestCount = booking.guests ?? booking.members ?? 1;
+                          const currentStatus = booking.status || getBookingStatus(booking);
+                          return (
+                            <tr key={booking._id || booking.id || code}>
+                              <td><strong>{roomTitle}</strong></td>
+                              <td>Rs. {Number(priceVal).toLocaleString()}</td>
+                              <td><code style={{ fontSize: '0.75rem', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>{code}</code></td>
+                              <td>
+                                <span className={`badge ${currentStatus === 'Confirmed' || booking.verified ? 'badge-completed' : 'badge-active'}`}>
+                                  {currentStatus}
+                                </span>
+                              </td>
+                              <td>{guestCount} guest(s)</td>
+                              <td>{booking.checkIn}</td>
+                              <td>{booking.checkOut}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
