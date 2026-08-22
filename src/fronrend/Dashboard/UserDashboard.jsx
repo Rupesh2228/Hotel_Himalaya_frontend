@@ -201,37 +201,6 @@ const UserDashboard = () => {
 
           {/* Tab Content */}
           <main className="user-dashboard-content">
-            {!user && (
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', alignItems: 'center', flexWrap: 'wrap', background: '#fdf9f5', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f0e2d5' }}>
-                <span style={{ fontSize: '0.85rem', color: '#6b6055', fontWeight: 600 }}>Guest Lookup:</span>
-                <input
-                  type="email"
-                  placeholder="Enter your booking email…"
-                  value={lookupEmail}
-                  onChange={(e) => setLookupEmail(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && lookupEmail.trim()) {
-                      localStorage.setItem('hotel_guest_email', lookupEmail.trim());
-                      fetchBookings();
-                    }
-                  }}
-                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem', minWidth: '240px', flex: 1, maxWidth: '350px' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (lookupEmail.trim()) {
-                      localStorage.setItem('hotel_guest_email', lookupEmail.trim());
-                      fetchBookings();
-                    }
-                  }}
-                  style={{ padding: '6px 14px', borderRadius: '6px', background: '#b56b2f', color: '#fff', border: 'none', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
-                >
-                  Find Bookings
-                </button>
-              </div>
-            )}
-
             {activeTab === 'my-bookings' && (
               <section className="tab-pane">
                 <h2> Booked Rooms History</h2>
@@ -245,7 +214,6 @@ const UserDashboard = () => {
                           <th>Room</th>
                           <th>Price</th>
                           <th>Booking ID</th>
-                          <th>Status</th>
                           <th>Guests</th>
                           <th>Check-in</th>
                           <th>Check-out</th>
@@ -257,17 +225,11 @@ const UserDashboard = () => {
                           const priceVal = booking.totalPrice ?? booking.roomPrice ?? booking.price ?? 0;
                           const code = booking.bookingId || booking.verificationCode || booking._id?.slice(-6) || '-';
                           const guestCount = booking.guests ?? booking.members ?? 1;
-                          const currentStatus = booking.status || getBookingStatus(booking);
                           return (
                             <tr key={booking._id || booking.id || code}>
                               <td><strong>{roomTitle}</strong></td>
                               <td>Rs. {Number(priceVal).toLocaleString()}</td>
                               <td><code style={{ fontSize: '0.75rem', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>{code}</code></td>
-                              <td>
-                                <span className={`badge ${currentStatus === 'Confirmed' || booking.verified ? 'badge-completed' : 'badge-active'}`}>
-                                  {currentStatus}
-                                </span>
-                              </td>
                               <td>{guestCount} guest(s)</td>
                               <td>{booking.checkIn}</td>
                               <td>{booking.checkOut}</td>
