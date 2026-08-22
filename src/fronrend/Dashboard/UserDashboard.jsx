@@ -90,25 +90,17 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('my-bookings')
   const deviceId = getDeviceId()
   const storedGuestEmail = typeof window !== 'undefined'
-    ? (localStorage.getItem('hotel_guest_email') || localStorage.getItem('guest_email') || localStorage.getItem('hotel_user_email') || '')
+    ? (localStorage.getItem('hotel_guest_email') || '')
     : ''
   const [lookupEmail, setLookupEmail] = useState(user?.email || storedGuestEmail)
   const activeEmail = user?.email || lookupEmail
-  const bookingOwnerId = activeEmail || deviceId
-  const bookingsCacheKey = getBookingsCacheKey(bookingOwnerId)
-  const [bookings, setBookings] = useState(() => {
-    try {
-      const cachedBookings = localStorage.getItem(bookingsCacheKey)
-      return cachedBookings ? JSON.parse(cachedBookings) : []
-    } catch (error) {
-      console.error('Error loading cached bookings:', error)
-      return []
-    }
-  })
+  const bookingQuery = useMemo(() => buildBookingQuery(activeEmail, deviceId), [activeEmail, deviceId])
+
+  // Always start empty — never pre-load stale localStorage cache
+  const [bookings, setBookings] = useState([])
   const [eventBookings, setEventBookings] = useState([])
   const [tourBookings, setTourBookings] = useState([])
-
-  const bookingQuery = useMemo(() => buildBookingQuery(activeEmail, deviceId), [activeEmail, deviceId])
+  const [loading, setLoading] = useState(true)
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -116,13 +108,10 @@ const UserDashboard = () => {
       const data = await apiRequest(`/api/bookings${query}`)
       const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
       setBookings(bookingsArray)
-      if (bookingsArray.length > 0) {
-        localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
-      }
     } catch (error) {
       console.error('Error fetching bookings:', error)
     }
-  }, [bookingQuery, bookingsCacheKey])
+  }, [bookingQuery])
 
   useEffect(() => {
     fetchBookings()
