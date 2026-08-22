@@ -116,6 +116,9 @@ const Events = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Booking failed');
 
+      if (bookingForm.email) {
+        localStorage.setItem('hotel_guest_email', bookingForm.email.trim());
+      }
       setTicketBooking(data);
       setShowTicketModal(true);
       setBookingMessage('Successfully Booked! Enjoy your event.');

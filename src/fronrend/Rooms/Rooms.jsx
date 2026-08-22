@@ -181,13 +181,22 @@ const Rooms = () => {
         body: JSON.stringify(payload),
       });
 
-      // Update local storage cache so User Dashboard displays the new booking immediately
+      // Save guest email and update local storage caches so User Dashboard displays the new booking immediately
       try {
-        const bookingOwnerId = user?.email || deviceId;
-        const cacheKey = `hotel_user_dashboard_bookings_${bookingOwnerId}`;
-        const stored = localStorage.getItem(cacheKey);
-        const list = stored ? JSON.parse(stored) : [];
-        localStorage.setItem(cacheKey, JSON.stringify([data, ...list.filter((b) => b._id !== data._id && b.bookingId !== data.bookingId)]));
+        const guestEmail = form.guestEmail.trim();
+        localStorage.setItem('hotel_guest_email', guestEmail);
+        
+        const keysToUpdate = [
+          `hotel_user_dashboard_bookings_${guestEmail}`,
+          `hotel_user_dashboard_bookings_${deviceId}`,
+          user?.email ? `hotel_user_dashboard_bookings_${user.email}` : null
+        ].filter(Boolean);
+
+        keysToUpdate.forEach((key) => {
+          const stored = localStorage.getItem(key);
+          const list = stored ? JSON.parse(stored) : [];
+          localStorage.setItem(key, JSON.stringify([data, ...list.filter((b) => b._id !== data._id && b.bookingId !== data.bookingId)]));
+        });
       } catch (_) {}
 
       setSuccess(data);

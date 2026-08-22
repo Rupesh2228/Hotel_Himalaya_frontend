@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { 
   FaStar, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, 
@@ -184,6 +184,9 @@ const handleBookNowSubmit = async (e) => {
         throw new Error((data && data.error) || 'Failed to book tour');
       }
       serverBooking = data;
+      if (email) {
+        localStorage.setItem('hotel_guest_email', email.trim());
+      }
     } catch (error) {
       console.error('Failed to book tour via API:', error);
       alert(error.message || 'Error occurred while booking tour');

@@ -89,7 +89,12 @@ const UserDashboard = () => {
 
   const [activeTab, setActiveTab] = useState('my-bookings')
   const deviceId = getDeviceId()
-  const bookingOwnerId = user?.email || deviceId
+  const storedGuestEmail = typeof window !== 'undefined'
+    ? (localStorage.getItem('hotel_guest_email') || localStorage.getItem('guest_email') || localStorage.getItem('hotel_user_email') || '')
+    : ''
+  const [lookupEmail, setLookupEmail] = useState(user?.email || storedGuestEmail)
+  const activeEmail = user?.email || lookupEmail
+  const bookingOwnerId = activeEmail || deviceId
   const bookingsCacheKey = getBookingsCacheKey(bookingOwnerId)
   const [bookings, setBookings] = useState(() => {
     try {
@@ -103,23 +108,25 @@ const UserDashboard = () => {
   const [eventBookings, setEventBookings] = useState([])
   const [tourBookings, setTourBookings] = useState([])
 
-  const bookingQuery = useMemo(() => buildBookingQuery(user?.email, deviceId), [user?.email, deviceId])
+  const bookingQuery = useMemo(() => buildBookingQuery(activeEmail, deviceId), [activeEmail, deviceId])
+
+  const fetchBookings = useCallback(async () => {
+    try {
+      const query = bookingQuery ? `?${bookingQuery}` : ''
+      const data = await apiRequest(`/api/bookings${query}`)
+      const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
+      setBookings(bookingsArray)
+      if (bookingsArray.length > 0) {
+        localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error)
+    }
+  }, [bookingQuery, bookingsCacheKey])
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const query = bookingQuery ? `?${bookingQuery}` : ''
-        const data = await apiRequest(`/api/bookings${query}`);
-        const bookingsArray = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : [])
-        setBookings(bookingsArray)
-        localStorage.setItem(bookingsCacheKey, JSON.stringify(bookingsArray))
-      } catch (error) {
-        console.error('Error fetching bookings:', error)
-      }
-    }
-
     fetchBookings()
-  }, [bookingQuery, bookingsCacheKey])
+  }, [fetchBookings])
 
   useEffect(() => {
     const fetchEventBookings = async () => {
@@ -165,8 +172,8 @@ const UserDashboard = () => {
             <div className="avatar" style={{ cursor: 'default' }}>{user?.name ? user.name[0].toUpperCase() : 'U'}</div>
 
             <div>
-              <h1>Welcome</h1>
-              <p>Manage your reservations, tickets, and feedback in your personal portal.</p>
+              <h1>Welcome{user?.name ? `, ${user.name}` : ''}</h1>
+              <p>Manage your room reservations, event tickets, and tour bookings in your personal portal.</p>
             </div>
           </div>
         </div>
@@ -194,6 +201,37 @@ const UserDashboard = () => {
 
           {/* Tab Content */}
           <main className="user-dashboard-content">
+            {!user && (
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', alignItems: 'center', flexWrap: 'wrap', background: '#fdf9f5', padding: '12px 16px', borderRadius: '8px', border: '1px solid #f0e2d5' }}>
+                <span style={{ fontSize: '0.85rem', color: '#6b6055', fontWeight: 600 }}>Guest Lookup:</span>
+                <input
+                  type="email"
+                  placeholder="Enter your booking email…"
+                  value={lookupEmail}
+                  onChange={(e) => setLookupEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && lookupEmail.trim()) {
+                      localStorage.setItem('hotel_guest_email', lookupEmail.trim());
+                      fetchBookings();
+                    }
+                  }}
+                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem', minWidth: '240px', flex: 1, maxWidth: '350px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (lookupEmail.trim()) {
+                      localStorage.setItem('hotel_guest_email', lookupEmail.trim());
+                      fetchBookings();
+                    }
+                  }}
+                  style={{ padding: '6px 14px', borderRadius: '6px', background: '#b56b2f', color: '#fff', border: 'none', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Find Bookings
+                </button>
+              </div>
+            )}
+
             {activeTab === 'my-bookings' && (
               <section className="tab-pane">
                 <h2> Booked Rooms History</h2>
