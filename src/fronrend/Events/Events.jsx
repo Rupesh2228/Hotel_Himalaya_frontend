@@ -159,52 +159,85 @@ const Events = () => {
             <p>We are currently designing new experiences. Please check back soon!</p>
           </div>
         ) : (
-          <div className="events-grid">
+          <div className="events-list">
             {events.map((event) => {
               const isSoldOut = event.availableSeats <= 0;
+              const soldOutPercent = event.totalSeats > 0
+                ? Math.round(((event.totalSeats - event.availableSeats) / event.totalSeats) * 100)
+                : 0;
               return (
-                <div key={event._id} className="event-card">
-                  <div className="event-image-wrapper">
+                <article key={event._id} className="event-medium-card">
+                  {/* Left: Image */}
+                  <div className="emc-image-col">
                     {event.imageUrl ? (
-                      <img src={event.imageUrl} alt={event.title} className="event-image" />
+                      <img src={event.imageUrl} alt={event.title} className="emc-image" />
                     ) : (
-                      <div className="event-placeholder-image">🏔️ {event.title}</div>
+                      <div className="emc-placeholder">🏔️</div>
                     )}
-                    <div className="event-price-badge">
-                      {event.price > 0 ? `Rs. ${event.price}` : 'FREE'}
-                    </div>
+                    {isSoldOut && <div className="emc-sold-out-ribbon">Sold Out</div>}
                   </div>
-                  <div className="event-details">
-                    <h2 className="event-title">{event.title}</h2>
-                    <p className="event-desc">{event.description}</p>
-                    
-                    <div className="event-meta">
-                      <div className="meta-item">
-                        <span className="icon">📅</span>
-                        <span>{event.date} at {event.time}</span>
-                      </div>
-                      <div className="meta-item">
-                        <span className="icon">📍</span>
-                        <span>{event.location}</span>
-                      </div>
-                      <div className="meta-item">
-                        <span className="icon">👥</span>
-                        <span>{event.availableSeats} of {event.totalSeats} seats left</span>
-                      </div>
+
+                  {/* Right: Content */}
+                  <div className="emc-content">
+                    {/* Tag row */}
+                    <div className="emc-tags">
+                      <span className="emc-tag">
+                        {event.price > 0 ? `Rs. ${event.price} / ticket` : 'FREE'}
+                      </span>
+                      {!isSoldOut && (
+                        <span className="emc-tag emc-tag--seats">
+                          {event.availableSeats} seats left
+                        </span>
+                      )}
                     </div>
 
-                    <div className="event-payment-note">Cash payment accepted on site</div>
+                    {/* Title */}
+                    <h2 className="emc-title">{event.title}</h2>
 
-                    <button 
-                      type="button" 
-                      onClick={() => handleOpenBooking(event)} 
-                      disabled={isSoldOut}
-                      className={`book-button ${isSoldOut ? 'sold-out' : ''}`}
-                    >
-                      {isSoldOut ? 'Sold Out' : 'Book Event'}
-                    </button>
+                    {/* Description */}
+                    <p className="emc-desc">{event.description}</p>
+
+                    {/* Meta info row */}
+                    <div className="emc-meta-row">
+                      <span className="emc-meta-item">
+                        <span className="emc-meta-icon">📅</span>
+                        {event.date} &nbsp;·&nbsp; {event.time}
+                      </span>
+                      <span className="emc-meta-item">
+                        <span className="emc-meta-icon">📍</span>
+                        {event.location}
+                      </span>
+                    </div>
+
+                    {/* Seat progress bar */}
+                    {event.totalSeats > 0 && (
+                      <div className="emc-progress-wrap">
+                        <div className="emc-progress-bar">
+                          <div
+                            className={`emc-progress-fill ${soldOutPercent >= 90 ? 'emc-progress-fill--red' : soldOutPercent >= 60 ? 'emc-progress-fill--orange' : ''}`}
+                            style={{ width: `${soldOutPercent}%` }}
+                          />
+                        </div>
+                        <span className="emc-progress-label">
+                          {event.totalSeats - event.availableSeats} / {event.totalSeats} booked
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="emc-footer">
+                      <span className="emc-payment-note">💵 Cash on site</span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenBooking(event)}
+                        disabled={isSoldOut}
+                        className={`emc-book-btn ${isSoldOut ? 'emc-book-btn--disabled' : ''}`}
+                      >
+                        {isSoldOut ? 'Sold Out' : 'Book Now →'}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
