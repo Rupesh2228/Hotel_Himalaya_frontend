@@ -203,18 +203,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ── 7. Reset Password ────────────────────────────────────────────────────────
-  const resetPassword = async (token, password, confirmPassword) => {
+  const resetPassword = async (emailOrPayload, otp, password, confirmPassword) => {
     setError(null);
-    const res = await fetch(`${apiUrl()}/api/auth/reset-password/${token}`, {
+    const payload = typeof emailOrPayload === "object"
+      ? emailOrPayload
+      : { email: emailOrPayload, otp, password, confirmPassword: confirmPassword || password };
+
+    const res = await fetch(`${apiUrl()}/api/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, confirmPassword }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Password reset failed");
-    saveToken(data.token);
-    setUser(data.user);
-    return data.user;
+    if (data.token) {
+      saveToken(data.token);
+      setUser(data.user);
+    }
+    return data.user || data;
   };
 
   return (
