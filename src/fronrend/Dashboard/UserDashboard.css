@@ -994,3 +994,54 @@ transform: translateY(-2px);
 }
 
 
+
+@media (max-width: 640px) {
+  .user-dashboard-wrapper {
+    margin: 10px;
+    padding: 12px;
+  }
+  .user-profile-summary {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .user-profile-summary .avatar {
+    margin-bottom: 10px;
+  }
+  .user-dashboard-header {
+    padding: 16px 12px;
+  }
+  .tab-pane {
+    padding: 14px;
+  }
+  .user-dashboard-tabs {
+    padding: 8px;
+    gap: 6px;
+  }
+  .tab-btn {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+  .rooms-booking-grid {
+    grid-template-columns: 1fr;
+  }
+  .event-ticket-details {
+    font-size: 0.8rem;
+  }
+  .tour-booking-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-profile-summary h1 {
+    font-size: 1.4rem;
+  }
+  .tab-btn span {
+    font-size: 0.8rem;
+  }
+  .table-wrapper th, .table-wrapper td {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+}

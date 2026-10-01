@@ -783,3 +783,23 @@ button {
   .eb-card-details { grid-template-columns: 1fr; }
   .admin-overview-grid { grid-template-columns: repeat(2, 1fr); }
 }
+@media (max-width: 640px) {
+  .admin-topbar { padding: 0 10px; }
+  .topbar-left { gap: 10px; }
+  .topbar-right { gap: 6px; }
+  .admin-topbar-title { font-size: 14px; }
+  .btn-push-alerts { padding: 6px 8px; font-size: 11px; }
+  .btn-push-alerts span { display: none; }
+  .btn-back-to-site { padding: 6px 10px; font-size: 11px; }
+  .admin-content { padding: 16px 12px 48px; }
+  .eb-grid { grid-template-columns: 1fr; }
+  .admin-overview-grid { grid-template-columns: 1fr; }
+  .admin-grid.two-cols { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .admin-topbar-title { font-size: 13px; }
+  .typing { display: none; }
+  .stat-card { padding: 14px; flex-direction: column; text-align: center; }
+  .sidebar-toggle { padding: 6px 10px; }
+}
